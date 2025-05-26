@@ -1,0 +1,5 @@
+android
+build
+obsolete_code
+*.apk
+*.o
