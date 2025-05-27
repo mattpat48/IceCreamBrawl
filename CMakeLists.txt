@@ -57,21 +57,13 @@ FetchContent_MakeAvailable(raylib raylib_cpp entt sol2)
 
 # Collect engine source files (now in src/)
 file(GLOB_RECURSE ENGINE_SOURCES
-    "src/core/*.cpp"
-    "src/core/*.c"
-    "src/serialization/*.cpp"
-    "src/serialization/*.c"
-    "src/Tilemap.cpp"
-    "src/engine.hpp"
+    "src/engine/*.cpp"
+    "src/engine/*.c"
 )
 
 file(GLOB_RECURSE ENGINE_HEADERS
-    "src/core/*.hpp"
-    "src/core/*.h"
-    "src/serialization/*.hpp"
-    "src/serialization/*.h"
-    "src/Tilemap.hpp"
-    "src/engine.hpp"
+    "src/engine/*.hpp"
+    "src/engine/*.h"
 )
 
 # Create engine library
@@ -80,10 +72,7 @@ add_library(ICB_engine STATIC ${ENGINE_SOURCES} ${ENGINE_HEADERS})
 target_include_directories(ICB_engine 
     PUBLIC
         src/
-        ${entt_SOURCE_DIR}/src
-    PRIVATE
-        src/core
-        src/serialization
+        src/engine
 )
 
 target_link_libraries(ICB_engine 
@@ -124,10 +113,6 @@ if(NOT ANDROID)
     set(GAME_SOURCES "src/main.cpp")
 
     # Collect additional game-specific files
-    file(GLOB_RECURSE GAME_SCRIPTS
-        "src/native_scripts/*.hpp"
-        "src/native_scripts/*.cpp"
-    )
     
     file(GLOB_RECURSE GAME_SCENES
         "src/scenes/*.hpp"
@@ -135,14 +120,11 @@ if(NOT ANDROID)
     )
 
     # Create game executable
-    add_executable(ICB_game ${GAME_SOURCES} ${GAME_SCRIPTS} ${GAME_SCENES})
+    add_executable(ICB_game ${GAME_SOURCES} ${GAME_SCENES})
 
     target_include_directories(ICB_game 
-        PRIVATE
-            src/
-            src/native_scripts
-            src/scenes
-            src/core
+        PUBLIC
+            src/game/*cpp
     )
 
     target_link_libraries(ICB_game 
@@ -182,12 +164,9 @@ if(ANDROID)
 
     target_include_directories(ICB_android 
         PRIVATE
-            src/
-            src/native_scripts
-            src/scenes
-            src/core
-            src/serialization
-            ${entt_SOURCE_DIR}/src
+            src/engine
+            src/game
+            src/screens
     )
 
     target_link_libraries(ICB_android 

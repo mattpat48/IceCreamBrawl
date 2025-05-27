@@ -17,23 +17,22 @@ NATIVE_APP_GLUE=android/ndk/sources/android/native_app_glue
 # C++ specific flags - UPDATED
 CXX_FLAGS="-std=c++17 -ffunction-sections -funwind-tables -fstack-protector-strong -fPIC -Wall \
 	-Wformat -Werror=format-security -no-canonical-prefixes \
-	-DANDROID -DPLATFORM_ANDROID -D__ANDROID_API__=29 \
+	-DANDROID -DPLATFORM_ANDROID -D__ANDROID_API__=33 \
 	-D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L \
 	-fno-exceptions"
 
 # C flags for native app glue (still C code)
 C_FLAGS="-ffunction-sections -funwind-tables -fstack-protector-strong -fPIC -Wall \
 	-Wformat -Werror=format-security -no-canonical-prefixes \
-	-DANDROID -DPLATFORM_ANDROID -D__ANDROID_API__=29 \
+	-DANDROID -DPLATFORM_ANDROID -D__ANDROID_API__=33 \
 	-D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L"
 
-# Updated includes
-INCLUDES="-I. -Isrc -Isrc/core -Isrc/serialization -Isrc/native_scripts -Isrc/scenes \
-    -Isrc/include -Isrc/include/core -Isrc/include/components -Isrc/include/scripting \
+INCLUDES="-I. -Isrc -Isrc/game -Isrc/engine -Isrc/screens \
+	-Iraylib/src -Iraylib-cpp/include \
     -I$NATIVE_APP_GLUE \
     -I$TOOLCHAIN/sysroot/usr/include"
 
-# Copy icons (if they exist)
+# Copy icons
 if [ -f "assets/icon_ldpi.png" ]; then
     mkdir -p android/build/res/drawable-ldpi
     cp assets/icon_ldpi.png android/build/res/drawable-ldpi/icon.png
@@ -100,9 +99,9 @@ for ABI in $ABIS; do
 	esac
 	
 	# C compiler for native app glue
-	CC="$TOOLCHAIN/bin/${CCTYPE}29-clang"
+	CC="$TOOLCHAIN/bin/${CCTYPE}33-clang"
 	# C++ compiler for project files
-	CXX="$TOOLCHAIN/bin/${CCTYPE}29-clang++"
+	CXX="$TOOLCHAIN/bin/${CCTYPE}33-clang++"
 
 	echo "Building for ABI: $ABI with $CXX"
 
@@ -145,13 +144,13 @@ for ABI in $ABIS; do
 		--exclude-libs libatomic.a --build-id \
 		-z noexecstack -z relro -z now \
 		--warn-shared-textrel --fatal-warnings -u ANativeActivity_onCreate \
-		-L$TOOLCHAIN/sysroot/usr/lib/$LIBPATH/29 \
+		-L$TOOLCHAIN/sysroot/usr/lib/$LIBPATH/33 \
 		-L$TOOLCHAIN/sysroot/usr/include \
 		-L$TOOLCHAIN/sysroot/usr/include/$LIBATH \
 		-L$TOOLCHAIN/lib/clang/19/lib/linux/$ARCH \
 		-L$TOOLCHAIN/sysroot/usr/lib/$LIBPATH \
 		-L. -Landroid/build/obj -Llib/$ABI \
-		-lraylib -lnative_app_glue -llog -landroid -lEGL -lGLESv2 -lOpenSLES \
+		-lraylib -lraylib-cpp -lnative_app_glue -llog -landroid -lEGL -lGLESv2 -lOpenSLES \
 		-latomic -lc -lm -ldl -lstdc++ -lc++abi -lc++_static
 
 	echo "Completed build for $ABI"

@@ -2,6 +2,8 @@ android
 assets
 lib
 build
-obsolete_code
+include
+raylib
+raylib-cpp
 *.apk
 *.o

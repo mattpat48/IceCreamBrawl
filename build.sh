@@ -90,12 +90,21 @@ build_android() {
     log_info "Building Android APK..."
     
     # Check Android dependencies
-    if [ ! -d "$PROJECT_ROOT/android/ndk" ] || [ ! -d "$PROJECT_ROOT/android/sdk" ]; then
+    if [ ! -d "$PROJECT_ROOT/android_files/android/ndk" ] || [ ! -d "$PROJECT_ROOT/android_files/android/sdk" ]; then
         log_error "Android NDK/SDK not found in android/ directory"
         log_error "Please ensure android/ndk and android/sdk directories exist"
         exit 1
     fi
     
+    log_info "Ensuring CMake dependencies are downloaded..."
+    mkdir -p "$BUILD_DIR/android_deps"
+    cd "$BUILD_DIR/android_deps"
+    cmake "$PROJECT_ROOT" -DCMAKE_SYSTEM_NAME=Android || true
+    cd "$PROJECT_ROOT"
+
+    export RAYLIB_SRC_DIR="$BUILD_DIR/android_deps/_deps/raylib-src"
+    export RAYLIB_CPP_SRC_DIR="$BUILD_DIR/android_deps/_deps/raylib-cpp-src"
+
     # Make sure build script is executable
     chmod +x "$PROJECT_ROOT/build_android.sh"
     
@@ -119,8 +128,8 @@ clean_builds() {
     fi
     
     # Clean Android builds
-    if [ -d "$PROJECT_ROOT/android/build" ]; then
-        rm -rf "$PROJECT_ROOT/android/build"
+    if [ -d "$PROJECT_ROOT/android_files/android/build" ]; then
+        rm -rf "$PROJECT_ROOT/android_files/android/build"
         log_info "Removed android/build"
     fi
     
