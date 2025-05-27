@@ -1,4 +1,6 @@
 android
+assets
+lib
 build
 obsolete_code
 *.apk
