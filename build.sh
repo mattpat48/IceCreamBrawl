@@ -90,7 +90,7 @@ build_android() {
     log_info "Building Android APK..."
     
     # Check Android dependencies
-    if [ ! -d "$PROJECT_ROOT/android_files/android/ndk" ] || [ ! -d "$PROJECT_ROOT/android_files/android/sdk" ]; then
+    if [ ! -d "$PROJECT_ROOT/android/ndk" ] || [ ! -d "$PROJECT_ROOT/android/sdk" ]; then
         log_error "Android NDK/SDK not found in android/ directory"
         log_error "Please ensure android/ndk and android/sdk directories exist"
         exit 1
@@ -128,8 +128,8 @@ clean_builds() {
     fi
     
     # Clean Android builds
-    if [ -d "$PROJECT_ROOT/android_files/android/build" ]; then
-        rm -rf "$PROJECT_ROOT/android_files/android/build"
+    if [ -d "$PROJECT_ROOT/android/build" ]; then
+        rm -rf "$PROJECT_ROOT/android/build"
         log_info "Removed android/build"
     fi
     

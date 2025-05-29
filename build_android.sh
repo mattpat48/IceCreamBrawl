@@ -27,7 +27,8 @@ C_FLAGS="-ffunction-sections -funwind-tables -fstack-protector-strong -fPIC -Wal
 	-DANDROID -DPLATFORM_ANDROID -D__ANDROID_API__=33 \
 	-D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L"
 
-INCLUDES="-I. -Isrc -Isrc/game -Isrc/engine -Isrc/screens \
+INCLUDES="-I. -Iinclude -Iinclude/enet -Iinclude/entt \
+	-Isrc -Isrc/game -Isrc/engine -Isrc/screens \
 	-Iraylib/src -Iraylib-cpp/include \
     -I$NATIVE_APP_GLUE \
     -I$TOOLCHAIN/sysroot/usr/include"
