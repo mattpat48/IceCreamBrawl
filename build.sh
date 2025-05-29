@@ -164,3 +164,8 @@ case "${1:-desktop}" in
         exit 1
         ;;
 esac
+
+cd "$PROJECT_ROOT"
+cd "$BUILD_DIR"
+cd "desktop/game"
+./ICB_game

@@ -8,21 +8,26 @@
 class Engine {
 public:
 
-    void init(int width, int height, const char* title) {
-        window.Init(width, height, title);
+    Engine(int width, int height, const char* title) : window(width, height, title) {
         SetTargetFPS(60); // Set the target frames per second
     }
 
+    void setScreen(std::unique_ptr<Screen> screen) {
+        screenManager.setScreen(std::move(screen));
+    }
 
     void run() {
         while (!window.ShouldClose()) {
+
             float delta = GetFrameTime();
-            //Update(delta);
+
+            screenManager.update(delta);
 
             window.BeginDrawing();
             window.ClearBackground(RAYWHITE);
 
             window.DrawFPS(10, 10);
+            screenManager.draw();
 
             window.EndDrawing();
         }

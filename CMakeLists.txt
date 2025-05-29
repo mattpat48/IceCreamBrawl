@@ -71,6 +71,9 @@ add_library(ICB_engine STATIC ${ENGINE_SOURCES} ${ENGINE_HEADERS})
 
 target_include_directories(ICB_engine 
     PUBLIC
+        include/
+        include/entt
+        include/enet
         src/
         src/engine
 )

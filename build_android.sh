@@ -1,7 +1,7 @@
 #!/bin/sh
 # ______________________________________________________________________________
 #
-#  Compile raylib C++ project for Android - FIXED VERSION
+#  Compile raylib project for Android
 # ______________________________________________________________________________
 
 # stop on error and display each command as it gets executed. Optional step but helpful in catching where errors happen if they do.
@@ -17,51 +17,23 @@ NATIVE_APP_GLUE=android/ndk/sources/android/native_app_glue
 # C++ specific flags - UPDATED
 CXX_FLAGS="-std=c++17 -ffunction-sections -funwind-tables -fstack-protector-strong -fPIC -Wall \
 	-Wformat -Werror=format-security -no-canonical-prefixes \
-	-DANDROID -DPLATFORM_ANDROID -D__ANDROID_API__=33 \
-	-D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L \
-	-fno-exceptions"
+	-DANDROID -DPLATFORM_ANDROID -D__ANDROID_API__=29"
 
 # C flags for native app glue (still C code)
 C_FLAGS="-ffunction-sections -funwind-tables -fstack-protector-strong -fPIC -Wall \
 	-Wformat -Werror=format-security -no-canonical-prefixes \
-	-DANDROID -DPLATFORM_ANDROID -D__ANDROID_API__=33 \
-	-D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L"
+	-DANDROID -DPLATFORM_ANDROID -D__ANDROID_API__=29"
 
-INCLUDES="-I. -Iinclude -Iinclude/enet -Iinclude/entt \
-	-Isrc -Isrc/game -Isrc/engine -Isrc/screens \
-	-Iraylib/src -Iraylib-cpp/include \
-    -I$NATIVE_APP_GLUE \
-    -I$TOOLCHAIN/sysroot/usr/include"
+INCLUDES="-I. -Iinclude -Iraylib-cpp/include -I../include -I$NATIVE_APP_GLUE -I$TOOLCHAIN/sysroot/usr/include"
 
 # Copy icons
-if [ -f "assets/icon_ldpi.png" ]; then
-    mkdir -p android/build/res/drawable-ldpi
-    cp assets/icon_ldpi.png android/build/res/drawable-ldpi/icon.png
-fi
-if [ -f "assets/icon_mdpi.png" ]; then
-    mkdir -p android/build/res/drawable-mdpi
-    cp assets/icon_mdpi.png android/build/res/drawable-mdpi/icon.png
-fi
-if [ -f "assets/icon_hdpi.png" ]; then
-    mkdir -p android/build/res/drawable-hdpi
-    cp assets/icon_hdpi.png android/build/res/drawable-hdpi/icon.png
-fi
-if [ -f "assets/icon_xhdpi.png" ]; then
-    mkdir -p android/build/res/drawable-xhdpi
-    cp assets/icon_xhdpi.png android/build/res/drawable-xhdpi/icon.png
-fi
+cp assets/icon_ldpi.png android/build/res/drawable-ldpi/icon.png
+cp assets/icon_mdpi.png android/build/res/drawable-mdpi/icon.png
+cp assets/icon_hdpi.png android/build/res/drawable-hdpi/icon.png
+cp assets/icon_xhdpi.png android/build/res/drawable-xhdpi/icon.png
 
-# Copy other assets (resources from src/resources)
-if [ -d "src/resources" ]; then
-    mkdir -p android/build/assets
-    cp -r src/resources/* android/build/assets/ 2>/dev/null || true
-fi
-
-# Create lib directories for each ABI
-for ABI in $ABIS; do
-    mkdir -p lib/$ABI
-    mkdir -p android/build/lib/$ABI
-done
+# Copy other assets
+cp assets/* android/build/assets
 
 # ______________________________________________________________________________
 #
@@ -99,10 +71,10 @@ for ABI in $ABIS; do
 			;;
 	esac
 	
-	# C compiler for native app glue
-	CC="$TOOLCHAIN/bin/${CCTYPE}33-clang"
 	# C++ compiler for project files
-	CXX="$TOOLCHAIN/bin/${CCTYPE}33-clang++"
+	CXX="$TOOLCHAIN/bin/${CCTYPE}29-clang++"
+	# C compiler for native app glue
+	CC="$TOOLCHAIN/bin/${CCTYPE}29-clang"
 
 	echo "Building for ABI: $ABI with $CXX"
 
@@ -113,12 +85,6 @@ for ABI in $ABIS; do
 
 	# .o -> .a
 	$TOOLCHAIN/bin/llvm-ar rcs lib/$ABI/libnative_app_glue.a $NATIVE_APP_GLUE/native_app_glue_$ABI.o
-
-	# Clean previous object files
-	find src -name "*.o" -delete 2>/dev/null || true
-
-	# Compile all C++ source files
-	echo "Compiling C++ sources for $ABI..."
 	
 	# Find and compile all .cpp files
 	find src -name "*.cpp" -type f | while read cppfile; do
@@ -134,25 +100,14 @@ for ABI in $ABIS; do
 			$INCLUDES -I$TOOLCHAIN/sysroot/usr/include/$CCTYPE $C_FLAGS -std=c99 $ABI_FLAGS
 	done
 
-	# Collect all object files
-	OBJECT_FILES=$(find src -name "*.o" -type f | tr '\n' ' ')
-	
-	echo "Linking for $ABI..."
-	echo "Object files: $OBJECT_FILES"
-
-	# FIXED LINKING COMMAND - Updated library order and paths
-	$TOOLCHAIN/bin/ld.lld $OBJECT_FILES -o android/build/lib/$ABI/libmain.so -shared \
+	$TOOLCHAIN/bin/ld.lld src/*.o -o android/build/lib/$ABI/libmain.so -shared \
 		--exclude-libs libatomic.a --build-id \
 		-z noexecstack -z relro -z now \
 		--warn-shared-textrel --fatal-warnings -u ANativeActivity_onCreate \
-		-L$TOOLCHAIN/sysroot/usr/lib/$LIBPATH/33 \
-		-L$TOOLCHAIN/sysroot/usr/include \
-		-L$TOOLCHAIN/sysroot/usr/include/$LIBATH \
-		-L$TOOLCHAIN/lib/clang/19/lib/linux/$ARCH \
-		-L$TOOLCHAIN/sysroot/usr/lib/$LIBPATH \
+		-L$TOOLCHAIN/sysroot/usr/lib/$LIBPATH/29 \
+		-L$TOOLCHAIN/lib/clang/17/lib/linux/$ARCH \
 		-L. -Landroid/build/obj -Llib/$ABI \
-		-lraylib -lraylib-cpp -lnative_app_glue -llog -landroid -lEGL -lGLESv2 -lOpenSLES \
-		-latomic -lc -lm -ldl -lstdc++ -lc++abi -lc++_static
+		-lraylib -lraylib-cpp -lnative_app_glue -llog -landroid -lEGL -lGLESv2 -lOpenSLES -latomic -lc -lm -ldl
 
 	echo "Completed build for $ABI"
 done

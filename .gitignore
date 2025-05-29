@@ -7,3 +7,4 @@ raylib
 raylib-cpp
 *.apk
 *.o
+*.a

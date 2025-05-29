@@ -1,14 +1,17 @@
 #pragma once
+
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
 #include "screens/screen.hpp"
+#include <entt/entt.hpp>
 
 #include <memory>
 
 class ScreenManager {
 public:
     std::unique_ptr<Screen> currentScreen;
+    entt::registry globalRegistry;
 
     ~ScreenManager() {
         if (currentScreen) {
@@ -22,7 +25,8 @@ public:
         }
         currentScreen = std::move(screen);
         if (currentScreen) {
-            currentScreen->init();
+            std::cout << "Loading new screen..." << std::endl;
+            currentScreen->load(globalRegistry);
         }
     }
 
