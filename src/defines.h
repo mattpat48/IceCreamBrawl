@@ -1,3 +1,8 @@
+#pragma once
+
+#define MAX_TOUCH_POINTS 10
+
+// sprite dimensions and paths
 #define SPRITES_HORIZONTAL_DIMENSION 48
 #define SPRITES_VERTICAL_DIMENSION 64
 #define SPRITESHEET_ROWS 6

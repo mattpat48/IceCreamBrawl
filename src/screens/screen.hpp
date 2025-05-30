@@ -33,11 +33,8 @@ public:
     }
 
     void basicDraw() {
-        int count = 0;
         auto view = registry.view<transform, sprite, animation>();
         for (auto entity : view) {
-            count++;
-            std::cout << "Drawing entity: " << count << std::endl;
             auto& t = view.get<transform>(entity);
             auto& s = view.get<sprite>(entity);
             auto& a = view.get<animation>(entity);
@@ -66,6 +63,14 @@ public:
 
             s.texture.Draw(source, dest, origin, t.rotation, WHITE);
         }
+
+        auto scriptView = registry.view<script>();
+        for (auto entity : scriptView) {
+            auto& s = scriptView.get<script>(entity);
+            if (s.instance) {
+                s.instance->onDraw();
+            }
+        }
     }
 
     void basicUnload() {
@@ -74,10 +79,10 @@ public:
 
     void updateScripts() {
         float dt = GetFrameTime();
-        auto view = registry.view<script>();
+        auto scriptView = registry.view<script>();
 
-        for (auto entity : view) {
-            auto& s = view.get<script>(entity);
+        for (auto entity : scriptView) {
+            auto& s = scriptView.get<script>(entity);
             if (s.instance) {
                 s.instance->entity = entity;
                 s.instance->registry = &registry;

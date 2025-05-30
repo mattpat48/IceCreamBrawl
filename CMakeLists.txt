@@ -76,6 +76,9 @@ target_include_directories(ICB_engine
         include/enet
         src/
         src/engine
+        src/game
+        src/screens
+        src/utils
 )
 
 target_link_libraries(ICB_engine 
