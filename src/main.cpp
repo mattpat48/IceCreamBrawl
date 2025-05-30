@@ -5,15 +5,18 @@
 
 #include <iostream>
 
+class Game : public Engine {
+public:
+    Game() : Engine(563, 1000, "ICB Test Game") {
+    }
+};
+
 int main() {
 
-    // Get the current device pixel ratio and dimensions
-    int width = GetScreenWidth();
-    int height = GetScreenHeight();
+    Game engine;
 
-    auto engine = Engine(0, 0, "ICB Test Game");
     engine.setScreen(std::make_unique<GameScreen>());
-
+    
     engine.run();
 
     engine.close();

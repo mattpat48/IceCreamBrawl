@@ -2,6 +2,9 @@
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
+#include "defines.h"
+#include "scripts/script.hpp"
+
 struct sprite {
     raylib::Texture2D texture;
     int width;
@@ -29,4 +32,15 @@ struct animation {
     float timer;
     bool isPlaying;
     int direction;
+};
+
+struct script {
+    std::unique_ptr<Script> instance = nullptr;
+
+    template <typename T, typename... Args>
+    T& bind(Args&&... args) {
+        instance = std::make_unique<T>(std::forward<Args>(args)...);
+        instance->onCreate();
+        return *static_cast<T*>(instance.get());
+    }
 };

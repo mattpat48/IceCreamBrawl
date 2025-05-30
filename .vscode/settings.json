@@ -55,7 +55,13 @@
         "functional": "cpp",
         "numbers": "cpp",
         "ranges": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "cstdarg": "cpp",
+        "mutex": "cpp",
+        "span": "cpp",
+        "thread": "cpp"
     },
     "C_Cpp.default.compilerPath": "/usr/bin/g++"
 }

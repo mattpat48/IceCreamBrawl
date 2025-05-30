@@ -15,13 +15,14 @@ public:
 
     ~ScreenManager() {
         if (currentScreen) {
-            currentScreen->unload();
+            currentScreen->unload(globalRegistry);
         }
     }
 
     void setScreen(std::unique_ptr<Screen> screen) {
         if (currentScreen) {
-            currentScreen->unload();
+            std::cout << "Unloading current screen..." << std::endl;
+            currentScreen->unload(globalRegistry);
         }
         currentScreen = std::move(screen);
         if (currentScreen) {
