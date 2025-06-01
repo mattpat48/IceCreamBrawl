@@ -61,7 +61,12 @@
         "cstdarg": "cpp",
         "mutex": "cpp",
         "span": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "any": "cpp",
+        "queue": "cpp",
+        "stack": "cpp",
+        "expected": "cpp",
+        "regex": "cpp"
     },
     "C_Cpp.default.compilerPath": "/usr/bin/g++"
 }

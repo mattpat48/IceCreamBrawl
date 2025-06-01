@@ -61,7 +61,8 @@ public:
                 source.width = -source.width;
             }
 
-            s.texture.Draw(source, dest, origin, t.rotation, WHITE);
+            s.textures.at(s.currentTexture)->Draw(source, dest, origin, t.rotation, WHITE);
+            
         }
 
         auto scriptView = registry.view<script>();
@@ -97,31 +98,24 @@ public:
             auto& a = view.get<animation>(entity);
             auto& v = view.get<velocity>(entity);
 
-            if (v.dx != 0.0f || v.dy != 0.0f) {
-                if (std::abs(v.dx) > std::abs(v.dy)) {
-                    // Horizontal movement dominates
-                    a.row = (v.dx > 0) ? 5 : 1;  // right : left
-                } else if (v.dy != 0) {
-                    // Vertical movement dominates
-                    a.row = (v.dy > 0) ? 0 : 3;  // down : up
-                }
+            if (std::abs(v.dx) > std::abs(v.dy)) {
+                // Horizontal movement dominates
+                a.row = (v.dx > 0) ? 5 : 1;  // right : left
+            } else if (v.dy != 0) {
+                // Vertical movement dominates
+                a.row = (v.dy > 0) ? 0 : 3;  // down : up
+            }
 
-                a.isPlaying = true;
-                a.timer += dt;
+            a.isPlaying = true;
+            a.timer += dt;
 
-                if (a.timer >= a.frameTime) {
-                    a.timer = 0.0f;
-                    a.currentFrame++;
-
-                    if (a.currentFrame > a.endFrame) {
-                        a.currentFrame = a.startFrame;
-                    }
-                }
-            } else {
-                // When stopped, keep the direction (row) but reset animation
-                a.isPlaying = false;
-                a.currentFrame = 0;  // Use middle frame for idle
+            if (a.timer >= a.frameTime) {
                 a.timer = 0.0f;
+                a.currentFrame++;
+
+                if (a.currentFrame > a.endFrame) {
+                    a.currentFrame = a.startFrame;
+                }
             }
         }
     }

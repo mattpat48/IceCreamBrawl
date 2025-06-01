@@ -14,16 +14,24 @@ public:
     void load(entt::registry& globalRegistry) override {
         auto playerEntity = registry.create();
 
-        registry.emplace<sprite>(playerEntity, std::move(raylib::Texture2D("resources/sprites/player/walk.png")),
+        std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> playerTextures;
+        playerTextures["idle"] = std::make_shared<raylib::Texture2D>("resources/sprites/player/idle.png");
+        playerTextures["walk"] = std::make_shared<raylib::Texture2D>("resources/sprites/player/walk.png");
+
+        registry.emplace<sprite>(playerEntity,
+                                 std::move(playerTextures), "idle",
                                  PLAYER_SPRITES_H_DIMENSION, PLAYER_SPRITES_V_DIMENSION, Vector2{100.0f, 100.0f});
-        registry.emplace<transform>(playerEntity, Vector2{100.0f, 100.0f}, Vector2{2.0f, 2.0f}, 0.0f);
+        registry.emplace<transform>(playerEntity, Vector2{100.0f, 100.0f}, Vector2{3.0f, 3.0f}, 0.0f);  
         registry.emplace<velocity>(playerEntity, 0.0f, 0.0f);
         registry.emplace<animation>(playerEntity, 0, 0, 7, 0, 0.05f, 0.0f, false, 0);
-        //registry.emplace<script>(playerEntity).bind<touchController>();
+        registry.emplace<script>(playerEntity).bind<wasdController>();
 
         auto buttonEntity = registry.create();
-        registry.emplace<sprite>(buttonEntity, std::move(raylib::Texture2D("resources/sprites/buttons/primary.png")),
-                     BUTTON_SPRITES_H_DIMENSION, BUTTON_SPRITES_V_DIMENSION, Vector2{100.0f, 100.0f});
+        std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> buttonTextures;
+        buttonTextures["default"] = std::make_shared<raylib::Texture2D>("resources/sprites/buttons/primary.png");
+        registry.emplace<sprite>(buttonEntity,
+                                 std::move(buttonTextures), "default",
+                                 BUTTON_SPRITES_H_DIMENSION, BUTTON_SPRITES_V_DIMENSION, Vector2{100.0f, 100.0f});
         registry.emplace<transform>(buttonEntity, Vector2{BUTTON_PRIMARY_X, BUTTON_PRIMARY_Y}, Vector2{BUTTON_PRIMARY_SCALE_X, BUTTON_PRIMARY_SCALE_Y}, 0.0f);
         registry.emplace<animation>(buttonEntity, BUTTON_PRIMARY_ANIMATION_START_FRAME,
                                                   BUTTON_PRIMARY_ANIMATION_END_FRAME,
@@ -35,6 +43,17 @@ public:
     }
 
     void update(float delta) override {
+        auto playerView = registry.view<sprite, velocity>();
+        for (auto entity : playerView) {
+            auto& s = playerView.get<sprite>(entity);
+            auto& v = playerView.get<velocity>(entity);
+
+            if (v.dx != 0.0f || v.dy != 0.0f) {
+                s.currentTexture = "walk"; // Walking state
+            } else {
+                s.currentTexture = "idle"; // Idle state
+            }
+        }
         basicUpdate(delta);
     }
 

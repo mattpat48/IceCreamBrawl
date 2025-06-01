@@ -6,7 +6,8 @@
 #include "scripts/script.hpp"
 
 struct sprite {
-    raylib::Texture2D texture;
+    std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;
+    std::string currentTexture;
     int width;
     int height;
     Vector2 position;
