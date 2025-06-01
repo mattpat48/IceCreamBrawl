@@ -120,7 +120,7 @@ public:
             } else {
                 // When stopped, keep the direction (row) but reset animation
                 a.isPlaying = false;
-                a.currentFrame = 1;  // Use middle frame for idle
+                a.currentFrame = 0;  // Use middle frame for idle
                 a.timer = 0.0f;
             }
         }
