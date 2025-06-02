@@ -15,6 +15,14 @@ set(CMAKE_CXX_EXTENSIONS NO)
 if(ANDROID)
     set(PLATFORM_ANDROID TRUE)
     add_definitions(-DPLATFORM_ANDROID -D__ANDROID_API__=29)
+    
+    # Android specific settings
+    set(ANDROID_STL c++_shared)
+    set(CMAKE_ANDROID_STL_TYPE c++_shared)
+    
+    # Assicurati che le librerie standard siano disponibili
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -fexceptions -frtti")
+    
 elseif(WIN32)
     set(PLATFORM_DESKTOP TRUE)
 elseif(APPLE)
@@ -108,6 +116,11 @@ if(ANDROID)
         m
         dl
     )
+    
+    # Assicurati che le librerie C++ standard siano linkate
+    target_link_libraries(ICB_engine PUBLIC
+        c++_shared
+    )
 endif()
 
 # ============================================================================
@@ -119,7 +132,6 @@ if(NOT ANDROID)
     set(GAME_SOURCES "src/main.cpp")
 
     # Collect additional game-specific files
-    
     file(GLOB_RECURSE GAME_SCENES
         "src/scenes/*.hpp"
         "src/scenes/*.cpp"
@@ -166,16 +178,16 @@ if(ANDROID)
     )
 
     # Create Android shared library
-    add_library(ICB_android SHARED ${ANDROID_SOURCES})
+    add_library(main SHARED ${ANDROID_SOURCES})
 
-    target_include_directories(ICB_android 
+    target_include_directories(main 
         PRIVATE
             src/engine
             src/game
             src/screens
     )
 
-    target_link_libraries(ICB_android 
+    target_link_libraries(main 
         PRIVATE
             raylib
             raylib_cpp
@@ -188,17 +200,18 @@ if(ANDROID)
             atomic
             m
             dl
+            c++_shared  # Importante per le librerie standard C++
     )
 
     # Android specific flags
-    target_compile_definitions(ICB_android PRIVATE
+    target_compile_definitions(main PRIVATE
         PLATFORM_ANDROID
         __ANDROID_API__=29
         _GNU_SOURCE
         _POSIX_C_SOURCE=200809L
     )
 
-    target_compile_options(ICB_android PRIVATE
+    target_compile_options(main PRIVATE
         -ffunction-sections
         -funwind-tables
         -fstack-protector-strong
@@ -207,13 +220,24 @@ if(ANDROID)
         -Wformat
         -Werror=format-security
         -no-canonical-prefixes
+        -fexceptions
+        -frtti
     )
 
-    # Set output name for Android
-    set_target_properties(ICB_android PROPERTIES
-        OUTPUT_NAME "main"
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/android/lib/${ANDROID_ABI}
+    # Android Native Activity
+    find_library(android-lib android)
+    target_link_libraries(main PRIVATE ${android-lib})
+    
+    # Add native app glue
+    add_library(native_app_glue STATIC
+        ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c
     )
+    
+    target_include_directories(native_app_glue PUBLIC
+        ${ANDROID_NDK}/sources/android/native_app_glue
+    )
+    
+    target_link_libraries(main PRIVATE native_app_glue)
 
 endif()
 
@@ -221,8 +245,16 @@ endif()
 # CUSTOM TARGETS AND COMMANDS
 # ============================================================================
 
-# Custom target for Android build (calls the shell script)
+# Custom target for Android build usando CMake
 if(NOT ANDROID)
+    add_custom_target(android_build_cmake
+        COMMAND ${CMAKE_SOURCE_DIR}/build_android_cmake.sh
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Building Android APK using CMake"
+        VERBATIM
+    )
+    
+    # Mantieni anche il vecchio target per compatibilità
     add_custom_target(android_build
         COMMAND ${CMAKE_SOURCE_DIR}/build_android.sh
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -233,7 +265,7 @@ endif()
 
 # Custom target for cleaning Android build
 add_custom_target(android_clean
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/android/build
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/build/android
     COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_SOURCE_DIR}/game.apk
     COMMENT "Cleaning Android build files"
 )
@@ -246,6 +278,7 @@ message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
 if(ANDROID)
     message(STATUS "  Android ABI: ${ANDROID_ABI}")
     message(STATUS "  Android API Level: ${ANDROID_PLATFORM}")
+    message(STATUS "  Android STL: ${CMAKE_ANDROID_STL_TYPE}")
 endif()
 
 # ============================================================================

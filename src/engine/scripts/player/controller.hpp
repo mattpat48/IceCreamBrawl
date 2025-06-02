@@ -37,6 +37,33 @@ class wasdController : public Script {
     }
 };
 
+class changeDirectionController : public Script {
+public:
+    void onCreate() {
+        // Initialization logic
+    }
+
+    void onUpdate(float dt) override {
+        auto a = getComponent<animation>();
+
+        if (IsKeyDown(KEY_W)) {
+            a->row = UP; // Set animation row for moving up
+        } else if (IsKeyDown(KEY_S)) {
+            a->row = DOWN; // Set animation row for moving down
+        }
+
+        if (IsKeyDown(KEY_A)) {
+            a->row = LEFT; // Set animation row for moving left
+        } else if (IsKeyDown(KEY_D)) {
+            a->row = RIGHT; // Set animation row for moving right
+        }
+    }
+
+    void onDraw() override {
+        // Drawing logic if needed
+    }
+};
+
 class touchController : public Script {
 public:
     touchController(entt::entity& player, entt::registry& registry, Vector2 joystickBasePosition, float joystickRadius) {

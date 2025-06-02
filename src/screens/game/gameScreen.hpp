@@ -16,15 +16,18 @@ public:
 
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> playerTextures;
         playerTextures["idle"] = std::make_shared<raylib::Texture2D>("resources/sprites/player/idle.png");
-        playerTextures["walk"] = std::make_shared<raylib::Texture2D>("resources/sprites/player/walk.png");
+        playerTextures["attack"] = std::make_shared<raylib::Texture2D>("resources/sprites/player/attack.png");
 
         registry.emplace<sprite>(playerEntity,
                                  std::move(playerTextures), "idle",
                                  PLAYER_SPRITES_H_DIMENSION, PLAYER_SPRITES_V_DIMENSION, Vector2{100.0f, 100.0f});
-        registry.emplace<transform>(playerEntity, Vector2{100.0f, 100.0f}, Vector2{3.0f, 3.0f}, 0.0f);  
+        // position the player at the center of the screen
+        registry.emplace<transform>(playerEntity, Vector2{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}, Vector2{3.0f, 3.0f}, 0.0f);
         registry.emplace<velocity>(playerEntity, 0.0f, 0.0f);
-        registry.emplace<animation>(playerEntity, 0, 0, 7, 0, 0.05f, 0.0f, false, 0);
-        registry.emplace<script>(playerEntity).bind<wasdController>();
+        registry.emplace<animation>(playerEntity, 0, 0, 7, 1, 0.1f, 0.0f, false, 0);
+        registry.emplace<script>(playerEntity).bind<changeDirectionController>();
+
+        this->playerEntity = playerEntity; // Store the player entity reference
 
         auto buttonEntity = registry.create();
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> buttonTextures;
@@ -43,27 +46,31 @@ public:
     }
 
     void update(float delta) override {
-        auto playerView = registry.view<sprite, velocity>();
-        for (auto entity : playerView) {
-            auto& s = playerView.get<sprite>(entity);
-            auto& v = playerView.get<velocity>(entity);
+        auto& ps = registry.get<sprite>(playerEntity);
+        auto& pa = registry.get<animation>(playerEntity);
 
-            if (v.dx != 0.0f || v.dy != 0.0f) {
-                s.currentTexture = "walk"; // Walking state
-            } else {
-                s.currentTexture = "idle"; // Idle state
-            }
+        if (ps.currentTexture == "attack" && pa.currentFrame == pa.endFrame) {
+            std::cout << "Player is resetting!" << std::endl;
+            ps.currentTexture = "idle"; // Reset to idle texture after attack
         }
+
         basicUpdate(delta);
     }
 
     void draw() override {
         basicDraw();
+        transform& pt = registry.get<transform>(playerEntity);
+        int x = static_cast<int>(pt.position.x);
+        int y = static_cast<int>(pt.position.y);
+        DrawText(("X: " + std::to_string(x) + " Y: " + std::to_string(y)).c_str(), 10, 30, 20, GREEN);
     }
 
     void unload(entt::registry& globalRegistry) override {
         //basicUnload();
     }
+
+protected:
+    entt::entity playerEntity; // Reference to the player entity
 };
 
 /*

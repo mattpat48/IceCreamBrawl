@@ -49,8 +49,8 @@ public:
             float absScaleX = std::abs(t.scale.x);
 
             Rectangle dest = {
-                t.position.x,
-                t.position.y,
+                t.position.x - s.width * t.scale.x / 2.0f,
+                t.position.y - s.height * t.scale.y / 2.0f,
                 s.width * absScaleX,
                 s.height * t.scale.y
             };
@@ -100,10 +100,10 @@ public:
 
             if (std::abs(v.dx) > std::abs(v.dy)) {
                 // Horizontal movement dominates
-                a.row = (v.dx > 0) ? 5 : 1;  // right : left
+                a.row = (v.dx > 0) ? RIGHT : LEFT;  // right : left
             } else if (v.dy != 0) {
                 // Vertical movement dominates
-                a.row = (v.dy > 0) ? 0 : 3;  // down : up
+                a.row = (v.dy > 0) ? DOWN : UP;  // down : up
             }
 
             a.isPlaying = true;

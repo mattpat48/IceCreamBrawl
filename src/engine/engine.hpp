@@ -8,8 +8,11 @@
 class Engine {
 public:
 
-    Engine(int width, int height, const char* title) : window(width, height, title) {
+    Engine(int width, int height, const char* title) {
+        SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+        InitWindow(width, height, title);
         SetTargetFPS(60); // Set the target frames per second
+        std::cout << "Screen: " << GetScreenWidth() << " x " << GetScreenHeight() << std::endl;
     }
 
     void setScreen(std::unique_ptr<Screen> screen) {
@@ -17,26 +20,25 @@ public:
     }
 
     void run() {
-        while (!window.ShouldClose()) {
+        while (!WindowShouldClose()) {
 
             float delta = GetFrameTime();
 
             screenManager.update(delta);
 
-            window.BeginDrawing();
-            window.ClearBackground(RAYWHITE);
+            BeginDrawing();
+            ClearBackground(LIGHTGRAY);
 
-            window.DrawFPS(10, 10);
+            DrawFPS(10, 10);
             screenManager.draw();
 
-            window.EndDrawing();
+            EndDrawing();
         }
     }
     void close() {
-        window.Close();
+        CloseWindow();
     }
 
 private:
     ScreenManager screenManager;
-    raylib::Window window;
 };

@@ -27,7 +27,8 @@ public:
             }
 
             // Check if the mouse position is within the button area
-            if (CheckCollisionPointRec(mousePosition, {t->position.x, t->position.y,
+            if (CheckCollisionPointRec(mousePosition, {t->position.x - (s->width) * t->scale.x / 2.0f,
+                                                       t->position.y - (s->height) * t->scale.y / 2.0f,
                                                        (float)s->width * BUTTON_PRIMARY_SCALE_X,
                                                        (float)s->height * BUTTON_PRIMARY_SCALE_Y})) {
                 a->currentFrame = 1; // Change to pressed frame
@@ -36,11 +37,12 @@ public:
             }
         } else {
             if (a->currentFrame == 1) {
-                // If the button was pressed and now released,
-                // make the player move down
-                auto pt = registry->try_get<transform>(playerEntity);
-                if (pt) {
-                    pt->position.y += 50.0f; // Move player down by 50 units
+                std::cout << "Button pressed!" << std::endl;
+                auto ps = registry->try_get<sprite>(playerEntity);
+                auto pa = registry->try_get<animation>(playerEntity);
+                if (ps->currentTexture != "attack") {
+                    ps->currentTexture = "attack"; // Change player texture to attack
+                    pa->currentFrame = 0;
                 }
             }
             a->currentFrame = 2; // Change to normal frame
