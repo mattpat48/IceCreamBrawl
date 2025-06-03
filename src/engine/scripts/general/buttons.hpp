@@ -3,6 +3,7 @@
 #include "components/components.hpp"
 #include "scripts/script.hpp"
 #include <entt/entt.hpp>
+#include <iostream>
 
 class buttonHandler : public Script {
 public:
@@ -37,13 +38,7 @@ public:
             }
         } else {
             if (a->currentFrame == 1) {
-                std::cout << "Button pressed!" << std::endl;
-                auto ps = registry->try_get<sprite>(playerEntity);
-                auto pa = registry->try_get<animation>(playerEntity);
-                if (ps->currentTexture != "attack") {
-                    ps->currentTexture = "attack"; // Change player texture to attack
-                    pa->currentFrame = 0;
-                }
+                buttonRelease();
             }
             a->currentFrame = 2; // Change to normal frame
         }
@@ -53,6 +48,30 @@ public:
         // Drawing logic for buttons if needed
     }
 
+    virtual void buttonRelease() = 0;
+
 protected:
     entt::entity playerEntity; // Reference to the player entity
+};
+    
+
+class primaryButtonScript : public buttonHandler {
+public:
+    primaryButtonScript(entt::entity playerEntity, entt::registry& registry)
+        : buttonHandler(playerEntity, registry) {}
+
+    void buttonRelease() override {
+        auto a = registry->try_get<animation>(playerEntity);
+        auto s = registry->try_get<sprite>(playerEntity);
+        auto stamina = registry->try_get<staminaComponent>(playerEntity);
+        auto attack = registry->try_get<attackComponent>(playerEntity);
+
+        if (a && s && stamina && attack) {
+            if (s->currentTexture == "idle") {
+                stamina->stamina -= attack->cost; // Reduce stamina on attack
+                s->currentTexture = "attack"; // Change to attack texture on button release
+                a->currentFrame = a->startFrame; // Reset animation frame to start frame
+            }
+        }
+    }
 };

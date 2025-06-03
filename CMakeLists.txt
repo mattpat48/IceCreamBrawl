@@ -83,9 +83,19 @@ target_include_directories(ICB_engine
         include/entt
         include/enet
         src/
+
         src/engine
-        src/game
+        src/engine/components
+        src/engine/scripts
+        src/engine/scripts/general
+        src/engine/scripts/player
+
         src/screens
+        src/screens/game
+        src/screens/menu
+        src/screens/pause
+        src/screens/settings
+
         src/utils
 )
 

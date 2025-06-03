@@ -39,8 +39,13 @@ class wasdController : public Script {
 
 class changeDirectionController : public Script {
 public:
-    void onCreate() {
-        // Initialization logic
+
+    changeDirectionController(entt::entity player, entt::registry& registry) {
+        this->entity = player; // Store the player entity for reference
+        this->registry = &registry; // Store the registry reference
+    }
+
+    void onCreate() override {
     }
 
     void onUpdate(float dt) override {

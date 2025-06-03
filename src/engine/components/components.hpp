@@ -4,6 +4,7 @@
 
 #include "defines.h"
 #include "scripts/script.hpp"
+#include "entityComponents.hpp"
 
 struct sprite {
     std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;

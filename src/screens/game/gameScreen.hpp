@@ -4,8 +4,9 @@
 #include "raylib-cpp.hpp"
 
 #include "screens/screen.hpp"
-#include "engine/scripts/player/controller.hpp"
-#include "engine/scripts/player/buttons.hpp"
+#include "scripts/general/controller.hpp"
+#include "scripts/general/buttons.hpp"
+#include "scripts/player/playerScripts.hpp"
 #include <entt/entt.hpp>
 #include <memory>
 
@@ -25,7 +26,11 @@ public:
         registry.emplace<transform>(playerEntity, Vector2{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}, Vector2{3.0f, 3.0f}, 0.0f);
         registry.emplace<velocity>(playerEntity, 0.0f, 0.0f);
         registry.emplace<animation>(playerEntity, 0, 0, 7, 1, 0.1f, 0.0f, false, 0);
-        registry.emplace<script>(playerEntity).bind<changeDirectionController>();
+        registry.emplace<script>(playerEntity).bind<playerScript>(registry);
+        registry.emplace<lifeComponent>(playerEntity, 100.0f, 100.0f);
+        registry.emplace<staminaComponent>(playerEntity, 100.0f, 100.0f);
+        registry.emplace<damageComponent>(playerEntity, 10.0f, 10.0f);
+        registry.emplace<attackComponent>(playerEntity, 10.0f, 1.0f, 0.0f);
 
         this->playerEntity = playerEntity; // Store the player entity reference
 
@@ -42,27 +47,26 @@ public:
                                                   0, 
                                                   BUTTON_PRIMARY_ANIMATION_FRAME_TIME, 
                                                   0.0f, false, 0);
-        registry.emplace<script>(buttonEntity).bind<buttonHandler>(playerEntity, registry);
+        registry.emplace<script>(buttonEntity).bind<primaryButtonScript>(playerEntity, registry);
+
+        auto enemyEntity = registry.create();
+        std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> enemyTextures;
+        enemyTextures["idle"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/idle.png");
+
+        registry.emplace<sprite>(enemyEntity,
+                                 std::move(enemyTextures), "idle",
+                                 48, 48, Vector2{100.0f, 100.0f});
+        registry.emplace<transform>(enemyEntity, Vector2{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - 200.0f}, Vector2{3.0f, 3.0f}, 0.0f);
+        registry.emplace<velocity>(enemyEntity, 0.0f, 0.0f);
+        registry.emplace<animation>(enemyEntity, 0, 0, 1, 1, 0.3f, 0.0f, false, 0);
     }
 
     void update(float delta) override {
-        auto& ps = registry.get<sprite>(playerEntity);
-        auto& pa = registry.get<animation>(playerEntity);
-
-        if (ps.currentTexture == "attack" && pa.currentFrame == pa.endFrame) {
-            std::cout << "Player is resetting!" << std::endl;
-            ps.currentTexture = "idle"; // Reset to idle texture after attack
-        }
-
         basicUpdate(delta);
     }
 
     void draw() override {
         basicDraw();
-        transform& pt = registry.get<transform>(playerEntity);
-        int x = static_cast<int>(pt.position.x);
-        int y = static_cast<int>(pt.position.y);
-        DrawText(("X: " + std::to_string(x) + " Y: " + std::to_string(y)).c_str(), 10, 30, 20, GREEN);
     }
 
     void unload(entt::registry& globalRegistry) override {
