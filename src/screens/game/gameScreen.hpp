@@ -7,6 +7,7 @@
 #include "scripts/general/controller.hpp"
 #include "scripts/general/buttons.hpp"
 #include "scripts/player/playerScripts.hpp"
+#include "scripts/player/primaryAttack.hpp"
 #include <entt/entt.hpp>
 #include <memory>
 
@@ -18,7 +19,6 @@ public:
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> playerTextures;
         playerTextures["idle"] = std::make_shared<raylib::Texture2D>("resources/sprites/player/idle.png");
         playerTextures["attack"] = std::make_shared<raylib::Texture2D>("resources/sprites/player/attack.png");
-
         registry.emplace<sprite>(playerEntity,
                                  std::move(playerTextures), "idle",
                                  PLAYER_SPRITES_H_DIMENSION, PLAYER_SPRITES_V_DIMENSION, Vector2{100.0f, 100.0f});
@@ -27,12 +27,30 @@ public:
         registry.emplace<velocity>(playerEntity, 0.0f, 0.0f);
         registry.emplace<animation>(playerEntity, 0, 0, 7, 1, 0.1f, 0.0f, false, 0);
         registry.emplace<script>(playerEntity).bind<playerScript>(registry);
-        registry.emplace<lifeComponent>(playerEntity, 100.0f, 100.0f);
-        registry.emplace<staminaComponent>(playerEntity, 100.0f, 100.0f);
-        registry.emplace<damageComponent>(playerEntity, 10.0f, 10.0f);
-        registry.emplace<attackComponent>(playerEntity, 10.0f, 1.0f, 0.0f);
+
+        registry.emplace<status>(playerEntity, IDLE);
+        registry.emplace<health>(playerEntity, 100.0f, 100.0f);
+        registry.emplace<endurance>(playerEntity, 100.0f, 100.0f);
+        registry.emplace<damage>(playerEntity, 10.0f, 10.0f);
+        registry.emplace<attack>(playerEntity, 10.0f, 1.0f, 0.0f);
 
         this->playerEntity = playerEntity; // Store the player entity reference
+
+        auto enemyEntity = registry.create();
+        std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> enemyTextures;
+        enemyTextures["idle"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/idle.png");
+        registry.emplace<sprite>(enemyEntity,
+                                 std::move(enemyTextures), "idle",
+                                 79, 71, Vector2{100.0f, 100.0f});
+        registry.emplace<transform>(enemyEntity, Vector2{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - 200.0f}, Vector2{3.0f, 3.0f}, 0.0f);
+        registry.emplace<velocity>(enemyEntity, 0.0f, 0.0f);
+        registry.emplace<animation>(enemyEntity, 0, 0, 3, 0, 0.2f, 0.0f, false, 0);
+
+        registry.emplace<status>(enemyEntity, IDLE);
+        registry.emplace<health>(enemyEntity, 100.0f, 100.0f);
+        registry.emplace<endurance>(enemyEntity, 100.0f, 100.0f);
+        registry.emplace<damage>(enemyEntity, 10.0f, 10.0f);
+        registry.emplace<attack>(enemyEntity, 10.0f, 1.0f, 0.0f);
 
         auto buttonEntity = registry.create();
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> buttonTextures;
@@ -47,18 +65,7 @@ public:
                                                   0, 
                                                   BUTTON_PRIMARY_ANIMATION_FRAME_TIME, 
                                                   0.0f, false, 0);
-        registry.emplace<script>(buttonEntity).bind<primaryButtonScript>(playerEntity, registry);
-
-        auto enemyEntity = registry.create();
-        std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> enemyTextures;
-        enemyTextures["idle"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/idle.png");
-
-        registry.emplace<sprite>(enemyEntity,
-                                 std::move(enemyTextures), "idle",
-                                 48, 48, Vector2{100.0f, 100.0f});
-        registry.emplace<transform>(enemyEntity, Vector2{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - 200.0f}, Vector2{3.0f, 3.0f}, 0.0f);
-        registry.emplace<velocity>(enemyEntity, 0.0f, 0.0f);
-        registry.emplace<animation>(enemyEntity, 0, 0, 1, 1, 0.3f, 0.0f, false, 0);
+        registry.emplace<script>(buttonEntity).bind<primaryAttack>(playerEntity, enemyEntity, registry);
     }
 
     void update(float delta) override {

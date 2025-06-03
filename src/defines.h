@@ -12,6 +12,11 @@
 #define LEFT 2
 #define RIGHT 3
 
+#define DEAD -1
+#define IDLE 0
+#define ATTACK 1
+#define DODGE 2
+
 // player sprite dimensions and paths
 #define PLAYER_SPRITES_H_DIMENSION 96
 #define PLAYER_SPRITES_V_DIMENSION 80

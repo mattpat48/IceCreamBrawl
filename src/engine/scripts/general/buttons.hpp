@@ -7,7 +7,7 @@
 
 class buttonHandler : public Script {
 public:
-    buttonHandler(entt::entity playerEntity, entt::registry& registry) : playerEntity(playerEntity) {
+    buttonHandler(entt::registry& registry) {
         this->registry = &registry;
     }
 
@@ -49,29 +49,4 @@ public:
     }
 
     virtual void buttonRelease() = 0;
-
-protected:
-    entt::entity playerEntity; // Reference to the player entity
-};
-    
-
-class primaryButtonScript : public buttonHandler {
-public:
-    primaryButtonScript(entt::entity playerEntity, entt::registry& registry)
-        : buttonHandler(playerEntity, registry) {}
-
-    void buttonRelease() override {
-        auto a = registry->try_get<animation>(playerEntity);
-        auto s = registry->try_get<sprite>(playerEntity);
-        auto stamina = registry->try_get<staminaComponent>(playerEntity);
-        auto attack = registry->try_get<attackComponent>(playerEntity);
-
-        if (a && s && stamina && attack) {
-            if (s->currentTexture == "idle") {
-                stamina->stamina -= attack->cost; // Reduce stamina on attack
-                s->currentTexture = "attack"; // Change to attack texture on button release
-                a->currentFrame = a->startFrame; // Reset animation frame to start frame
-            }
-        }
-    }
 };
