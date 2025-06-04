@@ -1,6 +1,4 @@
 #pragma once
-#include "raylib.h"
-#include "raylib-cpp.hpp"
 
 #include "defines.h"
 #include "scripts/script.hpp"

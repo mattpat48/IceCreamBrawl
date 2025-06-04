@@ -18,11 +18,15 @@ struct status {
     bool isDodging() const {
         return status == DODGE;
     }
+    bool isDead() const {
+        return status == DEAD;
+    }
 };
 
 struct health {
     float life;
     float maxLife;
+    float regenRate; // amount of health regenerated per 1/2 second
 
     void reset() {
         life = maxLife;
@@ -38,6 +42,7 @@ struct health {
 struct endurance {
     float stamina;
     float maxStamina;
+    float regenRate; // amount of stamina regenerated per 1/2 second
 
     void reset() {
         stamina = maxStamina;

@@ -98,25 +98,26 @@ public:
             auto& a = view.get<animation>(entity);
             auto& v = view.get<velocity>(entity);
 
-            if (std::abs(v.dx) > std::abs(v.dy)) {
-                // Horizontal movement dominates
-                a.row = (v.dx > 0) ? RIGHT : LEFT;  // right : left
-            } else if (v.dy != 0) {
-                // Vertical movement dominates
-                a.row = (v.dy > 0) ? DOWN : UP;  // down : up
-            }
-
-            a.isPlaying = true;
-            a.timer += dt;
-
-            if (a.timer >= a.frameTime) {
-                a.timer = 0.0f;
-                a.currentFrame++;
-
-                if (a.currentFrame > a.endFrame) {
-                    a.currentFrame = a.startFrame;
+            if (a.isPlaying) {
+                if (std::abs(v.dx) > std::abs(v.dy)) {
+                    // Horizontal movement dominates
+                    a.row = (v.dx > 0) ? RIGHT : LEFT;  // right : left
+                } else if (v.dy != 0) {
+                    // Vertical movement dominates
+                    a.row = (v.dy > 0) ? DOWN : UP;  // down : up
                 }
-            }
+
+                a.timer += dt;
+
+                if (a.timer >= a.frameTime) {
+                    a.timer = 0.0f;
+                    a.currentFrame++;
+
+                    if (a.currentFrame > a.endFrame) {
+                        a.currentFrame = a.startFrame;
+                    }
+                }
+            }    
         }
     }
 

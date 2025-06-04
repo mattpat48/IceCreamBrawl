@@ -6,8 +6,9 @@
 #include "screens/screen.hpp"
 #include "scripts/general/controller.hpp"
 #include "scripts/general/buttons.hpp"
-#include "scripts/player/playerScripts.hpp"
-#include "scripts/player/primaryAttack.hpp"
+#include "scripts/entities/player/playerScripts.hpp"
+#include "scripts/entities/player/primaryAttack.hpp"
+#include "scripts/entities/enemy/enemyScripts.hpp"
 #include <entt/entt.hpp>
 #include <memory>
 
@@ -25,32 +26,37 @@ public:
         // position the player at the center of the screen
         registry.emplace<transform>(playerEntity, Vector2{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}, Vector2{3.0f, 3.0f}, 0.0f);
         registry.emplace<velocity>(playerEntity, 0.0f, 0.0f);
-        registry.emplace<animation>(playerEntity, 0, 0, 7, 1, 0.1f, 0.0f, false, 0);
-        registry.emplace<script>(playerEntity).bind<playerScript>(registry);
+        registry.emplace<animation>(playerEntity, 0, 0, 7, 1, 0.1f, 0.0f, true, 0);
+        registry.emplace<script>(playerEntity).bind<playerScript>(playerEntity, registry);
 
         registry.emplace<status>(playerEntity, IDLE);
-        registry.emplace<health>(playerEntity, 100.0f, 100.0f);
-        registry.emplace<endurance>(playerEntity, 100.0f, 100.0f);
-        registry.emplace<damage>(playerEntity, 10.0f, 10.0f);
-        registry.emplace<attack>(playerEntity, 10.0f, 1.0f, 0.0f);
+        registry.emplace<health>(playerEntity, 100.0f, 100.0f, 2.0f);
+        registry.emplace<endurance>(playerEntity, 100.0f, 100.0f, 2.0f);
+        registry.emplace<damage>(playerEntity, 10.0f, 10.0f, 0.0f, 1.0f);
+        registry.emplace<attack>(playerEntity, 10.0f, 0.5f, 0.0f);
 
         this->playerEntity = playerEntity; // Store the player entity reference
 
         auto enemyEntity = registry.create();
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> enemyTextures;
         enemyTextures["idle"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/idle.png");
+        enemyTextures["hurt"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/hurt.png");
+        enemyTextures["death"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/death.png");
         registry.emplace<sprite>(enemyEntity,
                                  std::move(enemyTextures), "idle",
-                                 79, 71, Vector2{100.0f, 100.0f});
+                                 79, 69, Vector2{100.0f, 100.0f});
         registry.emplace<transform>(enemyEntity, Vector2{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - 200.0f}, Vector2{3.0f, 3.0f}, 0.0f);
         registry.emplace<velocity>(enemyEntity, 0.0f, 0.0f);
-        registry.emplace<animation>(enemyEntity, 0, 0, 3, 0, 0.2f, 0.0f, false, 0);
+        registry.emplace<animation>(enemyEntity, 0, 0, 3, 0, 0.15f, 0.0f, true, 0);
+        registry.emplace<script>(enemyEntity).bind<enemyScript>(enemyEntity, registry);
 
-        registry.emplace<status>(enemyEntity, IDLE);
-        registry.emplace<health>(enemyEntity, 100.0f, 100.0f);
-        registry.emplace<endurance>(enemyEntity, 100.0f, 100.0f);
+        registry.emplace<status>(enemyEntity, ATTACK);
+        registry.emplace<health>(enemyEntity, 100.0f, 100.0f, 2.0f);
+        registry.emplace<endurance>(enemyEntity, 100.0f, 100.0f, 2.0f);
         registry.emplace<damage>(enemyEntity, 10.0f, 10.0f);
-        registry.emplace<attack>(enemyEntity, 10.0f, 1.0f, 0.0f);
+        registry.emplace<attack>(enemyEntity, 10.0f, 0.5f, 0.0f);
+
+        this->enemyEntity = enemyEntity; // Store the enemy entity reference
 
         auto buttonEntity = registry.create();
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> buttonTextures;
@@ -82,6 +88,7 @@ public:
 
 protected:
     entt::entity playerEntity; // Reference to the player entity
+    entt::entity enemyEntity; // Reference to the enemy entity
 };
 
 /*
