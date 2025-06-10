@@ -33,10 +33,13 @@ public:
                 st->status = ATTACK;
 
                 if (!es->isDodging()) {
-                    enSprite->currentTexture = "hurt"; // Change enemy texture to hurt if not dodging
-                    ea->currentFrame = ea->startFrame; // Reset enemy animation frame to start frame
                     eh->consume(dmg->currentDamage); // Apply damage to enemy if not dodging
                     std::cout << "Enemy took damage: " << dmg->currentDamage << std::endl;
+                    if (!es->isAttacking()) {
+                        enSprite->currentTexture = "hurt"; // Change enemy texture to hurt if not dodging
+                        ea->currentFrame = ea->startFrame; // Reset enemy animation frame to start frame
+                    }
+
                 } else {
                     std::cout << "Enemy is dodging, no damage taken." << std::endl;
                 }

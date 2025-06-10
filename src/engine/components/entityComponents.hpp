@@ -77,6 +77,8 @@ struct damage {
 struct attack {
     float cost;
     float cooldown;
+    bool modifier;
+    float cooldownModifier;
     float currentCooldown;
 
     void reset() {

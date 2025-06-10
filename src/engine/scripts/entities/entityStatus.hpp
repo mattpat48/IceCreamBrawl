@@ -24,7 +24,7 @@ public:
         if (statusComp->isDead() && pa->isPlaying) {
             if (pa->currentFrame == pa->endFrame) {
                 pa->isPlaying = false;
-            }         
+            }
         }
 
         // Example logic to update player status
@@ -36,12 +36,23 @@ public:
             return;
         }
 
-        if (ps->currentTexture != "idle" &&
-            ps->currentTexture != "death" &&
-            pa->currentFrame == pa->endFrame) {
+        if (statusComp->isAttacking() && pa->currentFrame == pa->endFrame) {
+            std::cout << "Reset after attack" << std::endl;
             statusComp->status = IDLE;
             ps->currentTexture = "idle"; // Reset to idle texture after attack
             atk->currentCooldown = atk->cooldown; // Reset attack cooldown
+            if (atk->modifier) {
+                atk->cooldownModifier = (float)(rand()) / (float)(RAND_MAX);
+                atk->currentCooldown += atk->cooldownModifier + 0.5f;
+            }
+            std::cout << "CD modifier: " << atk->cooldownModifier << std::endl;
+            std::cout << "current CD: " << atk->currentCooldown << std::endl;
+        }
+
+        if (ps->currentTexture == "hurt" && pa->currentFrame == pa->endFrame) {
+            std::cout << "Reset after hurt" << std::endl;
+            statusComp->status = IDLE;
+            ps->currentTexture = "idle"; // Reset to idle texture after attack
         }
         
         atk->updateCooldown(dt);

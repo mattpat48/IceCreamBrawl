@@ -33,7 +33,7 @@ public:
         registry.emplace<health>(playerEntity, 100.0f, 100.0f, 2.0f);
         registry.emplace<endurance>(playerEntity, 100.0f, 100.0f, 2.0f);
         registry.emplace<damage>(playerEntity, 10.0f, 10.0f, 0.0f, 1.0f);
-        registry.emplace<attack>(playerEntity, 10.0f, 0.5f, 0.0f);
+        registry.emplace<attack>(playerEntity, 10.0f, 0.5f, false, 0.0f, 0.0f);
 
         this->playerEntity = playerEntity; // Store the player entity reference
 
@@ -42,19 +42,20 @@ public:
         enemyTextures["idle"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/idle.png");
         enemyTextures["hurt"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/hurt.png");
         enemyTextures["death"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/death.png");
+        enemyTextures["attack"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/attack.png");
         registry.emplace<sprite>(enemyEntity,
                                  std::move(enemyTextures), "idle",
                                  79, 69, Vector2{100.0f, 100.0f});
         registry.emplace<transform>(enemyEntity, Vector2{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - 200.0f}, Vector2{3.0f, 3.0f}, 0.0f);
         registry.emplace<velocity>(enemyEntity, 0.0f, 0.0f);
         registry.emplace<animation>(enemyEntity, 0, 0, 3, 0, 0.15f, 0.0f, true, 0);
-        registry.emplace<script>(enemyEntity).bind<enemyScript>(enemyEntity, registry);
+        registry.emplace<script>(enemyEntity).bind<enemyScript>(enemyEntity, registry, playerEntity);
 
-        registry.emplace<status>(enemyEntity, ATTACK);
+        registry.emplace<status>(enemyEntity, IDLE);
         registry.emplace<health>(enemyEntity, 100.0f, 100.0f, 2.0f);
         registry.emplace<endurance>(enemyEntity, 100.0f, 100.0f, 2.0f);
-        registry.emplace<damage>(enemyEntity, 10.0f, 10.0f);
-        registry.emplace<attack>(enemyEntity, 10.0f, 0.5f, 0.0f);
+        registry.emplace<damage>(enemyEntity, 1.0f, 1.0f);
+        registry.emplace<attack>(enemyEntity, 10.0f, 0.5f, true, 0.0f, 0.0f);
 
         this->enemyEntity = enemyEntity; // Store the enemy entity reference
 
