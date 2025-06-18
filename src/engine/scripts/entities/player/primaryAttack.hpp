@@ -13,33 +13,31 @@ public:
     }
 
     void buttonRelease() override {
-        auto a = registry->try_get<animation>(playerEntity);
-        auto s = registry->try_get<sprite>(playerEntity);
-        auto st = registry->try_get<status>(playerEntity);
-        auto en = registry->try_get<endurance>(playerEntity);
+        auto ani = registry->try_get<animation>(playerEntity);
+        auto spr = registry->try_get<sprite>(playerEntity);
+        auto sta = registry->try_get<status>(playerEntity);
+        auto end = registry->try_get<endurance>(playerEntity);
         auto atk = registry->try_get<attack>(playerEntity);
         auto dmg = registry->try_get<damage>(playerEntity);
 
-        auto es = registry->try_get<status>(enemyEntity);
-        auto eh = registry->try_get<health>(enemyEntity);
-        auto ea = registry->try_get<animation>(enemyEntity);
-        auto enSprite = registry->try_get<sprite>(enemyEntity);
+        auto esta = registry->try_get<status>(enemyEntity);
+        auto ehea = registry->try_get<health>(enemyEntity);
+        auto eani = registry->try_get<animation>(enemyEntity);
+        auto espr = registry->try_get<sprite>(enemyEntity);
+        auto ehit = registry->try_get<hitFlash>(enemyEntity);
 
-        if (a && s && st && en && atk && es && eh && enSprite) {
-            if (st->isIdle() && atk->canAttack(en->stamina) && !es->isDead()) {
-                en->consume(atk->cost); // Consume stamina for attack
-                s->currentTexture = "attack"; // Change to attack texture on button release
-                a->currentFrame = a->startFrame; // Reset animation frame to start frame
-                st->status = ATTACK;
+        if (ani && spr && sta && end && atk && esta && ehea && espr) {
+            if (sta->isIdle() && atk->canAttack(end->stamina) && !esta->isDead()) {
+                end->consume(atk->cost); // Consume stamina for attack
+                spr->currentTexture = "attack"; // Change to attack texture on button release
+                ani->currentFrame = ani->startFrame; // Reset animation frame to start frame
+                sta->status = ATTACK;
 
-                if (!es->isDodging()) {
-                    eh->consume(dmg->currentDamage); // Apply damage to enemy if not dodging
+                if (!esta->isDodging()) {
+                    ehea->consume(dmg->currentDamage); // Apply damage to enemy if not dodging
+                    ehit->filter = RED;
+                    ehit->timeFlash = 0.0f;
                     std::cout << "Enemy took damage: " << dmg->currentDamage << std::endl;
-                    if (!es->isAttacking()) {
-                        enSprite->currentTexture = "hurt"; // Change enemy texture to hurt if not dodging
-                        ea->currentFrame = ea->startFrame; // Reset enemy animation frame to start frame
-                    }
-
                 } else {
                     std::cout << "Enemy is dodging, no damage taken." << std::endl;
                 }

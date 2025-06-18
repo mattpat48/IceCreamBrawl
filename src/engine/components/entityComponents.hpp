@@ -6,6 +6,11 @@
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
+struct hitFlash {
+    Color filter = WHITE;
+    float timeFlash = 0.0f;
+};
+
 struct status {
     int status;
 
@@ -20,6 +25,10 @@ struct status {
     }
     bool isDead() const {
         return status == DEAD;
+    }
+
+    bool isHurt() const {
+        return status == HURT;
     }
 };
 
@@ -37,6 +46,13 @@ struct health {
             life = 0;
         }
     }
+
+    void regen(float amount) {
+        life += amount;
+        if (life > maxLife) {
+            life = maxLife;
+        }
+    }
 };
 
 struct endurance {
@@ -51,6 +67,13 @@ struct endurance {
         stamina -= amount;
         if (stamina < 0) {
             stamina = 0;
+        }
+    }
+
+    void regen(float amount) {
+        stamina += amount;
+        if (stamina > maxStamina) {
+            stamina = maxStamina;
         }
     }
 };

@@ -29,10 +29,11 @@ public:
         registry.emplace<animation>(playerEntity, 0, 0, 7, 1, 0.1f, 0.0f, true, 0);
         registry.emplace<script>(playerEntity).bind<playerScript>(playerEntity, registry);
 
+        registry.emplace<hitFlash>(playerEntity);
         registry.emplace<status>(playerEntity, IDLE);
         registry.emplace<health>(playerEntity, 100.0f, 100.0f, 2.0f);
         registry.emplace<endurance>(playerEntity, 100.0f, 100.0f, 2.0f);
-        registry.emplace<damage>(playerEntity, 10.0f, 10.0f, 0.0f, 1.0f);
+        registry.emplace<damage>(playerEntity, 1.0f, 1.0f, 0.0f, 1.0f);
         registry.emplace<attack>(playerEntity, 10.0f, 0.5f, false, 0.0f, 0.0f);
 
         this->playerEntity = playerEntity; // Store the player entity reference
@@ -40,7 +41,7 @@ public:
         auto enemyEntity = registry.create();
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> enemyTextures;
         enemyTextures["idle"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/idle.png");
-        enemyTextures["hurt"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/hurt.png");
+        //enemyTextures["hurt"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/hurt.png");
         enemyTextures["death"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/death.png");
         enemyTextures["attack"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/attack.png");
         registry.emplace<sprite>(enemyEntity,
@@ -51,6 +52,7 @@ public:
         registry.emplace<animation>(enemyEntity, 0, 0, 3, 0, 0.15f, 0.0f, true, 0);
         registry.emplace<script>(enemyEntity).bind<enemyScript>(enemyEntity, registry, playerEntity);
 
+        registry.emplace<hitFlash>(enemyEntity);
         registry.emplace<status>(enemyEntity, IDLE);
         registry.emplace<health>(enemyEntity, 100.0f, 100.0f, 2.0f);
         registry.emplace<endurance>(enemyEntity, 100.0f, 100.0f, 2.0f);

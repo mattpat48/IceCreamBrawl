@@ -16,6 +16,7 @@
 #define IDLE 0
 #define ATTACK 1
 #define DODGE 2
+#define HURT 3
 
 // player sprite dimensions and paths
 #define PLAYER_SPRITES_H_DIMENSION 96

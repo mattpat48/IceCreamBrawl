@@ -17,13 +17,14 @@ public:
         auto healthComp = getComponent<health>();
         auto enduranceComp = getComponent<endurance>();
         auto statusComp = getComponent<status>();
-        auto ps = getComponent<sprite>();
-        auto pa = getComponent<animation>();
-        auto atk = getComponent<attack>();
+        auto spriteComp = getComponent<sprite>();
+        auto animationComp = getComponent<animation>();
+        auto attackComp = getComponent<attack>();
+        auto hitFlashComp = getComponent<hitFlash>();
 
-        if (statusComp->isDead() && pa->isPlaying) {
-            if (pa->currentFrame == pa->endFrame) {
-                pa->isPlaying = false;
+        if (statusComp->isDead() && animationComp->isPlaying) {
+            if (animationComp->currentFrame == animationComp->endFrame) {
+                animationComp->isPlaying = false;
             }
         }
 
@@ -31,36 +32,42 @@ public:
         if (healthComp->life <= 0 && !statusComp->isDead()) {
             statusComp->status = DEAD; // Set status to DEAD
             std::cout << "Entity is dead!" << std::endl;
-            ps->currentTexture = "death"; // Change texture to death
-            pa->currentFrame = pa->startFrame; // Reset animation frame to start frame
+            spriteComp->currentTexture = "death"; // Change texture to death
+            animationComp->currentFrame = animationComp->startFrame; // Reset animation frame to start frame
             return;
         }
 
-        if (statusComp->isAttacking() && pa->currentFrame == pa->endFrame) {
+        if (statusComp->isAttacking() && animationComp->currentFrame == animationComp->endFrame) {
             std::cout << "Reset after attack" << std::endl;
             statusComp->status = IDLE;
-            ps->currentTexture = "idle"; // Reset to idle texture after attack
-            atk->currentCooldown = atk->cooldown; // Reset attack cooldown
-            if (atk->modifier) {
-                atk->cooldownModifier = (float)(rand()) / (float)(RAND_MAX);
-                atk->currentCooldown += atk->cooldownModifier + 0.5f;
+            spriteComp->currentTexture = "idle"; // Reset to idle texture after attack
+            attackComp->currentCooldown = attackComp->cooldown; // Reset attack cooldown
+            if (attackComp->modifier) {
+                attackComp->cooldownModifier = (float)(rand()) / (float)(RAND_MAX);
+                attackComp->currentCooldown += attackComp->cooldownModifier + 0.5f;
             }
-            std::cout << "CD modifier: " << atk->cooldownModifier << std::endl;
-            std::cout << "current CD: " << atk->currentCooldown << std::endl;
+            std::cout << "CD modifier: " << attackComp->cooldownModifier << std::endl;
+            std::cout << "current CD: " << attackComp->currentCooldown << std::endl;
         }
 
-        if (ps->currentTexture == "hurt" && pa->currentFrame == pa->endFrame) {
-            std::cout << "Reset after hurt" << std::endl;
-            statusComp->status = IDLE;
-            ps->currentTexture = "idle"; // Reset to idle texture after attack
+        if (hitFlashComp &&
+            hitFlashComp->filter.r == RED.r &&
+            hitFlashComp->filter.g == RED.g &&
+            hitFlashComp->filter.b == RED.b &&
+            hitFlashComp->filter.a == RED.a) {
+            if (hitFlashComp->timeFlash >= 0.20f) {
+                hitFlashComp->filter = WHITE;
+                hitFlashComp->timeFlash = 0.0f;
+            } else {
+                std::cout << hitFlashComp->timeFlash << std::endl;
+                hitFlashComp->timeFlash += dt;
+            }
         }
         
-        atk->updateCooldown(dt);
+        attackComp->updateCooldown(dt);
         
-        enduranceComp->stamina += enduranceComp->regenRate * dt;
-        if (enduranceComp->stamina > enduranceComp->maxStamina) {
-            enduranceComp->stamina = enduranceComp->maxStamina; // Cap stamina at max
-        }
+        healthComp->regen(healthComp->regenRate * dt);
+        enduranceComp->regen(enduranceComp->regenRate * dt + 5.0f);
     }
 
     void onCreate() override {

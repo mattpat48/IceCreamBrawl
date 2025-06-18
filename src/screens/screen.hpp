@@ -61,8 +61,9 @@ public:
                 source.width = -source.width;
             }
 
-            s.textures.at(s.currentTexture)->Draw(source, dest, origin, t.rotation, WHITE);
-            
+            auto hf = registry.try_get<hitFlash>(entity);
+            Color filter = hf ? hf->filter : WHITE;
+            s.textures.at(s.currentTexture)->Draw(source, dest, origin, t.rotation, filter);
         }
 
         auto scriptView = registry.view<script>();
@@ -117,7 +118,7 @@ public:
                         a.currentFrame = a.startFrame;
                     }
                 }
-            }    
+            }
         }
     }
 
