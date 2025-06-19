@@ -30,8 +30,8 @@ public:
             // Check if the mouse position is within the button area
             if (CheckCollisionPointRec(mousePosition, {t->position.x - (s->width) * t->scale.x / 2.0f,
                                                        t->position.y - (s->height) * t->scale.y / 2.0f,
-                                                       (float)s->width * BUTTON_PRIMARY_SCALE_X,
-                                                       (float)s->height * BUTTON_PRIMARY_SCALE_Y})) {
+                                                       (float)s->width * t->scale.x,
+                                                       (float)s->height * t->scale.y})) {
                 a->currentFrame = 1; // Change to pressed frame
             } else {
                 a->currentFrame = 2; // Change to normal frame

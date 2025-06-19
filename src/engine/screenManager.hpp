@@ -10,24 +10,47 @@
 
 class ScreenManager {
 public:
-    std::unique_ptr<Screen> currentScreen;
+    Screen* currentScreen = nullptr;
+    std::vector<std::unique_ptr<Screen>> screenStack;
     entt::registry globalRegistry;
 
     ~ScreenManager() {
         if (currentScreen) {
             currentScreen->unload(globalRegistry);
         }
+        while (!screenStack.empty()) {
+            screenStack.back()->unload(globalRegistry);
+            screenStack.pop_back();
+        }
     }
 
     void setScreen(std::unique_ptr<Screen> screen) {
-        if (currentScreen) {
-            std::cout << "Unloading current screen..." << std::endl;
-            currentScreen->unload(globalRegistry);
+        while (!screenStack.empty()) {
+            screenStack.back()->unload(globalRegistry);
+            screenStack.pop_back();
         }
-        currentScreen = std::move(screen);
-        if (currentScreen) {
-            std::cout << "Loading new screen..." << std::endl;
-            currentScreen->load(globalRegistry);
+        if (screen) {
+            screen->load(globalRegistry);
+            screenStack.push_back(std::move(screen));
+            currentScreen = screenStack.back().get();
+        } else {
+            currentScreen = nullptr;
+        }
+    }
+
+    void pushScreen(std::unique_ptr<Screen> screen) {
+        if (screen) {
+            screen->load(globalRegistry);
+            screenStack.push_back(std::move(screen));
+            currentScreen = screenStack.back().get();
+        }
+    }
+
+    void popScreen() {
+        if (!screenStack.empty()) {
+            screenStack.back()->unload(globalRegistry);
+            screenStack.pop_back();
+            currentScreen = screenStack.empty() ? nullptr : screenStack.back().get();
         }
     }
 
@@ -38,8 +61,8 @@ public:
     }
 
     void draw() {
-        if (currentScreen) {
-            currentScreen->draw();
+        for (auto& screen : screenStack) {
+            screen->draw();
         }
     }
 };

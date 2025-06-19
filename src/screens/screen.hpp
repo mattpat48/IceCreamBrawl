@@ -5,10 +5,13 @@
 #include "components/components.hpp"
 #include <entt/entt.hpp>
 
+class Engine;
+
 class Screen {
 
 protected:
     entt::registry registry;
+    Engine* engine = nullptr;
 
 public:
 
@@ -16,6 +19,9 @@ public:
     virtual void update(float delta) = 0;
     virtual void draw() = 0;
     virtual void unload(entt::registry& registry) = 0;
+
+    void setEngine(Engine* eng) { engine = eng; }
+    Engine* getEngine() const { return engine; }
 
     void basicUpdate(float delta) {
         updateScripts();

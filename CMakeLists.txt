@@ -143,8 +143,8 @@ if(NOT ANDROID)
 
     # Collect additional game-specific files
     file(GLOB_RECURSE GAME_SCENES
-        "src/scenes/*.hpp"
-        "src/scenes/*.cpp"
+        "src/screens/*.hpp"
+        "src/screens/*.cpp"
     )
 
     # Create game executable

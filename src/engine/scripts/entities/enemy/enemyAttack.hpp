@@ -23,7 +23,7 @@ public:
         auto psta = registry->try_get<status>(playerEntity);
         auto phea = registry->try_get<health>(playerEntity);
 
-        if (atk && dmg && sta && end && spr && ani && psta && phea && false) {
+        if (atk && dmg && sta && end && spr && ani && psta && phea) {
             if (sta->isIdle() && atk->canAttack(end->stamina) && !psta->isDead()) {// && spr->currentTexture != "hurt") {
                 sta->status = ATTACK;
                 std::cout << "Enemy Attacking!" << std::endl;

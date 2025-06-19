@@ -66,7 +66,7 @@ public:
         
         attackComp->updateCooldown(dt);
         
-        healthComp->regen(healthComp->regenRate * dt);
+        //healthComp->regen(healthComp->regenRate * dt);
         enduranceComp->regen(enduranceComp->regenRate * dt + 5.0f);
     }
 

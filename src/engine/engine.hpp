@@ -16,7 +16,17 @@ public:
     }
 
     void setScreen(std::unique_ptr<Screen> screen) {
+        screen->setEngine(this);
         screenManager.setScreen(std::move(screen));
+    }
+
+    void pushScreen(std::unique_ptr<Screen> screen) {
+        screen->setEngine(this);
+        screenManager.pushScreen(std::move(screen)); 
+    }
+
+    void popScreen() {
+        screenManager.popScreen();
     }
 
     void run() {
