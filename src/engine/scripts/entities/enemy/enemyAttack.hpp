@@ -46,6 +46,8 @@ public:
 
     }
 
+    virtual ~enemyAttack() = default;
+
 protected:
     entt::entity playerEntity;
 };

@@ -13,6 +13,8 @@ public:
     pauseButton(entt::registry& registry, GameScreen* gameScreen, Engine* engine)
         : buttonHandler(registry), gameScreen(gameScreen), engine(engine) {}
 
+    virtual ~pauseButton();
+
     void buttonRelease() override;
 
 private:

@@ -41,6 +41,8 @@ public:
         DrawText(("PLAYER ST: " + std::to_string(static_cast<int>(ps->stamina)) + "/" + std::to_string(static_cast<int>(ps->maxStamina))).c_str(), 10, 70, 20, BLUE);
     }
 
+    virtual ~playerScript() = default;
+
 protected:
     entt::entity enemy;
     script dirController;

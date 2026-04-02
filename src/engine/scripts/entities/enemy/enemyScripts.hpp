@@ -34,6 +34,8 @@ public:
         DrawText(("ENEMY ST: " + std::to_string(static_cast<int>(ps->stamina)) + "/" + std::to_string(static_cast<int>(ps->maxStamina))).c_str(), 10, 110, 20, BLUE);
     }
 
+    virtual ~enemyScript() = default;
+
 protected:
     entt::entity player; // Reference to the player entity
     script enemyStatus;

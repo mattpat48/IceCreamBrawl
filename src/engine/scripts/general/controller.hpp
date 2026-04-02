@@ -35,6 +35,8 @@ class wasdController : public Script {
     void onDraw() override {
         // Drawing logic if needed
     }
+
+    virtual ~wasdController() = default;
 };
 
 class changeDirectionController : public Script {
@@ -67,6 +69,8 @@ public:
     void onDraw() override {
         // Drawing logic if needed
     }
+
+    virtual ~changeDirectionController() = default;
 };
 
 class touchController : public Script {
@@ -129,6 +133,8 @@ public:
     void onDraw() override {
         
     }
+
+    virtual ~touchController() = default;
 
 protected:
     entt::entity playerEntity; // Store the player entity for reference

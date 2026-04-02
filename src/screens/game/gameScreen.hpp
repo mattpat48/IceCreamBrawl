@@ -143,6 +143,8 @@ public:
         //basicUnload();
     }
 
+    virtual ~GameScreen() = default;
+
 protected:
     entt::entity playerEntity; // Reference to the player entity
     entt::entity enemyEntity; // Reference to the enemy entity
