@@ -1,6 +1,9 @@
 #pragma once
 
-#include "defines.h"
+#include "defines_screen.h"
+#include "defines_player.h"
+#include "defines_ui.h"
+#include "defines_general.h"
 #include "scripts/script.hpp"
 #include "entityComponents.hpp"
 
@@ -9,7 +12,6 @@ struct sprite {
     std::string currentTexture;
     int width;
     int height;
-    Vector2 position;
 };
 
 struct transform {

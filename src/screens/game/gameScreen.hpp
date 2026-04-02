@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
-#include "screens/screen.hpp"
+#include "screen.hpp"
 #include "scripts/general/controller.hpp"
 #include "scripts/general/buttons.hpp"
 #include "scripts/entities/player/playerScripts.hpp"
@@ -18,6 +18,10 @@ public:
     bool paused = false;
 
     void load(entt::registry& globalRegistry) override {
+        float scaleX = GetScreenWidth() / BASE_WIDTH;
+        float scaleY = GetScreenHeight() / BASE_HEIGHT;
+        float scale = std::min(scaleX, scaleY);
+
         auto playerEntity = registry.create();
 
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> playerTextures;
@@ -25,9 +29,12 @@ public:
         playerTextures["attack"] = std::make_shared<raylib::Texture2D>("resources/sprites/player/attack.png");
         registry.emplace<sprite>(playerEntity,
                                  std::move(playerTextures), "idle",
-                                 PLAYER_SPRITES_H_DIMENSION, PLAYER_SPRITES_V_DIMENSION, Vector2{100.0f, 100.0f});
+                                 PLAYER_SPRITES_H_DIMENSION, PLAYER_SPRITES_V_DIMENSION);
         // position the player at the center of the screen
-        registry.emplace<transform>(playerEntity, Vector2{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}, Vector2{3.0f, 3.0f}, 0.0f);
+        registry.emplace<transform>(playerEntity,
+                                    Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f},
+                                    Vector2{3.0f * scaleX, 3.0f * scaleY},
+                                    0.0f);
         registry.emplace<velocity>(playerEntity, 0.0f, 0.0f);
         registry.emplace<animation>(playerEntity, 0, 0, 7, 1, 0.1f, 0.0f, true, 0);
         registry.emplace<script>(playerEntity).bind<playerScript>(playerEntity, registry);
@@ -44,13 +51,15 @@ public:
         auto enemyEntity = registry.create();
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> enemyTextures;
         enemyTextures["idle"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/idle.png");
-        //enemyTextures["hurt"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/hurt.png");
         enemyTextures["death"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/death.png");
         enemyTextures["attack"] = std::make_shared<raylib::Texture2D>("resources/sprites/enemy/attack.png");
         registry.emplace<sprite>(enemyEntity,
                                  std::move(enemyTextures), "idle",
-                                 79, 69, Vector2{100.0f, 100.0f});
-        registry.emplace<transform>(enemyEntity, Vector2{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - 200.0f}, Vector2{3.0f, 3.0f}, 0.0f);
+                                 79, 69);
+        registry.emplace<transform>(enemyEntity,
+                                    Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f - 200.0f*scaleY},
+                                    Vector2{3.0f*scaleX, 3.0f*scaleY},
+                                    0.0f);
         registry.emplace<velocity>(enemyEntity, 0.0f, 0.0f);
         registry.emplace<animation>(enemyEntity, 0, 0, 3, 0, 0.15f, 0.0f, true, 0);
         registry.emplace<script>(enemyEntity).bind<enemyScript>(enemyEntity, registry, playerEntity);
@@ -69,31 +78,57 @@ public:
         primaryTextures["default"] = std::make_shared<raylib::Texture2D>("resources/sprites/buttons/primary.png");
         registry.emplace<sprite>(attackButtonEntity,
                                  std::move(primaryTextures), "default",
-                                 BUTTON_SPRITES_H_DIMENSION, BUTTON_SPRITES_V_DIMENSION, Vector2{100.0f, 100.0f});
-        registry.emplace<transform>(attackButtonEntity, Vector2{BUTTON_PRIMARY_X, BUTTON_PRIMARY_Y}, Vector2{BUTTON_PRIMARY_SCALE_X, BUTTON_PRIMARY_SCALE_Y}, 0.0f);
-        registry.emplace<animation>(attackButtonEntity, BUTTON_PRIMARY_ANIMATION_START_FRAME,
-                                                  BUTTON_PRIMARY_ANIMATION_END_FRAME,
-                                                  BUTTON_PRIMARY_ANIMATION_ROW,
-                                                  0, 
-                                                  BUTTON_PRIMARY_ANIMATION_FRAME_TIME, 
-                                                  0.0f, false, 0);
+                                 BUTTON_SPRITES_H_DIMENSION, BUTTON_SPRITES_V_DIMENSION);
+        registry.emplace<transform>(attackButtonEntity,
+                                    Vector2{BUTTON_PRIMARY_X * scaleX, BUTTON_PRIMARY_Y * scaleY},
+                                    Vector2{BUTTON_PRIMARY_SCALE_X * scaleX, BUTTON_PRIMARY_SCALE_Y * scaleY},
+                                    0.0f);
+        registry.emplace<animation>(attackButtonEntity,
+                                    BUTTON_PRIMARY_ANIMATION_START_FRAME,
+                                    BUTTON_PRIMARY_ANIMATION_END_FRAME,
+                                    BUTTON_PRIMARY_ANIMATION_ROW,
+                                    0,
+                                    BUTTON_PRIMARY_ANIMATION_FRAME_TIME,
+                                    0.0f,
+                                    false,
+                                    0);
         registry.emplace<script>(attackButtonEntity).bind<primaryAttack>(playerEntity, enemyEntity, registry);
+
+        auto dodgeAreaEntity = registry.create();
+        std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> dodgeAreaTextures;
+        Image img = GenImageColor(GetScreenWidth()/6*4, GetScreenHeight()/4*3, WHITE);
+        Texture2D tex = LoadTextureFromImage(img); 
+        dodgeAreaTextures["default"] = std::make_shared<raylib::Texture2D>(tex);
+        UnloadImage(img);
+        registry.emplace<sprite>(dodgeAreaEntity,
+                                 std::move(dodgeAreaTextures), "default",
+                                 GetScreenWidth()/6*4, GetScreenHeight()/4*3);
+        registry.emplace<transform>(dodgeAreaEntity,
+                                    Vector2{float(GetScreenWidth()/6*1), float(GetScreenHeight()/4*1)},
+                                    Vector2{1.0f, 1.0f},
+                                    0.0f);
+        registry.emplace<animation>(dodgeAreaEntity, 0, 0, 0, 0, 0.0f, 0.0f, false, 0);
 
         auto pauseButtonEntity = registry.create();
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> pauseTextures;
         pauseTextures["default"] = std::make_shared<raylib::Texture2D>("resources/sprites/buttons/pause.png");
         registry.emplace<sprite>(pauseButtonEntity,
                                  std::move(pauseTextures), "default",
-                                 64, 64, Vector2{100.0f, 100.0f});
-        registry.emplace<transform>(pauseButtonEntity, Vector2{500.0f, 75.0f}, Vector2{1.0f, 1.0f}, 0.0f);
-        registry.emplace<animation>(pauseButtonEntity, BUTTON_PRIMARY_ANIMATION_START_FRAME,
-                                                  BUTTON_PRIMARY_ANIMATION_END_FRAME,
-                                                  BUTTON_PRIMARY_ANIMATION_ROW,
-                                                  0, 
-                                                  BUTTON_PRIMARY_ANIMATION_FRAME_TIME, 
-                                                  0.0f, false, 0);
+                                 64, 64);
+        registry.emplace<transform>(pauseButtonEntity,
+                                    Vector2{500.0f * scaleX, 75.0f * scaleY},
+                                    Vector2{1.0f * scaleX, 1.0f * scaleY},
+                                    0.0f);
+        registry.emplace<animation>(pauseButtonEntity,
+                                    BUTTON_PRIMARY_ANIMATION_START_FRAME,
+                                    BUTTON_PRIMARY_ANIMATION_END_FRAME,
+                                    BUTTON_PRIMARY_ANIMATION_ROW,
+                                    0,
+                                    BUTTON_PRIMARY_ANIMATION_FRAME_TIME,
+                                    0.0f,
+                                    false,
+                                    0);
         registry.emplace<script>(pauseButtonEntity).bind<pauseButton>(registry, this, getEngine());
-
     }
 
     void update(float delta) override {

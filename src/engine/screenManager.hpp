@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
-#include "screens/screen.hpp"
+#include "screen.hpp"
 #include <entt/entt.hpp>
 
 #include <memory>

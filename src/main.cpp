@@ -7,7 +7,7 @@
 
 class Game : public Engine {
 public:
-    Game() : Engine(SCREEN_WIDTH, SCREEN_HEIGHT, "ICB Test Game") {
+    Game() : Engine(600, 800, "ICB Test Game") {
     }
 };
 
