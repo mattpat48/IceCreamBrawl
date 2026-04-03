@@ -7,13 +7,18 @@
 
 class Game : public Engine {
 public:
-    Game() : Engine(600, 800, "ICB Test Game") {
+    Game(int width, int height) : Engine(width, height, "ICB Test Game") {
     }
 };
 
 int main() {
 
-    Game engine;
+    auto width = GetScreenWidth();
+    auto height = GetScreenHeight();
+
+    std :: cout << "Initializing game with resolution: " << width << " x " << height << std::endl;
+
+    Game engine(width, height);
 
     engine.setScreen(std::make_unique<GameScreen>());
     

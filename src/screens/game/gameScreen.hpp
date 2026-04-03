@@ -27,6 +27,7 @@ public:
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> playerTextures;
         playerTextures["idle"] = std::make_shared<raylib::Texture2D>("resources/sprites/player/idle.png");
         playerTextures["attack"] = std::make_shared<raylib::Texture2D>("resources/sprites/player/attack.png");
+        playerTextures["death"] = std::make_shared<raylib::Texture2D>("resources/sprites/player/death.png");
         registry.emplace<sprite>(playerEntity,
                                  std::move(playerTextures), "idle",
                                  PLAYER_SPRITES_H_DIMENSION, PLAYER_SPRITES_V_DIMENSION);
@@ -41,7 +42,7 @@ public:
 
         registry.emplace<hitFlash>(playerEntity);
         registry.emplace<status>(playerEntity, IDLE);
-        registry.emplace<health>(playerEntity, 100.0f, 100.0f, 2.0f);
+        registry.emplace<health>(playerEntity, 10.0f, 10.0f, 2.0f);
         registry.emplace<endurance>(playerEntity, 100.0f, 100.0f, 2.0f);
         registry.emplace<damage>(playerEntity, 1.0f, 1.0f, 0.0f, 1.0f);
         registry.emplace<attack>(playerEntity, 10.0f, 0.5f, false, 0.0f, 0.0f);
@@ -66,7 +67,7 @@ public:
 
         registry.emplace<hitFlash>(enemyEntity);
         registry.emplace<status>(enemyEntity, IDLE);
-        registry.emplace<health>(enemyEntity, 100.0f, 100.0f, 2.0f);
+        registry.emplace<health>(enemyEntity, 10.0f, 10.0f, 2.0f);
         registry.emplace<endurance>(enemyEntity, 100.0f, 100.0f, 2.0f);
         registry.emplace<damage>(enemyEntity, 1.0f, 1.0f);
         registry.emplace<attack>(enemyEntity, 10.0f, 0.5f, true, 0.0f, 0.0f);
@@ -96,15 +97,15 @@ public:
 
         auto dodgeAreaEntity = registry.create();
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> dodgeAreaTextures;
-        Image img = GenImageColor(GetScreenWidth()/6*4, GetScreenHeight()/4*3, WHITE);
+        Image img = GenImageColor(GetScreenWidth() / 8.0f * 6.0f, GetScreenHeight() / 8.0f * 6.0f, WHITE);
         Texture2D tex = LoadTextureFromImage(img); 
         dodgeAreaTextures["default"] = std::make_shared<raylib::Texture2D>(tex);
         UnloadImage(img);
         registry.emplace<sprite>(dodgeAreaEntity,
                                  std::move(dodgeAreaTextures), "default",
-                                 GetScreenWidth()/6*4, GetScreenHeight()/4*3);
+                                 tex.width, tex.height);
         registry.emplace<transform>(dodgeAreaEntity,
-                                    Vector2{float(GetScreenWidth()/6*1), float(GetScreenHeight()/4*1)},
+                                    Vector2{float(GetScreenWidth() / 2.0f), float(GetScreenHeight() / 2.0f)},
                                     Vector2{1.0f, 1.0f},
                                     0.0f);
         registry.emplace<animation>(dodgeAreaEntity, 0, 0, 0, 0, 0.0f, 0.0f, false, 0);
