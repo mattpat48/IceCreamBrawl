@@ -12,7 +12,6 @@ public:
         SetConfigFlags(FLAG_WINDOW_HIGHDPI);
         InitWindow(width, height, title);
         SetTargetFPS(60); // Set the target frames per second
-        std::cout << "Screen: " << GetScreenWidth() << " x " << GetScreenHeight() << std::endl;
     }
 
     void setScreen(std::unique_ptr<Screen> screen) {

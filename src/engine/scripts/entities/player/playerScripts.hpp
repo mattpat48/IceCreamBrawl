@@ -20,12 +20,6 @@ public:
     }
 
     void onUpdate(float dt) override {
-        playerStatus.instance->onUpdate(dt);
-        auto stat = getComponent<status>();
-        if (stat->isDead()) {
-            std::cout << "Player is dead!" << std::endl;
-            return; // Skip further updates if the player is dead
-        }
         //dirController.instance->onUpdate(dt);
     }
 
@@ -35,10 +29,6 @@ public:
     }
 
     void onDraw() override {
-        auto pl = getComponent<health>();
-        DrawText(("PLAYER HP: " + std::to_string(static_cast<int>(pl->life)) + "/" + std::to_string(static_cast<int>(pl->maxLife))).c_str(), 10, 50, 20, RED);
-        auto ps = getComponent<endurance>();
-        DrawText(("PLAYER ST: " + std::to_string(static_cast<int>(ps->stamina)) + "/" + std::to_string(static_cast<int>(ps->maxStamina))).c_str(), 10, 70, 20, BLUE);
     }
 
     virtual ~playerScript() = default;

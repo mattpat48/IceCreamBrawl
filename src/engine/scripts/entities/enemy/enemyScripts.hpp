@@ -13,13 +13,6 @@ public:
     }
 
     void onUpdate(float dt) override {
-        enemyStatus.instance->onUpdate(dt);
-        auto stat = getComponent<status>();
-        if (stat->isDead()) {
-            std::cout << "Enemy is dead!" << std::endl;
-            return;
-        }
-        primaryAttack.instance->onUpdate(dt);
     }
 
     void onCreate() override {
@@ -28,10 +21,6 @@ public:
     }
 
     void onDraw() override {
-        auto pl = getComponent<health>();
-        DrawText(("ENEMY HP: " + std::to_string(static_cast<int>(pl->life)) + "/" + std::to_string(static_cast<int>(pl->maxLife))).c_str(), 10, 90, 20, RED);
-        auto ps = getComponent<endurance>();
-        DrawText(("ENEMY ST: " + std::to_string(static_cast<int>(ps->stamina)) + "/" + std::to_string(static_cast<int>(ps->maxStamina))).c_str(), 10, 110, 20, BLUE);
     }
 
     virtual ~enemyScript() = default;
