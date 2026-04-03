@@ -18,7 +18,8 @@ FLAGS="-ffunction-sections -funwind-tables -fstack-protector-strong -fPIC -Wall 
 
 MY_SRC_PATHS=$(find src -type d | sed 's/^/-I /')
 
-# Do NOT include the NDK's include here
+# Do NOT include the NDK's include here: it will cause conflicts with the system
+# headers and thus compilation will fail.
 INCLUDES="-I. -Iinclude -I../include \
           -I$NATIVE_APP_GLUE \
           -Iraylib/src \
@@ -31,7 +32,8 @@ cp assets/icon_mdpi.png android/build/res/drawable-mdpi/icon.png
 cp assets/icon_hdpi.png android/build/res/drawable-hdpi/icon.png
 cp assets/icon_xhdpi.png android/build/res/drawable-xhdpi/icon.png
 
-# Copia le risorse del gioco nella cartella assets temporanea della build
+# IMPORTANT: due to the fact that raylib uses foper wrapper, you have to insert all resources
+# in the assets folder, otherwise they won't be included in the APK and thus won't be accessible at runtime
 mkdir -p android/build/assets
 cp -r assets/* android/build/assets/ 2>/dev/null || true
 cp -r src/resources android/build/assets/ 2>/dev/null || true
@@ -41,6 +43,9 @@ cp -r src/resources android/build/assets/ 2>/dev/null || true
 #  Compile
 # ______________________________________________________________________________
 #       
+
+# IMPORTANT: remove the -fno-exceptions flag and -fno-rtti from
+# ABI FLAGS in order to enable C++ exceptions and RTTI, which are required by raylib-cpp
 for ABI in $ABIS; do
     case "$ABI" in
         "arm64-v8a")
@@ -107,6 +112,10 @@ for ABI in $ABIS; do
     done
 
     # Linking
+    # for this part, I don't have much to say. luck played an important role in figuring out
+    # the correct flags to use, so I won't even try to explain them.
+    # just know that they are necessary for the linking to succeed
+    # and that they are based on the flags used by raylib's Android.mk file
 	rm -f android/build/lib/$ABI/libmain.so
 
     $TOOLCHAIN/bin/clang++ -target $TARGET \
@@ -157,7 +166,7 @@ for ABI in $ABIS; do
 done
 cd ../..
 
-# Zipalign e firma
+# Zipalign and sign
 $BUILD_TOOLS/zipalign -f 4 game.apk game.final.apk
 mv -f game.final.apk game.apk
 
