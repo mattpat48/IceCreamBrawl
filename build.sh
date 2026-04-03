@@ -18,7 +18,7 @@ FLAGS="-ffunction-sections -funwind-tables -fstack-protector-strong -fPIC -Wall 
 
 MY_SRC_PATHS=$(find src -type d | sed 's/^/-I /')
 
-# Unisci tutto nella variabile INCLUDES
+# Do NOT include the NDK's include here
 INCLUDES="-I. -Iinclude -I../include \
           -I$NATIVE_APP_GLUE \
           -Iraylib/src \
@@ -31,8 +31,10 @@ cp assets/icon_mdpi.png android/build/res/drawable-mdpi/icon.png
 cp assets/icon_hdpi.png android/build/res/drawable-hdpi/icon.png
 cp assets/icon_xhdpi.png android/build/res/drawable-xhdpi/icon.png
 
-# Copy other assets
-cp assets/* android/build/assets
+# Copia le risorse del gioco nella cartella assets temporanea della build
+mkdir -p android/build/assets
+cp -r assets/* android/build/assets/ 2>/dev/null || true
+cp -r src/resources android/build/assets/ 2>/dev/null || true
 
 # ______________________________________________________________________________
 #
@@ -40,7 +42,6 @@ cp assets/* android/build/assets
 # ______________________________________________________________________________
 #       
 for ABI in $ABIS; do
-    # 1. RESET E ASSEGNAZIONE VARIABILI (Fondamentale!)
     case "$ABI" in
         "arm64-v8a")
             CCTYPE="aarch64-linux-android"
@@ -62,7 +63,6 @@ for ABI in $ABIS; do
             TARGET="i686-linux-android29"
             ARCH_DIR="i686-linux-android"
             LIBPATH="i686-linux-android"
-            # PROVA A CAMBIARE QUESTA:
             ARCH="i386" 
             ABI_FLAGS="-std=c++17 -fexceptions -frtti"
             ;;
@@ -71,17 +71,16 @@ for ABI in $ABIS; do
 			ARCH_DIR="x86_64-linux-android"
 			LIBPATH="x86_64-linux-android"
 			ARCH="x86_64"
-			TARGET="x86_64-linux-android"
+			TARGET="x86_64-linux-android29"
 			ABI_FLAGS="-march=x86-64 -std=c++17 -fexceptions -frtti"
 			;;
     esac
 
-	rm -rf src/*.o
+	find src -name "*.o" -type f -delete
     rm -rf android/build/obj/*
     rm -rf $NATIVE_APP_GLUE/*.o
 
-    # --- Compila native app glue ---
-	# Assicurati che $TARGET sia "i686-linux-android29" per x86
+    # --- Compile native app glue ---
 	$TOOLCHAIN/bin/${CCTYPE}29-clang \
 		-target $TARGET \
 		--sysroot=$TOOLCHAIN/sysroot \
@@ -91,13 +90,13 @@ for ABI in $ABIS; do
 		-I$TOOLCHAIN/sysroot/usr/include/$ARCH_DIR \
 		$FLAGS -std=c99
 
-	# Rigenera la libreria statica
+	# Rebuild libnative...
 	mkdir -p lib/$ABI
 	rm -f lib/$ABI/libnative_app_glue.a
 	$TOOLCHAIN/bin/llvm-ar rcs lib/$ABI/libnative_app_glue.a $NATIVE_APP_GLUE/native_app_glue.o
 
     # 3. COMPILAZIONE DEL TUO PROGETTO (.cpp)
-    for file in src/*.cpp; do
+    for file in $(find src -name "*.cpp"); do
         $TOOLCHAIN/bin/clang++ -target $TARGET \
             -c $file -o "$file".o \
             --sysroot=$TOOLCHAIN/sysroot \
@@ -107,20 +106,16 @@ for ABI in $ABIS; do
             $INCLUDES $FLAGS $ABI_FLAGS
     done
 
-    # 4. LINKER (La parte "difficile")
-    SYSROOT_LIB="$TOOLCHAIN/sysroot/usr/lib/$LIBPATH/29"
-    CLANG_VER=$(ls $TOOLCHAIN/lib/clang/ | head -n 1)
-    CLANG_LIB="$TOOLCHAIN/lib/clang/$CLANG_VER/lib/linux/$ARCH"
-
+    # Linking
 	rm -f android/build/lib/$ABI/libmain.so
 
-    $TOOLCHAIN/bin/ld.lld src/*.cpp.o -o android/build/lib/$ABI/libmain.so -shared \
-        --exclude-libs libatomic.a --build-id \
-        -z noexecstack -z relro -z now \
-        --warn-shared-textrel --fatal-warnings -u ANativeActivity_onCreate \
-        -L$SYSROOT_LIB \
-        -L$CLANG_LIB \
-        -L$TOOLCHAIN/sysroot/usr/lib/$LIBPATH \
+    $TOOLCHAIN/bin/clang++ -target $TARGET \
+        --sysroot=$TOOLCHAIN/sysroot \
+        $ABI_FLAGS \
+        $(find src -name "*.cpp.o") -o android/build/lib/$ABI/libmain.so -shared \
+        -Wl,--exclude-libs,libatomic.a -Wl,--build-id \
+        -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now \
+        -Wl,--warn-shared-textrel -Wl,--fatal-warnings -Wl,-u,ANativeActivity_onCreate -Wl,--wrap,fopen -Wl,--no-undefined \
         -L. -Landroid/build/obj -Llib/$ABI \
         -lraylib -lnative_app_glue -llog -landroid -lEGL -lGLESv2 -lOpenSLES \
         -lc++_shared -latomic -lc -lm -ldl
@@ -151,7 +146,7 @@ $BUILD_TOOLS/dx --verbose --dex --output=android/build/dex/classes.dex android/b
 
 # Add resources and assets to APK
 $BUILD_TOOLS/aapt package -f \
-	-M android/build/AndroidManifest.xml -S android/build/res -A assets \
+	-M android/build/AndroidManifest.xml -S android/build/res -A android/build/assets \
 	-I android/sdk/platforms/android-29/android.jar -F game.apk android/build/dex
 
 # Add libraries to APK (libmain.so + libc++_shared.so per ogni ABI)
