@@ -1,8 +1,8 @@
 #pragma once
 
-#include "components/components.hpp"
-#include "scripts/entities/entityStatus.hpp"
-#include "enemyAttack.hpp"
+#include "defines/components/components.hpp"
+#include "engine/scripts/entities/entityStatus.hpp"
+#include "engine/scripts/entities/enemy/enemyAttack.hpp"
 
 class enemyScript : public Script {
 public:

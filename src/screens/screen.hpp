@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "components/components.hpp"
+#include "defines/components/components.hpp"
 #include <entt/entt.hpp>
 
 class Engine;

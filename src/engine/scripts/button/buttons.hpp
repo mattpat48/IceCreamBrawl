@@ -1,7 +1,7 @@
 #pragma once
 
-#include "components/components.hpp"
-#include "scripts/script.hpp"
+#include "defines/components/components.hpp"
+#include "engine/scripts/script.hpp"
 #include <entt/entt.hpp>
 #include <iostream>
 
@@ -13,7 +13,6 @@ public:
     }
 
     void onUpdate(float dt) override {
-        auto v = getComponent<velocity>();
         auto t = getComponent<transform>();
         auto a = getComponent<animation>();
         auto s = getComponent<sprite>();

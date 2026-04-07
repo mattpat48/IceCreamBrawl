@@ -176,6 +176,9 @@ mv my-app-release.apk game.apk
 # Installa sul dispositivo / emulatore
 android/sdk/platform-tools/adb install -r game.apk
 
+mv game.apk apk/
+mv my-app-release.apk.idsig apk/
+
 find src -name "*.o" -type f -delete
 rm -rf android/build/obj/*
 rm -rf $NATIVE_APP_GLUE/*.o

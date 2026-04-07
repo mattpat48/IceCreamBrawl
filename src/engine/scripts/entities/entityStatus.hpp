@@ -1,15 +1,15 @@
 #pragma once
 
-#include "components/components.hpp"
-#include "scripts/script.hpp"
+#include "defines/components/components.hpp"
+#include "engine/scripts/script.hpp"
 #include <entt/entt.hpp>
-#include <iostream>
+#include "raylib.h"
+
+#include "utils/logs.h"
 
 class entityStatus : public Script {
 public:
-    entityStatus() {
-        std::cout << "entityStatus creato per entità: " << static_cast<uint32_t>(entity) << std::endl;
-    }
+    entityStatus() = default;
 
     void onUpdate(float dt) override {
         auto healthComp = getComponent<health>();
@@ -18,58 +18,57 @@ public:
         auto spriteComp = getComponent<sprite>();
         auto animationComp = getComponent<animation>();
         auto attackComp = getComponent<attack>();
-        auto hitFlashComp = getComponent<hitFlash>();
 
-        if (statusComp->isDead() && animationComp->isPlaying) {
-            if (animationComp->currentFrame == animationComp->endFrame) {
+        APP_LOG("entityStatus updated: %d", statusComp->status);
+
+        // 1. GESTIONE DELLA MORTE (Ha priorità assoluta)
+        if (healthComp->life <= 0) {
+            if (!statusComp->isDead()) {
+                statusComp->status = DEAD;
+                spriteComp->currentTexture = "death";
+                animationComp->currentFrame = animationComp->startFrame;
+                animationComp->isPlaying = true;
+                APP_LOG("Entity is dead!");
+            }
+            // Ferma l'animazione di morte sull'ultimo frame
+            else if (animationComp->isPlaying && animationComp->currentFrame == animationComp->endFrame) {
                 animationComp->isPlaying = false;
             }
+            return; // Se è morto, ignora tutto il resto!
         }
 
-        // Example logic to update player status
-        if (healthComp->life <= 0 && !statusComp->isDead()) {
-            statusComp->status = DEAD; // Set status to DEAD
-            std::cout << "Entity is dead!" << std::endl;
-            spriteComp->currentTexture = "death"; // Change texture to death
-            animationComp->currentFrame = animationComp->startFrame; // Reset animation frame to start frame
-            return;
-        }
-
-        if (statusComp->isAttacking() && animationComp->currentFrame == animationComp->endFrame) {
-            std::cout << "Reset after attack" << std::endl;
-            statusComp->status = IDLE;
-            spriteComp->currentTexture = "idle"; // Reset to idle texture after attack
-            attackComp->currentCooldown = attackComp->cooldown; // Reset attack cooldown
-            if (attackComp->modifier) {
-                attackComp->cooldownModifier = (float)(rand()) / (float)(RAND_MAX);
-                attackComp->currentCooldown += attackComp->cooldownModifier + 0.5f;
+        // 2. MACCHINA A STATI PER LE ANIMAZIONI (State Machine)
+        // Usiamo lo stato attuale per decidere che texture applicare
+        if (statusComp->isAttacking()) {
+            APP_LOG("Entity is ATTACK!");
+            if (spriteComp->currentTexture != "attack") {
+                spriteComp->currentTexture = "attack";
+                animationComp->currentFrame = animationComp->startFrame;
+            } else if (animationComp->currentFrame == animationComp->endFrame) {
+                statusComp->status = IDLE;
+                spriteComp->currentTexture = "idle";
+                attackComp->currentCooldown = attackComp->cooldown;
             }
-            std::cout << "CD modifier: " << attackComp->cooldownModifier << std::endl;
-            std::cout << "current CD: " << attackComp->currentCooldown << std::endl;
-        }
-
-        if (hitFlashComp &&
-            hitFlashComp->filter.r == RED.r &&
-            hitFlashComp->filter.g == RED.g &&
-            hitFlashComp->filter.b == RED.b &&
-            hitFlashComp->filter.a == RED.a) {
-            if (hitFlashComp->timeFlash >= 0.20f) {
-                hitFlashComp->filter = WHITE;
-                hitFlashComp->timeFlash = 0.0f;
-            } else {
-                std::cout << hitFlashComp->timeFlash << std::endl;
-                hitFlashComp->timeFlash += dt;
+        } 
+        else if (statusComp->isRunning()) {
+            APP_LOG("Entity is RUN!");
+            // Se il controller ha impostato RUNNING, assicuriamoci che la texture sia quella giusta
+            if (spriteComp->currentTexture != "run") {
+                spriteComp->currentTexture = "run"; // Assicurati di caricare "run.png" nella Factory!
+                animationComp->currentFrame = animationComp->startFrame;
+            }
+        } 
+        else if (statusComp->isIdle()) {
+            APP_LOG("Entity is IDLE!");
+            if (spriteComp->currentTexture != "idle") {
+                spriteComp->currentTexture = "idle";
+                animationComp->currentFrame = animationComp->startFrame;
             }
         }
-        
-        attackComp->updateCooldown(dt);
-        
-        //healthComp->regen(healthComp->regenRate * dt);
-        enduranceComp->regen(enduranceComp->regenRate * dt + 5.0f);
     }
 
     void onCreate() override {
-        // Initialization logic for player status
+        APP_LOG("entityStatus creato per entità: %d", static_cast<uint32_t>(entity));
     }
 
     void onDraw() override {

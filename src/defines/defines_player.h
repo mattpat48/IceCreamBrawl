@@ -23,7 +23,3 @@ struct PlayerBaseStats {
     static constexpr float ATTACK_RANGE = 10.0f;
     static constexpr float ATTACK_COOLDOWN = 0.5f;
 };
-
-struct PlayerGraphicValues {
-
-};

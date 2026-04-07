@@ -1,11 +1,11 @@
 #pragma once
 
-#include "defines_screen.h"
-#include "defines_player.h"
-#include "defines_ui.h"
-#include "defines_general.h"
-#include "scripts/script.hpp"
-#include "entityComponents.hpp"
+#include "defines/defines_screen.h"
+#include "defines/defines_player.h"
+#include "defines/defines_ui.h"
+#include "defines/defines_general.h"
+#include "engine/scripts/script.hpp"
+#include "components/entityComponents.hpp"
 
 struct sprite {
     std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;

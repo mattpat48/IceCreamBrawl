@@ -1,7 +1,7 @@
 #pragma once
 
-#include "scripts/script.hpp"
-#include "defines_general.h"
+#include "engine/scripts/script.hpp"
+#include "defines/defines_general.h"
 
 #include <entt/entt.hpp>
 #include "raylib.h"
@@ -28,8 +28,8 @@ struct status {
         return status == DEAD;
     }
 
-    bool isHurt() const {
-        return status == HURT;
+    bool isRunning() const {
+        return status == RUN;
     }
 };
 

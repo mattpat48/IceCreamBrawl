@@ -3,8 +3,8 @@
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
-#include "screenManager.hpp"
-#include "assetManager.hpp"
+#include "engine/screenManager.hpp"
+#include "engine/assetManager.hpp"
 
 class Engine {
 public:

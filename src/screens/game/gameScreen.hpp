@@ -3,12 +3,11 @@
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
-#include "screen.hpp"
-#include "scripts/general/controller.hpp"
-#include "scripts/general/buttons.hpp"
-#include "scripts/entities/player/playerScripts.hpp"
-#include "scripts/entities/player/primaryAttack.hpp"
-#include "scripts/entities/enemy/enemyScripts.hpp"
+#include "screens/screen.hpp"
+#include "engine/scripts/controller/controller.hpp"
+#include "engine/scripts/button/buttons.hpp"
+#include "engine/scripts/entities/player/playerScripts.hpp"
+#include "engine/scripts/entities/enemy/enemyScripts.hpp"
 #include "pauseButton.hpp"
 #include <entt/entt.hpp>
 #include <memory>

@@ -9,4 +9,4 @@
 #define IDLE 0
 #define ATTACK 1
 #define DODGE 2
-#define HURT 3
+#define RUN 3

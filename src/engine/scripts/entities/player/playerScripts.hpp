@@ -1,9 +1,11 @@
 #pragma once
 
-#include "components/components.hpp"
-#include "scripts/general/controller.hpp"
-#include "scripts/general/buttons.hpp"
-#include "scripts/entities/entityStatus.hpp"
+#include "defines/components/components.hpp"
+#include "engine/scripts/controller/controller.hpp"
+#include "engine/scripts/button/buttons.hpp"
+#include "engine/scripts/entities/entityStatus.hpp"
+#include "engine/scripts/entities/entityAttack.hpp"
+#include "engine/scripts/entities/entityRegen.hpp"
 #include <entt/entt.hpp>
 
 #include "raylib.h"
@@ -15,11 +17,15 @@ class playerScripts : public Script {
 public:
 
     void onUpdate(float dt) override {
-        //dirController.instance->onUpdate(dt);
+        playerStatus.instance->onUpdate(dt);
+        playerAttack.instance->onUpdate(dt);
+        playerRegen.instance->onUpdate(dt);
     }
 
     void onCreate() override {
         playerStatus.bind<entityStatus>(entity, *registry);
+        playerAttack.bind<entityAttack>(entity, *registry);
+        playerRegen.bind<entityRegen>(entity, *registry);
     }
 
     void onDraw() override {
@@ -29,4 +35,6 @@ public:
 
 protected:
     script playerStatus;
+    script playerAttack;
+    script playerRegen;
 };
