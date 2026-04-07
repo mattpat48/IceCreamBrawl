@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
-#include "engine/scripts/button/buttons.hpp"
+#include "engine/scripts/ui/buttons/buttons.hpp"
 
 class GameScreen;
 class Engine;

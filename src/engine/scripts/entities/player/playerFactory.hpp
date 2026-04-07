@@ -30,7 +30,7 @@ public:
         registry.emplace<animation>(playerEntity, 0, 0, 7, 1, 0.1f, 0.0f, true, 0);
         registry.emplace<script>(playerEntity).bind<playerScripts>(playerEntity, registry);
         registry.emplace<hitFlash>(playerEntity);
-        registry.emplace<status>(playerEntity, RUN);
+        registry.emplace<status>(playerEntity, IDLE);
         
         registry.emplace<health>(playerEntity, PlayerBaseStats::MAX_HEALTH, PlayerBaseStats::MAX_HEALTH, PlayerBaseStats::REGEN_HEALTH);
         registry.emplace<endurance>(playerEntity, PlayerBaseStats::MAX_ENDURANCE, PlayerBaseStats::MAX_ENDURANCE, PlayerBaseStats::REGEN_ENDURANCE);

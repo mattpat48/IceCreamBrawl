@@ -4,8 +4,8 @@
 #include "raylib-cpp.hpp"
 
 #include "screens/screen.hpp"
-#include "engine/scripts/controller/controller.hpp"
-#include "engine/scripts/button/buttons.hpp"
+#include "engine/scripts/ui/controller/controller.hpp"
+#include "engine/scripts/ui/buttons/buttons.hpp"
 #include "engine/scripts/entities/player/playerScripts.hpp"
 #include "engine/scripts/entities/enemy/enemyScripts.hpp"
 #include "pauseButton.hpp"
@@ -16,10 +16,17 @@ class GameScreen : public Screen {
 public:
     bool paused = false;
 
+    // Dimensioni della mappa in pixel
+    float mapWidth = 2000.0f;
+    float mapHeight = 3000.0f;
+
     void load(entt::registry& globalRegistry) override;
 
     void update(float delta) override {
-        if (!paused) basicUpdate(delta);
+        if (!paused) {
+            basicUpdate(delta);
+            updateCamera();
+        }
     }
 
     void draw() override {
@@ -32,4 +39,6 @@ public:
 
 protected:
     entt::entity playerEntity; // Reference to the player entity
+
+    void updateCamera(); // Logica per seguire il player
 };

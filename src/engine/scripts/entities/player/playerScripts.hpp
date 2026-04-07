@@ -1,11 +1,12 @@
 #pragma once
 
 #include "defines/components/components.hpp"
-#include "engine/scripts/controller/controller.hpp"
-#include "engine/scripts/button/buttons.hpp"
+#include "engine/scripts/ui/controller/controller.hpp"
+#include "engine/scripts/ui/buttons/buttons.hpp"
 #include "engine/scripts/entities/entityStatus.hpp"
 #include "engine/scripts/entities/entityAttack.hpp"
 #include "engine/scripts/entities/entityRegen.hpp"
+#include "engine/scripts/entities/entityMovement.hpp"
 #include <entt/entt.hpp>
 
 #include "raylib.h"
@@ -20,12 +21,14 @@ public:
         playerStatus.instance->onUpdate(dt);
         playerAttack.instance->onUpdate(dt);
         playerRegen.instance->onUpdate(dt);
+        playerMovement.instance->onUpdate(dt);
     }
 
     void onCreate() override {
         playerStatus.bind<entityStatus>(entity, *registry);
         playerAttack.bind<entityAttack>(entity, *registry);
         playerRegen.bind<entityRegen>(entity, *registry);
+        playerMovement.bind<entityMovement>(entity, *registry);
     }
 
     void onDraw() override {
@@ -37,4 +40,5 @@ protected:
     script playerStatus;
     script playerAttack;
     script playerRegen;
+    script playerMovement;
 };

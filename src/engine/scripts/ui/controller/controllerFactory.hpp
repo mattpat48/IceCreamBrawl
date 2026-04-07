@@ -2,7 +2,7 @@
 
 #include <entt/entt.hpp>
 #include "raylib.h"
-#include "engine/scripts/controller/controller.hpp"
+#include "engine/scripts/ui/controller/controller.hpp"
 #include "defines/components/components.hpp"
 #include "engine/assetManager.hpp"
 
@@ -13,6 +13,7 @@ public:
                                           entt::entity playerEntity, 
                                           Vector2 position, float radius) {
         entt::entity joystick = registry.create();
+        registry.emplace<is_ui>(joystick);
 
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;
         textures["idle"] = assetManager.loadTexture(std::string("resources/sprites/controller/") + "handle.png");

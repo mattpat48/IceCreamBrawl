@@ -4,6 +4,7 @@
 
 #include "defines/components/components.hpp"
 #include <entt/entt.hpp>
+#include <raymath.h>
 
 class Engine;
 
@@ -20,9 +21,17 @@ public:
     float scaleX = 1.0f;
     float scaleY = 1.0f;
 
+    Camera2D camera = { 0 };
+
     Screen() {
         width = GetScreenWidth();
         height = GetScreenHeight();
+        
+        // Inizializza la camera per centrare il target al centro dello schermo
+        camera.target = { 0.0f, 0.0f };
+        camera.offset = { width / 2.0f, height / 2.0f };
+        camera.rotation = 0.0f;
+        camera.zoom = 1.0f;
     };
 
     virtual void load(entt::registry& registry) = 0;
@@ -49,12 +58,8 @@ public:
     }
 
     void basicDraw() {
-        auto view = registry.view<transform, sprite, animation>();
-        for (auto entity : view) {
-            auto& t = view.get<transform>(entity);
-            auto& s = view.get<sprite>(entity);
-            auto& a = view.get<animation>(entity);
-
+        // Lambda di supporto per non duplicare la logica di disegno
+        auto drawEntitySprite = [&](entt::entity entity, transform& t, sprite& s, animation& a) {
             Rectangle source = {
                 static_cast<float>(a.currentFrame * s.width),
                 static_cast<float>(a.row * s.height),
@@ -80,6 +85,23 @@ public:
             auto hf = registry.try_get<hitFlash>(entity);
             Color filter = hf ? hf->filter : WHITE;
             s.textures.at(s.currentTexture)->Draw(source, dest, origin, t.rotation, filter);
+        };
+
+        // 1. Inizia la modalità telecamera: spazio del mondo
+        BeginMode2D(camera);
+
+        // Disegna solo le entità che NON fanno parte della UI (entt::exclude)
+        auto worldView = registry.view<transform, sprite, animation>(entt::exclude<is_ui>);
+        for (auto entity : worldView) {
+            drawEntitySprite(entity, worldView.get<transform>(entity), worldView.get<sprite>(entity), worldView.get<animation>(entity));
+        }
+
+        EndMode2D();
+
+        // 2. Disegna la UI (joystick, bottoni) fissa sullo schermo (senza telecamera)
+        auto uiView = registry.view<transform, sprite, animation, is_ui>();
+        for (auto entity : uiView) {
+            drawEntitySprite(entity, uiView.get<transform>(entity), uiView.get<sprite>(entity), uiView.get<animation>(entity));
         }
 
         auto scriptView = registry.view<script>();

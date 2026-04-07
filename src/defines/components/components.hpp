@@ -7,6 +7,10 @@
 #include "engine/scripts/script.hpp"
 #include "components/entityComponents.hpp"
 
+struct is_ui {
+    
+};
+
 struct sprite {
     std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;
     std::string currentTexture;
