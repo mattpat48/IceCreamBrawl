@@ -6,11 +6,6 @@
 
 class enemyAttack : public Script {
 public:
-    enemyAttack(entt::entity entity, entt::entity player, entt::registry& registry) {
-        this->entity = entity;
-        this->playerEntity = player;
-        this->registry = &registry;
-    }
 
     void onUpdate(float dt) override {
     }
@@ -20,7 +15,4 @@ public:
     }
 
     virtual ~enemyAttack() = default;
-
-protected:
-    entt::entity playerEntity;
 };

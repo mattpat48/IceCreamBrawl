@@ -7,9 +7,6 @@
 
 class buttonHandler : public Script {
 public:
-    buttonHandler(entt::registry& registry) {
-        this->registry = &registry;
-    }
 
     void onCreate() override {
         // Initialization logic for button handling

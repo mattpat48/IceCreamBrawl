@@ -4,6 +4,7 @@
 #include "raylib-cpp.hpp"
 
 #include "screenManager.hpp"
+#include "assetManager.hpp"
 
 class Engine {
 public:
@@ -48,6 +49,10 @@ public:
         CloseWindow();
     }
 
+    ScreenManager& getScreenManager() { return screenManager; }
+    AssetManager& getAssetManager() { return assetManager; }
+
 private:
     ScreenManager screenManager;
+    AssetManager assetManager;
 };

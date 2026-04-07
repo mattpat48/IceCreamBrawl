@@ -7,9 +7,7 @@
 
 class entityStatus : public Script {
 public:
-    entityStatus(entt::entity entity, entt::registry& registry) {
-        this->entity = entity; // Store the entity reference
-        this->registry = &registry; // Store the registry reference
+    entityStatus() {
         std::cout << "entityStatus creato per entità: " << static_cast<uint32_t>(entity) << std::endl;
     }
 

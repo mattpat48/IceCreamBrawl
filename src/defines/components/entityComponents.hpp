@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scripts/script.hpp"
+#include "defines_general.h"
 
 #include <entt/entt.hpp>
 #include "raylib.h"

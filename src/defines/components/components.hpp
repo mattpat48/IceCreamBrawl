@@ -40,8 +40,10 @@ struct script {
     std::unique_ptr<Script> instance = nullptr;
 
     template <typename T, typename... Args>
-    T& bind(Args&&... args) {
+    T& bind(entt::entity ownerEntity, entt::registry& reg, Args&&... args) {
         instance = std::make_unique<T>(std::forward<Args>(args)...);
+        instance->entity = ownerEntity;
+        instance->registry = &reg;
         instance->onCreate();
         return *static_cast<T*>(instance.get());
     }

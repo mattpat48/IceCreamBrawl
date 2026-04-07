@@ -14,6 +14,16 @@ protected:
     Engine* engine = nullptr;
 
 public:
+    int width = 800;
+    int height = 600;
+
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+
+    Screen() {
+        width = GetScreenWidth();
+        height = GetScreenHeight();
+    };
 
     virtual void load(entt::registry& registry) = 0;
     virtual void update(float delta) = 0;
@@ -92,8 +102,6 @@ public:
         for (auto entity : scriptView) {
             auto& s = scriptView.get<script>(entity);
             if (s.instance) {
-                s.instance->entity = entity;
-                s.instance->registry = &registry;
                 s.instance->onUpdate(dt);
             }
         }

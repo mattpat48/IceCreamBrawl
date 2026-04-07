@@ -11,30 +11,22 @@
 
 #include <iostream>
 
-class playerScript : public Script {
+class playerScripts : public Script {
 public:
-
-    playerScript(entt::entity player, entt::registry& registry) {
-        this->entity = player; // Store the player entity reference
-        this->registry = &registry; // Store the registry reference
-    }
 
     void onUpdate(float dt) override {
         //dirController.instance->onUpdate(dt);
     }
 
     void onCreate() override {
-        dirController.bind<changeDirectionController>(entity, *registry);
         playerStatus.bind<entityStatus>(entity, *registry);
     }
 
     void onDraw() override {
     }
 
-    virtual ~playerScript() = default;
+    virtual ~playerScripts() = default;
 
 protected:
-    entt::entity enemy;
-    script dirController;
     script playerStatus;
 };

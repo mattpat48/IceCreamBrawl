@@ -10,3 +10,20 @@
 #define PLAYER_SPRITESHEET_DIMENSION (PLAYER_SPRITESHEET_ROW_DIMENSION * PLAYER_SPRITESHEET_COLUMN_DIMENSION)
 #define PLAYER_SPRITESHEET_SIZE (PLAYER_SPRITESHEET_DIMENSION * PLAYER_SPRITESHEET_DIMENSION)
 #define PLAYER_SPRITESHEET_PATH "resources/sprites/player/"
+
+// Statistiche iniziali del player
+struct PlayerBaseStats {
+    static constexpr float MAX_HEALTH = 10.0f;
+    static constexpr float REGEN_HEALTH = 2.0f;
+    
+    static constexpr float MAX_ENDURANCE = 100.0f;
+    static constexpr float REGEN_ENDURANCE = 2.0f;
+    
+    static constexpr float BASE_DAMAGE = 1.0f;
+    static constexpr float ATTACK_RANGE = 10.0f;
+    static constexpr float ATTACK_COOLDOWN = 0.5f;
+};
+
+struct PlayerGraphicValues {
+
+};
