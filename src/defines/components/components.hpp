@@ -11,6 +11,10 @@ struct is_ui {
     
 };
 
+struct is_map_background {
+    
+};
+
 struct sprite {
     std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;
     std::string currentTexture;

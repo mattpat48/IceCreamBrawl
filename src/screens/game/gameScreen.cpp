@@ -2,26 +2,32 @@
 #include "playerFactory.hpp"
 #include "controllerFactory.hpp"
 #include "minimapFactory.hpp"
+#include "mapFactory.hpp"
 #include "engine.hpp"
 #include <raymath.h>
 #include "engine/scripts/ui/minimap/minimap.hpp"
+#include "utils/logs.h"
 
 void GameScreen::load(entt::registry& globalRegistry) {
-    // Il calcolo dello scale se necessario
+ 
     Vector2 startPosition = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
     Vector2 playerScale = {6.0f * scaleX, 6.0f * scaleY};
-
-	// Add player entity
-    // Passiamo il registry locale (della classe Screen) alla factory
     playerEntity = PlayerFactory::create(registry, engine->getAssetManager(), startPosition, playerScale);
+    APP_LOG("Player created with entity ID: %d", static_cast<int>(playerEntity));
+
+    // Add map background entity
+    auto mapEntity = MapFactory::create(registry, engine->getAssetManager(), mapWidth, mapHeight);
+    APP_LOG("Map loaded with entity ID: %d", static_cast<int>(mapEntity));
 
     // Add touch controller entity
     Vector2 joystickPosition = {GetScreenWidth() / 4.0f, GetScreenHeight() / 4.0f * 3.0f};
     float joystickRadius = 200.0f;
-    ControllerFactory::createTouchJoystick(registry, engine->getAssetManager(), playerEntity, joystickPosition, joystickRadius);
+    auto joystickEntity = ControllerFactory::createTouchJoystick(registry, engine->getAssetManager(), playerEntity, joystickPosition, joystickRadius);
+    APP_LOG("Touch joystick created with entity ID: %d", static_cast<int>(joystickEntity));
     
     // Add minimap entity
-    MinimapFactory::create(registry, playerEntity, mapWidth, mapHeight);
+    auto minimapEntity = MinimapFactory::create(registry, playerEntity, mapWidth, mapHeight);
+    APP_LOG("Minimap created with entity ID: %d", static_cast<int>(minimapEntity));
 
 }
 
