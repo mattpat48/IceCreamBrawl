@@ -8,7 +8,6 @@
 #include "engine/scripts/ui/buttons/buttons.hpp"
 #include "engine/scripts/entities/player/playerScripts.hpp"
 #include "engine/scripts/entities/enemy/enemyScripts.hpp"
-#include "pauseButton.hpp"
 #include <entt/entt.hpp>
 #include <memory>
 
