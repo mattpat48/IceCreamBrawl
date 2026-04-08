@@ -8,10 +8,9 @@
 class entityMovement : public Script {
 public:
 
-    void onUpdate(float dt) override {
-    }
-
     void onCreate() override { }
+
+    void onUpdate(float dt) override { }
 
     void onDraw() override { }
 };

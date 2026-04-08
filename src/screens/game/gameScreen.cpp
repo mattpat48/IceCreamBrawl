@@ -16,7 +16,7 @@ void GameScreen::load(entt::registry& globalRegistry) {
     APP_LOG("Player created with entity ID: %d", static_cast<int>(playerEntity));
 
     // Add map background entity
-    auto mapEntity = MapFactory::create(registry, engine->getAssetManager(), mapWidth, mapHeight);
+    auto mapEntity = MapFactory::create(registry, engine->getAssetManager(), true, mapWidth, mapHeight);
     APP_LOG("Map loaded with entity ID: %d", static_cast<int>(mapEntity));
 
     // Add touch controller entity

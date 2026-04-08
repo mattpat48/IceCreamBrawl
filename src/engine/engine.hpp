@@ -29,22 +29,8 @@ public:
         screenManager.popScreen();
     }
 
-    void run() {
-        while (!WindowShouldClose()) {
-
-            float delta = GetFrameTime();
-
-            screenManager.update(delta);
-
-            BeginDrawing();
-            ClearBackground(LIGHTGRAY);
-
-            DrawFPS(10, 10);
-            screenManager.draw();
-
-            EndDrawing();
-        }
-    }
+    void run();
+    
     void close() {
         CloseWindow();
     }

@@ -7,12 +7,11 @@
 class enemyAttack : public Script {
 public:
 
-    void onUpdate(float dt) override {
-    }
+    void onCreate() override { }
 
-    void onDraw() override {
+    void onUpdate(float dt) override { }
 
-    }
+    void onDraw() override { }
 
     virtual ~enemyAttack() = default;
 };

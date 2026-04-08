@@ -12,7 +12,7 @@ struct is_ui {
 };
 
 struct is_map_background {
-    
+    bool tiled;
 };
 
 struct sprite {

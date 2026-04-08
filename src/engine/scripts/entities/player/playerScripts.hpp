@@ -17,18 +17,18 @@
 class playerScripts : public Script {
 public:
 
-    void onUpdate(float dt) override {
-        playerStatus.instance->onUpdate(dt);
-        playerAttack.instance->onUpdate(dt);
-        playerRegen.instance->onUpdate(dt);
-        playerMovement.instance->onUpdate(dt);
-    }
-
     void onCreate() override {
         playerStatus.bind<entityStatus>(entity, *registry);
         playerAttack.bind<entityAttack>(entity, *registry);
         playerRegen.bind<entityRegen>(entity, *registry);
         playerMovement.bind<entityMovement>(entity, *registry);
+    }
+
+    void onUpdate(float dt) override {
+        playerStatus.instance->onUpdate(dt);
+        playerAttack.instance->onUpdate(dt);
+        playerRegen.instance->onUpdate(dt);
+        playerMovement.instance->onUpdate(dt);
     }
 
     void onDraw() override {

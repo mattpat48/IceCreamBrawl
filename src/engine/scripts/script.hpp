@@ -11,9 +11,9 @@ class Script {
     entt::registry* registry = nullptr;
 
     virtual void onCreate() {}
-    virtual void onDestroy() {}
     virtual void onUpdate(float dt) {}
     virtual void onDraw() {}
+    virtual void onDestroy() {}
 
     template <typename T>
     T* getComponent() {

@@ -7,16 +7,14 @@
 class enemyScript : public Script {
 public:
 
-    void onUpdate(float dt) override {
-    }
-
     void onCreate() override {
         enemyStatus.bind<entityStatus>(entity, *registry);
         primaryAttack.bind<enemyAttack>(entity, *registry);
     }
 
-    void onDraw() override {
-    }
+    void onUpdate(float dt) override { }
+
+    void onDraw() override { }
 
     virtual ~enemyScript() = default;
 

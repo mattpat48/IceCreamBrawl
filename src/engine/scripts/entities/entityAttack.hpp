@@ -8,13 +8,12 @@
 class entityAttack : public Script {
 public:
 
+    void onCreate() override { }
+
     void onUpdate(float dt) override {
         auto attackComp = getComponent<attack>();
-        
         attackComp->updateCooldown(dt);
     }
-
-    void onCreate() override { }
 
     void onDraw() override { }
 };

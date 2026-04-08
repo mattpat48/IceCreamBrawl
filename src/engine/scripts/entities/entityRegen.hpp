@@ -8,6 +8,8 @@
 class entityRegen : public Script {
 public:
 
+    void onCreate() override { }
+
     void onUpdate(float dt) override {
         auto healthComp = getComponent<health>();
         auto enduranceComp = getComponent<endurance>();
@@ -15,8 +17,6 @@ public:
         healthComp->regen(healthComp->regenRate * dt);
 		enduranceComp->regen(enduranceComp->regenRate * dt);
     }
-
-    void onCreate() override { }
 
     void onDraw() override { }
 };

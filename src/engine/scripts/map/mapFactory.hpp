@@ -8,10 +8,10 @@
 
 class MapFactory {
 public:
-    static entt::entity create(entt::registry& registry, AssetManager& assetManager, float width, float height) {
+    static entt::entity create(entt::registry& registry, AssetManager& assetManager, bool isTiled, float width, float height) {
         entt::entity mapEntity = registry.create();
 
-        registry.emplace<is_map_background>(mapEntity);
+        registry.emplace<is_map_background>(mapEntity, isTiled);
         registry.emplace<transform>(mapEntity, Vector2{0, 0}, Vector2{width, height}, 0.0f);
 
 		std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> mapTextures;
