@@ -1,4 +1,4 @@
-#include "engine/scripts/ui/minimap/minimap.hpp"
+#include "ui/minimap/minimap.hpp"
 #include <entt/entt.hpp>
 #include "defines/components/components.hpp"
 

@@ -19,7 +19,9 @@ struct PlayerBaseStats {
     static constexpr float MAX_ENDURANCE = 100.0f;
     static constexpr float REGEN_ENDURANCE = 2.0f;
     
-    static constexpr float BASE_DAMAGE = 1.0f;
-    static constexpr float ATTACK_RANGE = 10.0f;
+    static constexpr float ATTACK_COST = 10.0f;
     static constexpr float ATTACK_COOLDOWN = 0.5f;
+    static constexpr float ATTACK_RANGE = 75.0f;
+
+    static constexpr float BASE_DAMAGE = 1.0f;
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/scripts/script.hpp"
+#include "engine/script.hpp"
 #include "defines/defines_general.h"
 
 #include <entt/entt.hpp>
@@ -101,8 +101,12 @@ struct damage {
 struct attack {
     float cost;
     float cooldown;
-    bool modifier;
+    float range;
+
+    float costModifier;
     float cooldownModifier;
+    float rangeModifier;
+    
     float currentCooldown;
 
     void reset() {
@@ -166,4 +170,16 @@ struct special {
             }
         }
     }
+};
+
+struct attackIntent {
+
+};
+
+struct damageReceived {
+    float amount;
+};
+
+struct deathEvent {
+
 };

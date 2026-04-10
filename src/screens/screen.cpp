@@ -83,6 +83,11 @@ void Screen::DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle des
 }
 
 void Screen::basicUpdate(float delta) {
+	// 1. Legge gli input da Raylib e lancia gli eventi tramite il dispatcher
+	if (inputSystem) {
+		inputSystem->update();
+	}
+
 	updateScripts();
 	updateAnimations(delta);
 

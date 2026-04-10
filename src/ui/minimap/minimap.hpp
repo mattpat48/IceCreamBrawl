@@ -2,7 +2,7 @@
 
 #include "raylib.h"
 #include "raymath.h"
-#include "engine/scripts/script.hpp"
+#include "engine/script.hpp"
 #include "defines/components/components.hpp"
 #include <entt/entt.hpp>
 

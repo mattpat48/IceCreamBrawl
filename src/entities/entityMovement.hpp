@@ -1,7 +1,7 @@
 #pragma once
 
 #include "defines/components/components.hpp"
-#include "engine/scripts/script.hpp"
+#include "engine/script.hpp"
 #include <entt/entt.hpp>
 #include <iostream>
 

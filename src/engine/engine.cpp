@@ -10,8 +10,8 @@ void Engine::run() {
 		BeginDrawing();
 		ClearBackground(LIGHTGRAY);
 
-		DrawFPS(10, 10);
 		screenManager.draw();
+		DrawFPS(10, 10);
 
 		EndDrawing();
 	}

@@ -6,7 +6,7 @@
 #include "engine/assetManager.hpp"
 #include "defines/components/components.hpp"
 #include "defines/defines_player.h"
-#include "engine/scripts/entities/player/playerScripts.hpp"
+#include "entities/player/playerScripts.hpp"
 #include <memory>
 #include <unordered_map>
 #include <string>
@@ -35,7 +35,7 @@ public:
         registry.emplace<health>(playerEntity, PlayerBaseStats::MAX_HEALTH, PlayerBaseStats::MAX_HEALTH, PlayerBaseStats::REGEN_HEALTH);
         registry.emplace<endurance>(playerEntity, PlayerBaseStats::MAX_ENDURANCE, PlayerBaseStats::MAX_ENDURANCE, PlayerBaseStats::REGEN_ENDURANCE);
         registry.emplace<damage>(playerEntity, PlayerBaseStats::BASE_DAMAGE, PlayerBaseStats::BASE_DAMAGE, 0.0f, 1.0f);
-        registry.emplace<attack>(playerEntity, PlayerBaseStats::ATTACK_RANGE, PlayerBaseStats::ATTACK_COOLDOWN, false, 0.0f, 0.0f);
+        registry.emplace<attack>(playerEntity, PlayerBaseStats::ATTACK_COST, PlayerBaseStats::ATTACK_COOLDOWN, PlayerBaseStats::ATTACK_RANGE, 0.0f, 0.0f, 0.0f, 0.0f);
 
         return playerEntity;
     }

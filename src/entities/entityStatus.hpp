@@ -1,7 +1,7 @@
 #pragma once
 
 #include "defines/components/components.hpp"
-#include "engine/scripts/script.hpp"
+#include "engine/script.hpp"
 #include <entt/entt.hpp>
 #include "raylib.h"
 
@@ -17,5 +17,5 @@ public:
 
     void onUpdate(float dt) override;
 
-    void onDraw() override { }
+    void onDraw() override;
 };

@@ -4,7 +4,7 @@
 #include "defines/defines_player.h"
 #include "defines/defines_ui.h"
 #include "defines/defines_general.h"
-#include "engine/scripts/script.hpp"
+#include "engine/script.hpp"
 #include "components/entityComponents.hpp"
 
 struct is_ui {

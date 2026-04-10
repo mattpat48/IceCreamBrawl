@@ -173,12 +173,12 @@ mv -f game.final.apk game.apk
 apksigner sign --ks android/raylib.keystore --out my-app-release.apk --ks-pass pass:raylib game.apk
 mv my-app-release.apk game.apk
 
-# Installa sul dispositivo / emulatore
-android/sdk/platform-tools/adb install -r game.apk
+find src -name "*.o" -type f -delete
+rm -rf android/build/obj/*
+rm -rf $NATIVE_APP_GLUE/*.o
 
 mv game.apk apk/
 mv my-app-release.apk.idsig apk/
 
-find src -name "*.o" -type f -delete
-rm -rf android/build/obj/*
-rm -rf $NATIVE_APP_GLUE/*.o
+# Installa sul dispositivo / emulatore
+android/sdk/platform-tools/adb install -r apk/game.apk

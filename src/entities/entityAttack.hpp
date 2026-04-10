@@ -1,7 +1,7 @@
 #pragma once
 
 #include "defines/components/components.hpp"
-#include "engine/scripts/script.hpp"
+#include "engine/script.hpp"
 #include <entt/entt.hpp>
 #include <iostream>
 
@@ -12,7 +12,9 @@ public:
 
     void onUpdate(float dt) override {
         auto attackComp = getComponent<attack>();
-        attackComp->updateCooldown(dt);
+        if (attackComp) {
+            attackComp->updateCooldown(dt);
+        }
     }
 
     void onDraw() override { }

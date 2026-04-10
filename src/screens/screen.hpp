@@ -1,10 +1,13 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 
 #include "defines/components/components.hpp"
 #include <entt/entt.hpp>
 #include <raymath.h>
+
+#include "input/inputSystem.hpp"
 
 class Engine;
 
@@ -13,6 +16,8 @@ class Screen {
 protected:
     entt::registry registry;
     Engine* engine = nullptr;
+
+    std::unique_ptr<InputSystem> inputSystem;
 
 public:
     int width;
@@ -32,6 +37,9 @@ public:
         camera.offset = { width / 2.0f, height / 2.0f };
         camera.rotation = 0.0f;
         camera.zoom = 1.0f;
+
+        registry.ctx().emplace<entt::dispatcher>();
+        inputSystem = std::make_unique<InputSystem>(registry.ctx().get<entt::dispatcher>());
     };
 
     virtual void load(entt::registry& registry) = 0;

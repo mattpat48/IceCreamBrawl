@@ -3,9 +3,10 @@
 #include "controllerFactory.hpp"
 #include "minimapFactory.hpp"
 #include "mapFactory.hpp"
+#include "attackButtonFactory.hpp"
 #include "engine.hpp"
 #include <raymath.h>
-#include "engine/scripts/ui/minimap/minimap.hpp"
+#include "ui/minimap/minimap.hpp"
 #include "utils/logs.h"
 
 void GameScreen::load(entt::registry& globalRegistry) {
@@ -15,12 +16,16 @@ void GameScreen::load(entt::registry& globalRegistry) {
     playerEntity = PlayerFactory::create(registry, engine->getAssetManager(), startPosition, playerScale);
     APP_LOG("Player created with entity ID: %d", static_cast<int>(playerEntity));
 
+    Vector2 primaryPosition = {GetScreenWidth() / 4.0f, GetScreenHeight() / 4.0f * 3.0f};
+    auto primaryAttackButton = AttackButtonFactory::create(registry, engine->getAssetManager(), playerEntity, primaryPosition, Vector2{1.0f, 1.0f});
+    APP_LOG("Primary attack button created with entity ID: %d", static_cast<int>(primaryAttackButton));
+
     // Add map background entity
     auto mapEntity = MapFactory::create(registry, engine->getAssetManager(), true, mapWidth, mapHeight);
     APP_LOG("Map loaded with entity ID: %d", static_cast<int>(mapEntity));
 
     // Add touch controller entity
-    Vector2 joystickPosition = {GetScreenWidth() / 4.0f, GetScreenHeight() / 4.0f * 3.0f};
+    Vector2 joystickPosition = {GetScreenWidth() / 4.0f * 3.0f, GetScreenHeight() / 4.0f * 3.0f};
     float joystickRadius = 200.0f;
     auto joystickEntity = ControllerFactory::createTouchJoystick(registry, engine->getAssetManager(), playerEntity, joystickPosition, joystickRadius);
     APP_LOG("Touch joystick created with entity ID: %d", static_cast<int>(joystickEntity));

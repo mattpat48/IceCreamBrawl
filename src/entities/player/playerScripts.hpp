@@ -1,12 +1,12 @@
 #pragma once
 
 #include "defines/components/components.hpp"
-#include "engine/scripts/ui/controller/controller.hpp"
-#include "engine/scripts/ui/buttons/buttons.hpp"
-#include "engine/scripts/entities/entityStatus.hpp"
-#include "engine/scripts/entities/entityAttack.hpp"
-#include "engine/scripts/entities/entityRegen.hpp"
-#include "engine/scripts/entities/entityMovement.hpp"
+#include "ui/controller/controller.hpp"
+#include "ui/buttons/buttons.hpp"
+#include "entities/entityStatus.hpp"
+#include "entities/entityAttack.hpp"
+#include "entities/entityRegen.hpp"
+#include "entities/entityMovement.hpp"
 #include <entt/entt.hpp>
 
 #include "raylib.h"
@@ -32,6 +32,10 @@ public:
     }
 
     void onDraw() override {
+        playerStatus.instance->onDraw();
+        playerAttack.instance->onDraw();
+        playerRegen.instance->onDraw();
+        playerMovement.instance->onDraw();
     }
 
     virtual ~playerScripts() = default;

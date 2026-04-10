@@ -1,0 +1,11 @@
+#include "raylib.h"
+#include "raylib-cpp.hpp"
+#include <entt/entt.hpp>
+
+#include "defines/components/components.hpp"
+#include "defines/components/entityComponents.hpp"
+
+class CombatSystem {
+public:
+	void update(entt::registry& registry, float dt);
+};

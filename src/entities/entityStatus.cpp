@@ -11,19 +11,15 @@ void entityStatus::onUpdate(float dt) {
 	APP_LOG("entityStatus updated: %d", statusComp->status);
 
 	// 1. GESTIONE DELLA MORTE (Ha priorità assoluta)
-	if (healthComp->life <= 0) {
-		if (!statusComp->isDead()) {
-			statusComp->status = DEAD;
-			spriteComp->currentTexture = "death";
+	if (statusComp->isDead()) {
+		APP_LOG("Entity is DEAD!");
+		if (spriteComp->currentTexture != "dead") {
+			spriteComp->currentTexture = "dead"; // Assicurati di avere una texture "dead.png" caricata nella Factory!
 			animationComp->currentFrame = animationComp->startFrame;
-			animationComp->isPlaying = true;
-			APP_LOG("Entity is dead!");
+		} else if (animationComp->currentFrame == animationComp->endFrame) {
+			registry->destroy(entity); // Se vuoi distruggerla subito
 		}
-		// Ferma l'animazione di morte sull'ultimo frame
-		else if (animationComp->isPlaying && animationComp->currentFrame == animationComp->endFrame) {
-			animationComp->isPlaying = false;
-		}
-		return; // Se è morto, ignora tutto il resto!
+		return; // Se è morto, non facciamo nient'altro
 	}
 
 	// 2. MACCHINA A STATI PER LE ANIMAZIONI (State Machine)
@@ -53,5 +49,22 @@ void entityStatus::onUpdate(float dt) {
 			spriteComp->currentTexture = "idle";
 			animationComp->currentFrame = animationComp->startFrame;
 		}
+	}
+}
+
+void entityStatus::onDraw() {
+	auto healthComp = getComponent<health>();
+	auto enduranceComp = getComponent<endurance>();
+
+	if (healthComp) {
+		float healthPercent = healthComp->life / healthComp->maxLife;
+		DrawRectangle(10, 40, 200 * healthPercent, 20, RED);
+		DrawRectangleLines(10, 40, 200, 20, BLACK);
+	}
+
+	if (enduranceComp) {
+		float staminaPercent = enduranceComp->stamina / enduranceComp->maxStamina;
+		DrawRectangle(10, 70, 200 * staminaPercent, 20, BLUE);
+		DrawRectangleLines(10, 70, 200, 20, BLACK);
 	}
 }

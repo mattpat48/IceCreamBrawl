@@ -4,10 +4,12 @@
 #include "raylib-cpp.hpp"
 
 #include "screens/screen.hpp"
-#include "engine/scripts/ui/controller/controller.hpp"
-#include "engine/scripts/ui/buttons/buttons.hpp"
-#include "engine/scripts/entities/player/playerScripts.hpp"
-#include "engine/scripts/entities/enemy/enemyScripts.hpp"
+#include "ui/controller/controller.hpp"
+#include "ui/buttons/buttons.hpp"
+#include "entities/player/playerScripts.hpp"
+#include "entities/enemy/enemyScripts.hpp"
+#include "combat/combatSystem.hpp"
+#include "combat/healthSystem.hpp"
 #include <entt/entt.hpp>
 #include <memory>
 
@@ -25,6 +27,8 @@ public:
         if (!paused) {
             basicUpdate(delta);
             updateCamera();
+            combatManager.update(registry, delta);
+            healthManager.update(registry, delta);
         }
     }
 
@@ -38,6 +42,8 @@ public:
 
 protected:
     entt::entity playerEntity; // Reference to the player entity
+    CombatSystem combatManager;
+    HealthSystem healthManager;
 
     void updateCamera(); // Logica per seguire il player
 };
