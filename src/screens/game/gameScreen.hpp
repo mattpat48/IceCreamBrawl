@@ -6,10 +6,13 @@
 #include "screens/screen.hpp"
 #include "ui/controller/controller.hpp"
 #include "ui/buttons/buttons.hpp"
-#include "entities/player/playerScripts.hpp"
-#include "entities/enemy/enemyScripts.hpp"
+#include "player/playerScripts.hpp"
+#include "enemies/enemyScripts.hpp"
 #include "combat/combatSystem.hpp"
 #include "combat/healthSystem.hpp"
+#include "enemies/systems/enemyMovementSystem.hpp"
+#include "enemies/systems/enemyAttackSystem.hpp"
+#include "enemies/systems/enemySpawnSystem.hpp"
 #include <entt/entt.hpp>
 #include <memory>
 
@@ -18,19 +21,12 @@ public:
     bool paused = false;
 
     // Dimensioni della mappa in pixel
-    float mapWidth = 2000.0f;
-    float mapHeight = 3000.0f;
+    float mapWidth = GetScreenWidth();
+    float mapHeight = GetScreenHeight();
 
     void load(entt::registry& globalRegistry) override;
 
-    void update(float delta) override {
-        if (!paused) {
-            basicUpdate(delta);
-            updateCamera();
-            combatManager.update(registry, delta);
-            healthManager.update(registry, delta);
-        }
-    }
+    void update(float delta) override;
 
     void draw() override {
         basicDraw();
@@ -44,6 +40,10 @@ protected:
     entt::entity playerEntity; // Reference to the player entity
     CombatSystem combatManager;
     HealthSystem healthManager;
+
+    EnemySpawnSystem enemySpawnSystem;
+    EnemyMovementSystem enemyMovementSystem;
+    EnemyAttackSystem enemyAttackSystem;
 
     void updateCamera(); // Logica per seguire il player
 };

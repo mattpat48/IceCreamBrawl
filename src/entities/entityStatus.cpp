@@ -8,11 +8,8 @@ void entityStatus::onUpdate(float dt) {
 	auto animationComp = getComponent<animation>();
 	auto attackComp = getComponent<attack>();
 
-	APP_LOG("entityStatus updated: %d", statusComp->status);
-
 	// 1. GESTIONE DELLA MORTE (Ha priorità assoluta)
 	if (statusComp->isDead()) {
-		APP_LOG("Entity is DEAD!");
 		if (spriteComp->currentTexture != "dead") {
 			spriteComp->currentTexture = "dead"; // Assicurati di avere una texture "dead.png" caricata nella Factory!
 			animationComp->currentFrame = animationComp->startFrame;
@@ -25,7 +22,6 @@ void entityStatus::onUpdate(float dt) {
 	// 2. MACCHINA A STATI PER LE ANIMAZIONI (State Machine)
 	// Usiamo lo stato attuale per decidere che texture applicare
 	if (statusComp->isAttacking()) {
-		APP_LOG("Entity is ATTACK!");
 		if (spriteComp->currentTexture != "attack") {
 			spriteComp->currentTexture = "attack";
 			animationComp->currentFrame = animationComp->startFrame;
@@ -36,7 +32,6 @@ void entityStatus::onUpdate(float dt) {
 		}
 	} 
 	else if (statusComp->isRunning()) {
-		APP_LOG("Entity is RUN!");
 		// Se il controller ha impostato RUNNING, assicuriamoci che la texture sia quella giusta
 		if (spriteComp->currentTexture != "run") {
 			spriteComp->currentTexture = "run"; // Assicurati di caricare "run.png" nella Factory!
@@ -44,7 +39,6 @@ void entityStatus::onUpdate(float dt) {
 		}
 	} 
 	else if (statusComp->isIdle()) {
-		APP_LOG("Entity is IDLE!");
 		if (spriteComp->currentTexture != "idle") {
 			spriteComp->currentTexture = "idle";
 			animationComp->currentFrame = animationComp->startFrame;

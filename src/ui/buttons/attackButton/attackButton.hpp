@@ -14,7 +14,7 @@ public:
 	}
 
 	void buttonRelease() override {
-		registry->emplace<attackIntent>(playerEntity);
+		registry->emplace_or_replace<attackIntent>(playerEntity);
 	}
 
 private:

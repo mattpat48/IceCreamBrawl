@@ -5,6 +5,7 @@
 
 #include "engine/screenManager.hpp"
 #include "engine/assetManager.hpp"
+#include "engine/gameDataManager.hpp"
 
 class Engine {
 public:
@@ -37,8 +38,10 @@ public:
 
     ScreenManager& getScreenManager() { return screenManager; }
     AssetManager& getAssetManager() { return assetManager; }
+    GameDataManager& getDataManager() { return dataManager; }
 
 private:
     ScreenManager screenManager;
     AssetManager assetManager;
+    GameDataManager dataManager;
 };

@@ -11,9 +11,14 @@
 
 void GameScreen::load(entt::registry& globalRegistry) {
  
-    Vector2 startPosition = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
-    Vector2 playerScale = {6.0f * scaleX, 6.0f * scaleY};
-    playerEntity = PlayerFactory::create(registry, engine->getAssetManager(), startPosition, playerScale);
+    // 1. Carica i dati dal manager
+    PlayerSaveData pData = engine->getDataManager().getPlayerData();
+    LevelData lData = engine->getDataManager().getLevelData(1);
+
+    mapWidth = lData.mapWidth;
+    mapHeight = lData.mapHeight;
+
+    playerEntity = PlayerFactory::create(registry, engine->getAssetManager(), pData);
     APP_LOG("Player created with entity ID: %d", static_cast<int>(playerEntity));
 
     Vector2 primaryPosition = {GetScreenWidth() / 4.0f, GetScreenHeight() / 4.0f * 3.0f};
@@ -21,7 +26,7 @@ void GameScreen::load(entt::registry& globalRegistry) {
     APP_LOG("Primary attack button created with entity ID: %d", static_cast<int>(primaryAttackButton));
 
     // Add map background entity
-    auto mapEntity = MapFactory::create(registry, engine->getAssetManager(), true, mapWidth, mapHeight);
+    auto mapEntity = MapFactory::create(registry, engine->getAssetManager(), lData);
     APP_LOG("Map loaded with entity ID: %d", static_cast<int>(mapEntity));
 
     // Add touch controller entity
@@ -33,7 +38,9 @@ void GameScreen::load(entt::registry& globalRegistry) {
     // Add minimap entity
     auto minimapEntity = MinimapFactory::create(registry, playerEntity, mapWidth, mapHeight);
     APP_LOG("Minimap created with entity ID: %d", static_cast<int>(minimapEntity));
-
+    
+    // Inizializza lo spawner prendendo i dati dal level data!
+    enemySpawnSystem.init(lData.enemies);
 }
 
 void GameScreen::updateCamera() {
@@ -43,10 +50,10 @@ void GameScreen::updateCamera() {
     auto& playerTransform = registry.get<transform>(playerEntity);
     auto t = registry.try_get<transform>(playerEntity);
 
-    if (t->position.x < 20.0f) t->position.x = 20.0f;
-    if (t->position.y < 20.0f) t->position.y = 20.0f;
-    if (t->position.x > mapWidth - 20.0f) t->position.x = mapWidth - 20.0f;
-    if (t->position.y > mapHeight - 20.0f) t->position.y = mapHeight - 20.0f;
+    if (t->position.x < 40.0f) t->position.x = 40.0f;
+    if (t->position.y < 40.0f) t->position.y = 40.0f;
+    if (t->position.x > mapWidth - 40.0f) t->position.x = mapWidth - 40.0f;
+    if (t->position.y > mapHeight - 40.0f) t->position.y = mapHeight - 40.0f;
 
     // 1. Logica Deadzone (La telecamera lo segue se si allontana dal centro)
     float deadzoneX = GetScreenWidth() / 4.0f;  // tolleranza asse X
@@ -72,6 +79,20 @@ void GameScreen::updateCamera() {
 
     camera.target.x = Clamp(camera.target.x, minX, maxX);
     camera.target.y = Clamp(camera.target.y, minY, maxY);
+}
+
+void GameScreen::update(float delta) {
+    if (!paused) {
+        basicUpdate(delta);
+        updateCamera();
+
+        combatManager.update(registry, delta);
+        healthManager.update(registry, delta);
+
+        enemySpawnSystem.update(registry, engine->getAssetManager(), delta, mapWidth, mapHeight);
+        enemyMovementSystem.update(registry, playerEntity, delta);
+        enemyAttackSystem.update(registry, playerEntity, delta);
+    }
 }
 
 void GameScreen::unload(entt::registry& globalRegistry) {

@@ -183,3 +183,11 @@ struct damageReceived {
 struct deathEvent {
 
 };
+
+struct is_enemy {
+
+};
+
+struct is_aggroed {
+    bool aggroed;
+};

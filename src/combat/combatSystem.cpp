@@ -45,4 +45,10 @@ void CombatSystem::update(entt::registry& registry, float dt) {
         registry.remove<attackIntent>(attacker);
         APP_LOG("Removed attackIntent for: %d", attacker);
     }
+
+    auto cooldowners = registry.view<attack>();
+    for (auto entity : cooldowners) {
+        auto& atk = cooldowners.get<attack>(entity);
+        atk.updateCooldown(dt);
+    }
 }

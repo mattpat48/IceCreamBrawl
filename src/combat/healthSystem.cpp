@@ -1,4 +1,6 @@
 #include "healthSystem.hpp"
+#include "defines/components/components.hpp"
+#include "defines/components/entityComponents.hpp"
 
 void HealthSystem::update(entt::registry& registry, float dt) {
     // Trova chiunque abbia ricevuto danno e abbia una salute
@@ -20,5 +22,14 @@ void HealthSystem::update(entt::registry& registry, float dt) {
             registry.emplace<deathEvent>(entity);
 
         }
+    }
+
+    auto regenEntities = registry.view<health, endurance>();
+    for (auto entity : regenEntities) {
+        auto& hp = regenEntities.get<health>(entity);
+        auto& st = regenEntities.get<endurance>(entity);
+
+        hp.regen(hp.regenRate * dt);
+        st.regen(st.regenRate * dt);
     }
 }
