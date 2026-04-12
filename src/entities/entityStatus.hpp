@@ -4,6 +4,7 @@
 #include "engine/script.hpp"
 #include <entt/entt.hpp>
 #include "raylib.h"
+#include "raylib-cpp.hpp"
 
 #include "utils/logs.h"
 

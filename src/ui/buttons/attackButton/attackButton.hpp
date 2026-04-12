@@ -4,6 +4,7 @@
 
 #include "defines/components/components.hpp"
 #include "defines/components/entityComponents.hpp"
+#include "utils/logs.h"
 
 #include "buttons.hpp"
 
@@ -14,7 +15,9 @@ public:
 	}
 
 	void buttonRelease() override {
-		registry->emplace_or_replace<attackIntent>(playerEntity);
+		auto stamina = registry->try_get<endurance>(playerEntity);
+		APP_LOG("Attack button released! Player stamina: %.2f", stamina ? stamina->stamina : -1.0f);
+		registry->emplace_or_replace<attack_intent>(playerEntity);
 	}
 
 private:

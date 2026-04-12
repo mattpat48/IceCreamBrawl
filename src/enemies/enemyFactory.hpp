@@ -32,7 +32,7 @@ public:
         registry.emplace<sprite>(enemyEntity, std::move(enemyTextures), "idle", 64, 64);
 
         // Scala e Posizione
-        registry.emplace<transform>(enemyEntity, position, Vector2{5.0f, 5.0f}, 0.0f);
+        registry.emplace<transform>(enemyEntity, position, Vector2{6.0f, 6.0f}, 0.0f);
         registry.emplace<velocity>(enemyEntity, 0.0f, 0.0f);
         
         // Animazione di default
@@ -41,7 +41,7 @@ public:
         // Colleghiamo lo script specifico per i nemici (Status e Attacco)
         registry.emplace<script>(enemyEntity).bind<enemyScripts>(enemyEntity, registry);
         
-        registry.emplace<hitFlash>(enemyEntity);
+        registry.emplace<hit_flash>(enemyEntity);
         registry.emplace<status>(enemyEntity, IDLE);
         
         // Le statistiche vitali e di danno derivano dai dati generati dal GameDataManager!

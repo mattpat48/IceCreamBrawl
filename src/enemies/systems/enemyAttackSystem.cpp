@@ -24,8 +24,8 @@ void EnemyAttackSystem::update(entt::registry& registry, entt::entity playerEnti
 
         if (distance <= atk.range) {
             // Aggiungiamo l'intento, il CombatSystem processerà il danno reale!
-            registry.emplace_or_replace<attackIntent>(entity);
-			APP_LOG("Enemy %d is attacking! Distance to player: %.2f", entity, distance);
+            registry.emplace_or_replace<attack_intent>(entity);
+			//APP_LOG("Enemy %d is attacking! Distance to player: %.2f", entity, distance);
 		}
     }
 }

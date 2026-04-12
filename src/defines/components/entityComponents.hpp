@@ -7,7 +7,7 @@
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
-struct hitFlash {
+struct hit_flash {
     Color filter = WHITE;
     float timeFlash = 0.0f;
 };
@@ -172,19 +172,23 @@ struct special {
     }
 };
 
-struct attackIntent {
+struct attack_intent {
 
 };
 
-struct damageReceived {
+struct damage_received {
     float amount;
 };
 
-struct deathEvent {
+struct death_event {
 
 };
 
 struct is_enemy {
+
+};
+
+struct is_player {
 
 };
 

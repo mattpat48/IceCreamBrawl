@@ -16,6 +16,7 @@ class PlayerFactory {
 public:
     static entt::entity create(entt::registry& registry, AssetManager& assetManager, const PlayerSaveData& pData) {
         entt::entity playerEntity = registry.create();
+        registry.emplace<is_player>(playerEntity); // Aggiungiamo il tag is_player
 
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> playerTextures;
         
@@ -30,7 +31,7 @@ public:
         registry.emplace<velocity>(playerEntity, 0.0f, 0.0f);
         registry.emplace<animation>(playerEntity, 0, 0, 7, 1, 0.1f, 0.0f, true, 0);
         registry.emplace<script>(playerEntity).bind<playerScripts>(playerEntity, registry);
-        registry.emplace<hitFlash>(playerEntity);
+        registry.emplace<hit_flash>(playerEntity);
         registry.emplace<status>(playerEntity, IDLE);
         
         registry.emplace<health>(playerEntity, pData.maxHealth, pData.currentHealth, PlayerBaseStats::REGEN_HEALTH);

@@ -127,7 +127,7 @@ void Screen::basicDraw() {
 			source.width = -source.width;
 		}
 
-		auto hf = registry.try_get<hitFlash>(entity);
+		auto hf = registry.try_get<hit_flash>(entity);
 		Color filter = hf ? hf->filter : WHITE;
 		s.textures.at(s.currentTexture)->Draw(source, dest, origin, t.rotation, filter);
 	};
