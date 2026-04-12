@@ -10,3 +10,5 @@
 #define ATTACK 1
 #define DODGE 2
 #define RUN 3
+
+#define minimum_range 200.0f

@@ -12,6 +12,21 @@ struct hit_flash {
     float timeFlash = 0.0f;
 };
 
+struct collider {
+    float offsetX;
+    float offsetY;
+    float width;
+    float height;
+
+    Rectangle getRect(Vector2 position) const {
+        return { position.x + offsetX, position.y + offsetY, width, height };
+    }
+    
+    Vector2 getCenter(Vector2 position) const {
+        return { position.x + offsetX + width / 2.0f, position.y + offsetY + height / 2.0f };
+    }
+};
+
 struct status {
     int status;
 
@@ -98,10 +113,18 @@ struct damage {
     }
 };
 
+enum class AttackType { TARGET, AOE };
+enum class AttackShape { NONE, CIRCLE, CONE, LINE }; // NONE è usato per i TARGET
+
 struct attack {
     float cost;
     float cooldown;
     float range;
+    
+    // Nuovi parametri architetturali
+    AttackType type;
+    AttackShape shape;
+    float angle; // Usato per il CONE (in gradi, es. 120.0f)
 
     float costModifier;
     float cooldownModifier;
@@ -126,6 +149,19 @@ struct attack {
             }
         }
     }
+};
+
+// Componente temporaneo per mostrare l'area o il target dell'attacco
+struct attack_feedback {
+    float lifetime;
+    float maxLifetime;
+    AttackType type;
+    AttackShape shape;
+    float angle;
+    float range;
+    Vector2 origin;
+    Vector2 direction;
+    entt::entity target; // Usato solo se type == TARGET
 };
 
 struct ability {

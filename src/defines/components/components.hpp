@@ -1,9 +1,5 @@
 #pragma once
 
-#include "defines/defines_screen.h"
-#include "defines/defines_player.h"
-#include "defines/defines_ui.h"
-#include "defines/defines_general.h"
 #include "engine/script.hpp"
 #include "components/entityComponents.hpp"
 

@@ -28,9 +28,7 @@ public:
 
     void update(float delta) override;
 
-    void draw() override {
-        basicDraw();
-    }
+    void draw() override;
 
     void unload(entt::registry& globalRegistry) override;
 

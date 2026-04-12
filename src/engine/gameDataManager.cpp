@@ -2,14 +2,13 @@
 
 PlayerSaveData GameDataManager::getPlayerData() const {
     PlayerSaveData data;
+    EntityStaticData sData = EntityDatabase::getPlayerData();
     
     // SIMULAZIONE: in futuro qui leggerai un file "save_01.json" o chiamerai le API del server
     data.level = 1;
-    data.maxHealth = 100.0f;
-    data.currentHealth = 100.0f;
-    data.maxEndurance = 50.0f;
-    data.currentEndurance = 50.0f;
-    data.baseDamage = 15.0f;
+    // Su un nuovo gioco, la vita corrente è quella massima definita nel database
+    data.currentHealth = sData.maxHealth;
+    data.currentEndurance = sData.maxEndurance;
 	data.spawnPosition = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f}; // Posizione di spawn centrale
     
     return data;
@@ -26,8 +25,8 @@ LevelData GameDataManager::getLevelData(int levelId) const {
         level.isTiled = true;
         
         // Definiamo ondate o nemici statici per questo livello
-        // Tipo, Quantità, Intervallo(sec), Salute, Danno
-        level.enemies.push_back({"slime", 1, 0.0f, 30.0f, 5.0f}); // 1 slime spawnano subito
+        // Ora basta definire solo il TIPO, la QUANTITA' e l'INTERVALLO. Il resto è nel database.
+        level.enemies.push_back({"slime", 1, 0.0f}); 
         //level.enemies.push_back({"goblin", 3, 10.0f, 50.0f, 10.0f}); // 3 goblin, 1 ogni 10 secondi
     } else {
         // Fallback o altri livelli

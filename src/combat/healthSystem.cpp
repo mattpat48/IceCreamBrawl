@@ -15,6 +15,12 @@ void HealthSystem::update(entt::registry& registry, float dt) {
         hp.consume(dmg.amount);
         APP_LOG("Entity %d received %.2f damage! Remaining HP: %.2f", entity, dmg.amount, hp.life);
 
+        // Attiva l'hit flash se l'entità possiede il componente
+        if (auto* hf = registry.try_get<hit_flash>(entity)) {
+            hf->filter = RED; // Colora lo sprite di rosso
+            hf->timeFlash = 0.15f; // Durata del flash: 150 millisecondi
+        }
+
         // Rimuovi l'evento del danno
         registry.remove<damage_received>(entity);
 
@@ -33,5 +39,17 @@ void HealthSystem::update(entt::registry& registry, float dt) {
 
         hp.regen(hp.regenRate * dt);
         st.regen(st.regenRate * dt);
+    }
+
+    // Aggiorna i timer degli hit flash
+    auto flashEntities = registry.view<hit_flash>();
+    for (auto entity : flashEntities) {
+        auto& hf = flashEntities.get<hit_flash>(entity);
+        if (hf.timeFlash > 0.0f) {
+            hf.timeFlash -= dt;
+            if (hf.timeFlash <= 0.0f) {
+                hf.filter = WHITE; // Ripristina il colore originale
+            }
+        }
     }
 }

@@ -16,7 +16,7 @@ public:
     ~EnemySpawnSystem() = default;
 
     void init(const std::vector<EnemySpawnData>& enemies);
-    void update(entt::registry& registry, AssetManager& assetManager, float dt, float mapWidth, float mapHeight);
+    void update(entt::registry& registry, AssetManager& assetManager, GameDataManager& dataManager, float dt, float mapWidth, float mapHeight);
 
 private:
     std::vector<SpawnState> spawnStates;

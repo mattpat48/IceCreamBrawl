@@ -105,12 +105,12 @@ void Screen::basicUpdate(float delta) {
 void Screen::basicDraw() {
 	// Lambda di supporto per non duplicare la logica di disegno
 	auto drawEntitySprite = [&](entt::entity entity, transform& t, sprite& s, animation& a) {
-		Rectangle source = {
-			static_cast<float>(a.currentFrame * s.width),
-			static_cast<float>(a.row * s.height),
-			static_cast<float>(s.width),
-			static_cast<float>(s.height)
-		};
+        Rectangle source = {
+            .x = static_cast<float>(a.currentFrame * s.width),
+            .y = static_cast<float>(a.direction * s.height), // Usa direction invece di row per coerenza
+            .width = static_cast<float>(s.width),
+            .height = static_cast<float>(s.height)
+        };
 
 		float absScaleX = std::abs(t.scale.x);
 
@@ -195,30 +195,32 @@ void Screen::updateScripts() {
 }
 
 void Screen::updateAnimations(float dt) {
-	auto view = registry.view<animation, velocity>();
-	for (auto entity : view) {
-		auto& a = view.get<animation>(entity);
-		auto& v = view.get<velocity>(entity);
+	// 1. Aggiorna la direzione dell'animazione in base alla velocità (solo per entità che si muovono)
+	auto movingView = registry.view<animation, velocity>();
+	for (auto entity : movingView) {
+		auto& a = movingView.get<animation>(entity);
+		auto& v = movingView.get<velocity>(entity);
 
-		if (a.isPlaying) {
-			if (std::abs(v.dx) > std::abs(v.dy)) {
-				// Horizontal movement dominates
-				a.row = (v.dx > 0) ? RIGHT : LEFT;  // right : left
-			} else if (v.dy != 0) {
-				// Vertical movement dominates
-				a.row = (v.dy > 0) ? DOWN : UP;  // down : up
-			}
-
-			a.timer += dt;
-
-			if (a.timer >= a.frameTime) {
-				a.timer = 0.0f;
-				a.currentFrame++;
-
-				if (a.currentFrame > a.endFrame) {
-					a.currentFrame = a.startFrame;
-				}
-			}
+		if (std::abs(v.dx) > std::abs(v.dy)) {
+			a.direction = (v.dx > 0) ? RIGHT : LEFT;
+		} else if (v.dy != 0) {
+			a.direction = (v.dy > 0) ? DOWN : UP;
 		}
 	}
+
+	// 2. Aggiorna i frame per TUTTE le animazioni che sono in play (sia UI che entità di gioco)
+	auto allAnimationsView = registry.view<animation>();
+    for (auto entity : allAnimationsView) {
+        auto& a = allAnimationsView.get<animation>(entity);
+        if (a.isPlaying) {
+            a.timer += dt;
+            if (a.timer >= a.frameTime) {
+                a.timer = 0.0f;
+                a.currentFrame++;
+                if (a.currentFrame > a.endFrame) {
+                    a.currentFrame = a.startFrame;
+                }
+            }
+        }
+    }
 }

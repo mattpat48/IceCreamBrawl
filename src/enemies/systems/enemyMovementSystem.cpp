@@ -3,6 +3,7 @@
 #include <raymath.h>
 
 void EnemyMovementSystem::update(entt::registry& registry, entt::entity playerEntity, float dt) {
+	return; // DEBUG
     if (!registry.valid(playerEntity)) return;
 
     auto* playerTransform = registry.try_get<transform>(playerEntity);

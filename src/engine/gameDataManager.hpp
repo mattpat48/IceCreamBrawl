@@ -2,25 +2,31 @@
 #include <string>
 #include <vector>
 #include "raylib.h"
+#include "defines/components/entityComponents.hpp"
+#include "entities/entityDatabase.hpp"
+#include "ui/uiDatabase.hpp"
+
+struct EntityGraphicData {
+    std::string textureId;
+    int width;
+    int height;
+    int collisionWidth;
+    int collisionHeight;
+};
 
 // 1. Strutture dati "Pure", indipendenti da EnTT e Raylib
 struct PlayerSaveData {
     int level;
+    // Solo i dati che cambiano e devono essere salvati
     float currentHealth;
-    float maxHealth;
     float currentEndurance;
-    float maxEndurance;
-    float baseDamage;
     Vector2 spawnPosition;
-    // Qui potrai aggiungere inventario, abilità sbloccate, ecc.
 };
 
 struct EnemySpawnData {
     std::string enemyType; // es. "goblin", "orc", "slime"
     int count;             // Quanti ne spawnano
     float spawnInterval;   // Se 0.0f, spawnano tutti all'inizio, altrimenti ogni X secondi
-    float baseHealth;
-    float baseDamage;
 };
 
 struct LevelData {
@@ -40,4 +46,10 @@ public:
     // Metodi pubblici esposti al GameScreen e alle Factory
     PlayerSaveData getPlayerData() const;
     LevelData getLevelData(int levelId) const;
+
+    // Accesso ai database statici (Grafica, Collider, UI)
+    EntityStaticData getPlayerStaticData() const { return EntityDatabase::getPlayerData(); }
+    EntityStaticData getEnemyStaticData(const std::string& type) const { return EntityDatabase::getEnemyData(type); }
+    ButtonStaticData getPrimaryButtonData() const { return UIDatabase::getPrimaryAttackButtonData(); }
+    JoystickStaticData getJoystickData() const { return UIDatabase::getJoystickData(); }
 };

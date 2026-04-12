@@ -10,7 +10,7 @@ void EnemySpawnSystem::init(const std::vector<EnemySpawnData>& enemies) {
     }
 }
 
-void EnemySpawnSystem::update(entt::registry& registry, AssetManager& assetManager, float dt, float mapWidth, float mapHeight) {
+void EnemySpawnSystem::update(entt::registry& registry, AssetManager& assetManager, GameDataManager& dataManager, float dt, float mapWidth, float mapHeight) {
     for (auto& state : spawnStates) {
         if (state.spawnedCount < state.data.count) {
             state.timer -= dt;
@@ -19,8 +19,9 @@ void EnemySpawnSystem::update(entt::registry& registry, AssetManager& assetManag
                     static_cast<float>(GetRandomValue(100, static_cast<int>(mapWidth) - 100)),
                     static_cast<float>(GetRandomValue(100, static_cast<int>(mapHeight) - 100))
                 };
-                // SCOMMENTA QUANDO HAI CREATO LA ENEMY FACTORY:
-                EnemyFactory::create(registry, assetManager, state.data, spawnPos);
+                
+                EntityStaticData sData = dataManager.getEnemyStaticData(state.data.enemyType);
+                EnemyFactory::create(registry, assetManager, state.data, sData, spawnPos);
                 state.spawnedCount++;
                 state.timer = state.data.spawnInterval;
             }

@@ -18,11 +18,13 @@ void GameScreen::load(entt::registry& globalRegistry) {
     mapWidth = lData.mapWidth;
     mapHeight = lData.mapHeight;
 
-    playerEntity = PlayerFactory::create(registry, engine->getAssetManager(), pData);
+    auto pStaticData = engine->getDataManager().getPlayerStaticData();
+    playerEntity = PlayerFactory::create(registry, engine->getAssetManager(), pData, pStaticData);
     APP_LOG("Player created with entity ID: %d", static_cast<int>(playerEntity));
 
-    Vector2 primaryPosition = {GetScreenWidth() / 4.0f, GetScreenHeight() / 4.0f * 3.0f};
-    auto primaryAttackButton = AttackButtonFactory::create(registry, engine->getAssetManager(), playerEntity, primaryPosition, Vector2{1.0f, 1.0f});
+    auto btnData = engine->getDataManager().getPrimaryButtonData();
+    Vector2 primaryPosition = {GetScreenWidth() * btnData.relPosX, GetScreenHeight() * btnData.relPosY};
+    auto primaryAttackButton = AttackButtonFactory::create(registry, engine->getAssetManager(), playerEntity, btnData, primaryPosition);
     APP_LOG("Primary attack button created with entity ID: %d", static_cast<int>(primaryAttackButton));
 
     // Add map background entity
@@ -30,9 +32,9 @@ void GameScreen::load(entt::registry& globalRegistry) {
     APP_LOG("Map loaded with entity ID: %d", static_cast<int>(mapEntity));
 
     // Add touch controller entity
-    Vector2 joystickPosition = {GetScreenWidth() / 4.0f * 3.0f, GetScreenHeight() / 4.0f * 3.0f};
-    float joystickRadius = 200.0f;
-    auto joystickEntity = ControllerFactory::createTouchJoystick(registry, engine->getAssetManager(), playerEntity, joystickPosition, joystickRadius);
+    auto joyData = engine->getDataManager().getJoystickData();
+    Vector2 joystickPosition = {GetScreenWidth() * joyData.relPosX, GetScreenHeight() * joyData.relPosY};
+    auto joystickEntity = ControllerFactory::createTouchJoystick(registry, engine->getAssetManager(), playerEntity, joystickPosition, joyData.radius);
     APP_LOG("Touch joystick created with entity ID: %d", static_cast<int>(joystickEntity));
     
     // Add minimap entity
@@ -89,10 +91,21 @@ void GameScreen::update(float delta) {
         combatManager.update(registry, delta);
         healthManager.update(registry, delta);
 
-        enemySpawnSystem.update(registry, engine->getAssetManager(), delta, mapWidth, mapHeight);
+        enemySpawnSystem.update(registry, engine->getAssetManager(), engine->getDataManager(), delta, mapWidth, mapHeight);
         enemyMovementSystem.update(registry, playerEntity, delta);
         enemyAttackSystem.update(registry, playerEntity, delta);
     }
+}
+
+void GameScreen::draw() {
+    basicDraw(); // Questo disegna la mappa, gli sprite, ecc.
+    
+    // Disegniamo gli elementi di combattimento in 2D (con la prospettiva della telecamera)
+    BeginMode2D(camera);
+    combatManager.draw(registry);
+    EndMode2D();
+    
+    // Se hai elementi UI extra da disegnare, puoi metterli qui sotto
 }
 
 void GameScreen::unload(entt::registry& globalRegistry) {
