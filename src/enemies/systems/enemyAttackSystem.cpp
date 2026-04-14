@@ -2,8 +2,9 @@
 #include <raymath.h>
 #include "utils/logs.h"
 
+
+
 void EnemyAttackSystem::update(entt::registry& registry, entt::entity playerEntity, float dt) {
-    return; //DEBUG
     if (!registry.valid(playerEntity)) return;
 
     auto* playerTransform = registry.try_get<transform>(playerEntity);

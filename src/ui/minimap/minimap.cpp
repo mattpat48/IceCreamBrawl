@@ -17,8 +17,8 @@ void minimap::onDraw() {
 	
 	// 2. Posiziona la minimappa in alto a destra
 	Rectangle minimapRect = {
-		screenWidth - minimapWidth - margin,
-		margin,
+		10.0f,
+		100.0f,
 		minimapWidth,
 		minimapHeight
 	};

@@ -52,6 +52,9 @@ public:
 
     void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, float scale, Color tint);
 
+    void updateInput();
+    void updateGameLogic(float delta);
+
     void basicUpdate(float delta);
     void basicDraw();
     void basicUnload();

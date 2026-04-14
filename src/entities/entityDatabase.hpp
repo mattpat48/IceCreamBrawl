@@ -31,6 +31,7 @@ struct EntityStaticData {
     float attackCost;
     float attackCooldown;
     float attackRange;
+    AttackRange attackRangeType;
     AttackType attackType;
     AttackShape attackShape;
     float attackAngle;
@@ -44,11 +45,11 @@ public:
             96, 80,                      // sprite Width, Height
             {6.0f, 6.0f},                // scale
             0, 7, 0, 0.1f,               // animazione (start, end, row, frameTime)
-            -30.0f, 0.0f, 60.0f, 40.0f,  // collider (offsetX, offsetY, width, height)
+            -50.0f, -70.0f, 100.0f, 140.0f,  // collider (offsetX, offsetY, width, height)
             100.0f, 50.0f, 2.0f, 5.0f,	 // maxHealth, maxEndurance, healthRegenRate, enduranceRegenRate
 			15.0f, 						 // baseDamage
-            10.0f, 0.5f, 200.0f,         // attackCost, attackCooldown, attackRange
-            AttackType::AOE, AttackShape::CONE, 120.0f // attack pattern
+            10.0f, 0.0f, 200.0f,         // attackCost, attackCooldown, attackRange
+            AttackRange::MELEE, AttackType::TARGET, AttackShape::NONE, 0.0f // attack pattern
         };
     }
 
@@ -59,11 +60,11 @@ public:
                 64, 64, 
                 {6.0f, 6.0f}, 
                 0, 5, 0, 0.1f, 
-                -20.0f, 15.0f, 40.0f, 30.0f,
+                -40.0f, -40.0f, 80.0f, 80.0f,
                 30.0f, 100.0f, 0.0f, 0.0f,
 				5.0f,
                 0.0f, 1.5f, 100.0f,
-                AttackType::TARGET, AttackShape::NONE, 0.0f
+                AttackRange::MELEE, AttackType::TARGET, AttackShape::NONE, 0.0f
             };
         }
         // Fallback generico nel caso si sbagli a scrivere il nome
@@ -76,7 +77,7 @@ public:
 			30.0f, 100.0f, 0.0f, 0.0f,
 			5.0f,
 			0.0f, 1.5f, 100.0f,
-			AttackType::TARGET, AttackShape::NONE, 0.0f
+			AttackRange::MELEE, AttackType::TARGET, AttackShape::NONE, 0.0f
 		};
     }
 };

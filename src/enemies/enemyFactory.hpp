@@ -33,6 +33,7 @@ public:
         // Scala e Posizione
         registry.emplace<transform>(enemyEntity, position, sData.scale, 0.0f);
         registry.emplace<velocity>(enemyEntity, 0.0f, 0.0f);
+        registry.emplace<random_movement>(enemyEntity, 2.0f, 0.0f, Vector2{0.0f, 0.0f}); // Cambia direzione ogni 2 secondi (se usato)
         
         // Animazione di default
         registry.emplace<animation>(enemyEntity, sData.animStartFrame, sData.animStartFrame, sData.animEndFrame, sData.animRow, sData.animFrameTime, 0.0f, true, DOWN);
@@ -48,7 +49,7 @@ public:
         // Le statistiche vitali e di danno derivano dai dati generati dal GameDataManager!
         registry.emplace<health>(enemyEntity, sData.maxHealth, sData.maxHealth, 0.0f); // 0 regen per i nemici
         registry.emplace<damage>(enemyEntity, sData.baseDamage, sData.baseDamage, 0.0f, 1.0f);
-        registry.emplace<attack>(enemyEntity, sData.attackCost, sData.attackCooldown, sData.attackRange, sData.attackType, sData.attackShape, sData.attackAngle, 0.0f, 0.0f, 0.0f, 0.0f); 
+        registry.emplace<attack>(enemyEntity, sData.attackCost, sData.attackCooldown, sData.attackRange, sData.attackRangeType, sData.attackType, sData.attackShape, sData.attackAngle, 0.0f, 0.0f, 0.0f, 0.0f); 
 		registry.emplace<endurance>(enemyEntity, 100.0f, 100.0f, 100.0f); // I nemici non usano l'endurance per ora
 
         // TAG FONDAMENTALE: Dice a MovementSystem e AttackSystem che questa entità è un nemico

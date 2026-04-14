@@ -113,6 +113,7 @@ struct damage {
     }
 };
 
+enum class AttackRange { MELEE, RANGED };
 enum class AttackType { TARGET, AOE };
 enum class AttackShape { NONE, CIRCLE, CONE, LINE }; // NONE è usato per i TARGET
 
@@ -122,6 +123,7 @@ struct attack {
     float range;
     
     // Nuovi parametri architetturali
+    AttackRange attackRange;
     AttackType type;
     AttackShape shape;
     float angle; // Usato per il CONE (in gradi, es. 120.0f)
@@ -217,7 +219,7 @@ struct damage_received {
 };
 
 struct death_event {
-
+    bool isPlayer;
 };
 
 struct is_enemy {
@@ -228,6 +230,20 @@ struct is_player {
 
 };
 
+struct is_minimap {
+
+};
+
+struct is_joystick {
+
+};
+
 struct is_aggroed {
     bool aggroed;
+};
+
+struct random_movement {
+    float changeDirectionTime;
+    float timeSinceLastChange;
+    Vector2 direction;
 };

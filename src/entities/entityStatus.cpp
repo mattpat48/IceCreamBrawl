@@ -11,6 +11,7 @@ void entityStatus::onUpdate(float dt) {
 	// 1. GESTIONE DELLA MORTE (Ha priorità assoluta)
 	if (statusComp->isDead()) {
 		if (spriteComp->currentTexture != "dead") {
+			animationComp->row = 0; // Assumiamo che la riga 0 sia dedicata alla morte
 			spriteComp->currentTexture = "dead"; // Assicurati di avere una texture "dead.png" caricata nella Factory!
 			animationComp->currentFrame = animationComp->startFrame;
 		} else if (animationComp->currentFrame == animationComp->endFrame) {

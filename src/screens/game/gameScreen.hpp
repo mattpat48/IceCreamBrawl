@@ -4,6 +4,7 @@
 #include "raylib-cpp.hpp"
 
 #include "screens/screen.hpp"
+#include "defines/events.hpp"
 #include "ui/controller/controller.hpp"
 #include "ui/buttons/buttons.hpp"
 #include "player/playerScripts.hpp"
@@ -34,10 +35,16 @@ public:
 
     virtual ~GameScreen() = default;
 
+    //void onPauseToggle(const PauseToggleEvent& event);
+    void onPlayerDeath(const PlayerDeathEvent& event);
+    void onPlayerRespawn(const PlayerRespawnEvent& event);
+
 protected:
     entt::entity playerEntity; // Reference to the player entity
     CombatSystem combatManager;
     HealthSystem healthManager;
+
+    void rebindPlayer(entt::entity newPlayer);
 
     EnemySpawnSystem enemySpawnSystem;
     EnemyMovementSystem enemyMovementSystem;

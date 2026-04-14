@@ -1,8 +1,10 @@
 #include "gameScreen.hpp"
 #include "playerFactory.hpp"
 #include "controllerFactory.hpp"
+#include "screens/game/deathScreen.hpp"
 #include "minimapFactory.hpp"
 #include "mapFactory.hpp"
+#include "ui/buttons/pauseButton/pauseButtonFactory.hpp"
 #include "attackButtonFactory.hpp"
 #include "engine.hpp"
 #include <raymath.h>
@@ -10,6 +12,11 @@
 #include "utils/logs.h"
 
 void GameScreen::load(entt::registry& globalRegistry) {
+ 
+    // Colleghiamo l'evento di pausa alla funzione di questo schermo
+    //registry.ctx().get<entt::dispatcher>().sink<PauseToggleEvent>().connect<&GameScreen::onPauseToggle>(this);
+    registry.ctx().get<entt::dispatcher>().sink<PlayerDeathEvent>().connect<&GameScreen::onPlayerDeath>(this); // Ascolta la morte
+    registry.ctx().get<entt::dispatcher>().sink<PlayerRespawnEvent>().connect<&GameScreen::onPlayerRespawn>(this); // Ascolta il respawn
  
     // 1. Carica i dati dal manager
     PlayerSaveData pData = engine->getDataManager().getPlayerData();
@@ -40,6 +47,10 @@ void GameScreen::load(entt::registry& globalRegistry) {
     // Add minimap entity
     auto minimapEntity = MinimapFactory::create(registry, playerEntity, mapWidth, mapHeight);
     APP_LOG("Minimap created with entity ID: %d", static_cast<int>(minimapEntity));
+
+    // Aggiungiamo il pulsante di pausa
+    //auto pauseButton = PauseButtonFactory::create(registry, engine->getAssetManager(), {GetScreenWidth() - 70.0f, 70.0f});
+    //APP_LOG("Pause button created with entity ID: %d", static_cast<int>(pauseButton));
     
     // Inizializza lo spawner prendendo i dati dal level data!
     enemySpawnSystem.init(lData.enemies);
@@ -84,8 +95,12 @@ void GameScreen::updateCamera() {
 }
 
 void GameScreen::update(float delta) {
+    // L'input deve essere processato anche in pausa per poter catturare l'evento di un-pause
+    updateInput();
+
     if (!paused) {
-        basicUpdate(delta);
+        // Eseguiamo la logica di gioco solo se non siamo in pausa
+        updateGameLogic(delta);
         updateCamera();
 
         combatManager.update(registry, delta);
@@ -104,10 +119,63 @@ void GameScreen::draw() {
     BeginMode2D(camera);
     combatManager.draw(registry);
     EndMode2D();
-    
-    // Se hai elementi UI extra da disegnare, puoi metterli qui sotto
+
+    // Se il gioco è in pausa, disegna l'overlay di pausa sopra a tutto il resto
+    //if (paused) {
+    //    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.7f));
+    //    const char* text = "PAUSA";
+    //    int fontSize = 100;
+    //    int textWidth = MeasureText(text, fontSize);
+    //    DrawText(text, GetScreenWidth() / 2 - textWidth / 2, GetScreenHeight() / 2 - fontSize / 2, fontSize, WHITE);
+    //}
 }
 
 void GameScreen::unload(entt::registry& globalRegistry) {
+    // Scolleghiamo l'evento per evitare chiamate a oggetti distrutti
+    registry.ctx().get<entt::dispatcher>().sink<PlayerDeathEvent>().disconnect<&GameScreen::onPlayerDeath>(this);
+    registry.ctx().get<entt::dispatcher>().sink<PlayerRespawnEvent>().disconnect<&GameScreen::onPlayerRespawn>(this);
+    //registry.ctx().get<entt::dispatcher>().sink<PauseToggleEvent>().disconnect<&GameScreen::onPauseToggle>(this);
     engine->getAssetManager().unloadAll();
+}
+
+void GameScreen::onPlayerDeath(const PlayerDeathEvent& event) {
+    APP_LOG("PlayerDeathEvent received. Pushing DeathScreen.");
+    // Il gioco continua a girare sotto, ma noi aggiungiamo la schermata di morte in cima
+    engine->pushScreen(std::make_unique<DeathScreen>());
+}
+
+void GameScreen::onPlayerRespawn(const PlayerRespawnEvent& event) {
+    APP_LOG("PlayerRespawnEvent received. Respawning player.");
+
+    // 1. Ricrea il giocatore usando la factory
+    PlayerSaveData pData = engine->getDataManager().getPlayerData();
+    auto pStaticData = engine->getDataManager().getPlayerStaticData();
+    entt::entity newPlayerEntity = PlayerFactory::create(registry, engine->getAssetManager(), pData, pStaticData);
+
+    // 2. Aggiorna tutti i sistemi che avevano una reference alla vecchia entità
+    rebindPlayer(newPlayerEntity);
+}
+
+void GameScreen::rebindPlayer(entt::entity newPlayer) {
+    this->playerEntity = newPlayer;
+
+    // Aggiorna i sistemi che dipendono dal player
+    enemyMovementSystem.updatePlayerEntity(newPlayer);
+    enemyAttackSystem.updatePlayerEntity(newPlayer);
+
+    // Aggiorna gli script della UI che dipendono dal player
+    auto joystickView = registry.view<script, is_joystick>();
+    for (auto entity : joystickView) {
+        auto* controllerScript = dynamic_cast<touchController*>(registry.get<script>(entity).instance.get());
+        if (controllerScript) controllerScript->playerEntity = newPlayer;
+    }
+
+    auto minimapView = registry.view<script, is_minimap>();
+    for (auto entity : minimapView) {
+        auto* minimapScript = dynamic_cast<minimap*>(registry.get<script>(entity).instance.get());
+        if (minimapScript) minimapScript->setPlayerEntity(newPlayer);
+    }
+
+    // Aggiungi qui altri sistemi/UI che dipendono dal player, come i pulsanti di attacco
+    APP_LOG("Player rebound to all systems with new entity ID: %d", static_cast<int>(newPlayer));
 }

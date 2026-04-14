@@ -17,6 +17,8 @@ public:
 
     void onDraw() override;
 
+    void setPlayerEntity(entt::entity newPlayer) { playerEntity = newPlayer; }
+
 private:
     entt::entity playerEntity;
     float mapWidth;

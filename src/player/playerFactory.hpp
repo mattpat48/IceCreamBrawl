@@ -23,6 +23,7 @@ public:
         playerTextures["idle"] = assetManager.loadTexture(sData.basePath + "idle.png");
         playerTextures["attack"] = assetManager.loadTexture(sData.basePath + "attack.png");
         playerTextures["run"] = assetManager.loadTexture(sData.basePath + "run.png");
+        playerTextures["dead"] = assetManager.loadTexture(sData.basePath + "dead.png");
 
         registry.emplace<sprite>(playerEntity, std::move(playerTextures), "idle", sData.spriteWidth, sData.spriteHeight);
 
@@ -40,7 +41,7 @@ public:
         registry.emplace<endurance>(playerEntity, sData.maxEndurance, pData.currentEndurance, sData.enduranceRegenRate);
         registry.emplace<damage>(playerEntity, sData.baseDamage, sData.baseDamage, 0.0f, 1.0f);
         // Passiamo i nuovi parametri di forma e angolo dell'attacco
-        registry.emplace<attack>(playerEntity, sData.attackCost, sData.attackCooldown, sData.attackRange, sData.attackType, sData.attackShape, sData.attackAngle, 0.0f, 0.0f, 0.0f, 0.0f);
+        registry.emplace<attack>(playerEntity, sData.attackCost, sData.attackCooldown, sData.attackRange, sData.attackRangeType, sData.attackType, sData.attackShape, sData.attackAngle, 0.0f, 0.0f, 0.0f, 0.0f);
 
         return playerEntity;
     }

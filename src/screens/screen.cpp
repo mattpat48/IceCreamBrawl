@@ -83,18 +83,25 @@ void Screen::DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle des
 }
 
 void Screen::basicUpdate(float delta) {
-	// 1. Legge gli input da Raylib e lancia gli eventi tramite il dispatcher
+	updateInput();
+	updateGameLogic(delta);
+}
+
+void Screen::updateInput() {
+	// Legge gli input da Raylib e lancia gli eventi tramite il dispatcher
 	if (inputSystem) {
 		inputSystem->update();
 	}
+}
 
+void Screen::updateGameLogic(float delta) {
 	updateScripts();
 	updateAnimations(delta);
 
 	auto view = registry.view<transform, velocity>();
 	for (auto entity : view) {
-		auto& t = view.get<transform>(entity);
-		auto& v = view.get<velocity>(entity);
+		auto &t = view.get<transform>(entity);
+		auto &v = view.get<velocity>(entity);
 
 		// Update position
 		t.position.x += v.dx;

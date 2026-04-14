@@ -2,8 +2,9 @@
 #include "defines/components/components.hpp"
 #include <raymath.h>
 
+
+
 void EnemyMovementSystem::update(entt::registry& registry, entt::entity playerEntity, float dt) {
-	return; // DEBUG
     if (!registry.valid(playerEntity)) return;
 
     auto* playerTransform = registry.try_get<transform>(playerEntity);
@@ -56,6 +57,15 @@ void EnemyMovementSystem::update(entt::registry& registry, entt::entity playerEn
 			float distance = Vector2Distance(playerTransform->position, t.position);
 			if (distance < 300.0f) {
 				aggro.aggroed = true;
+			} else {
+				// movimento casuale ogni tot secondi
+				auto& randomMove = registry.get_or_emplace<random_movement>(entity);
+				randomMove.timeSinceLastChange += dt;
+				if (randomMove.timeSinceLastChange >= randomMove.changeDirectionTime) {
+					randomMove.direction = Vector2{ (float)(rand() % 200 - 100), (float)(rand() % 200 - 100) };
+					randomMove.timeSinceLastChange = 0.0f;
+				}
+
 			}
 		}
 	}

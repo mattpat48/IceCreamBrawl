@@ -1,6 +1,7 @@
 #include "healthSystem.hpp"
 #include "defines/components/components.hpp"
 #include "defines/components/entityComponents.hpp"
+#include "defines/events.hpp"
 #include "utils/logs.h"
 
 void HealthSystem::update(entt::registry& registry, float dt) {
@@ -27,8 +28,9 @@ void HealthSystem::update(entt::registry& registry, float dt) {
         // È morto?
         if (hp.life <= 0) {
 			sta.status = DEAD; // Imposta lo stato su DEAD
-            registry.emplace<death_event>(entity);
-
+            if (registry.all_of<is_player>(entity)) {
+                registry.ctx().get<entt::dispatcher>().trigger<PlayerDeathEvent>();
+            }
         }
     }
 
