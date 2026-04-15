@@ -20,6 +20,8 @@ public:
 		registry->emplace_or_replace<attack_intent>(playerEntity);
 	}
 
+	void setPlayerEntity(entt::entity newPlayer) { playerEntity = newPlayer; }
+
 private:
 	entt::entity playerEntity;
 };

@@ -1,11 +1,13 @@
 #pragma once
 
 #include "engine/script.hpp"
-#include "defines/defines_general.h"
 
 #include <entt/entt.hpp>
 #include "raylib.h"
 #include "raylib-cpp.hpp"
+
+enum class Directions { UP, DOWN, LEFT, RIGHT, UP_LEFT, UP_RIGHT, DOWN_LEFT, DOWN_RIGHT };
+enum class StatusType { IDLE, ATTACK, DODGE, RUN, DEAD };
 
 struct hit_flash {
     Color filter = WHITE;
@@ -28,23 +30,23 @@ struct collider {
 };
 
 struct status {
-    int status;
+    StatusType status;
 
     bool isIdle() const {
-        return status == IDLE;
+        return status == StatusType::IDLE;
     }
     bool isAttacking() const {
-        return status == ATTACK;
+        return status == StatusType::ATTACK;
     }
     bool isDodging() const {
-        return status == DODGE;
+        return status == StatusType::DODGE;
     }
     bool isDead() const {
-        return status == DEAD;
+        return status == StatusType::DEAD;
     }
 
     bool isRunning() const {
-        return status == RUN;
+        return status == StatusType::RUN;
     }
 };
 
@@ -238,12 +240,31 @@ struct is_joystick {
 
 };
 
+struct is_primary_attack {
+
+};
+
+struct is_hidden {
+
+};
+
 struct is_aggroed {
     bool aggroed;
 };
 
+enum class WanderState { STILL, MOVING };
+
 struct random_movement {
-    float changeDirectionTime;
-    float timeSinceLastChange;
-    Vector2 direction;
+    WanderState state = WanderState::STILL;
+    float timer = 0.0f;
+
+    // Config
+    float minIdleTime = 2.0f;
+    float maxIdleTime = 5.0f;
+    float moveDuration = 0.5f;
+    float moveSpeed = 100.0f;
+
+    // State-specific data
+    float currentIdleDuration = 2.0f; // The duration for the current idle phase
+    Vector2 moveDirection = {0.0f, 0.0f};
 };

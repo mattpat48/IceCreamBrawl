@@ -33,10 +33,10 @@ public:
         // Scala e Posizione
         registry.emplace<transform>(enemyEntity, position, sData.scale, 0.0f);
         registry.emplace<velocity>(enemyEntity, 0.0f, 0.0f);
-        registry.emplace<random_movement>(enemyEntity, 2.0f, 0.0f, Vector2{0.0f, 0.0f}); // Cambia direzione ogni 2 secondi (se usato)
+        registry.emplace<random_movement>(enemyEntity); // Componente per il movimento casuale
         
         // Animazione di default
-        registry.emplace<animation>(enemyEntity, sData.animStartFrame, sData.animStartFrame, sData.animEndFrame, sData.animRow, sData.animFrameTime, 0.0f, true, DOWN);
+        registry.emplace<animation>(enemyEntity, sData.animStartFrame, sData.animStartFrame, sData.animEndFrame, sData.animRow, sData.animFrameTime, 0.0f, true, Directions::DOWN);
         
         // Colleghiamo lo script specifico per i nemici (Status e Attacco)
         registry.emplace<script>(enemyEntity).bind<enemyScripts>(enemyEntity, registry);
@@ -44,7 +44,7 @@ public:
         registry.emplace<collider>(enemyEntity, sData.colOffsetX, sData.colOffsetY, sData.colWidth, sData.colHeight);
         
         registry.emplace<hit_flash>(enemyEntity);
-        registry.emplace<status>(enemyEntity, IDLE);
+        registry.emplace<status>(enemyEntity, StatusType::IDLE);
         
         // Le statistiche vitali e di danno derivano dai dati generati dal GameDataManager!
         registry.emplace<health>(enemyEntity, sData.maxHealth, sData.maxHealth, 0.0f); // 0 regen per i nemici

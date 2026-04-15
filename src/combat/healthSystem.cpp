@@ -27,10 +27,8 @@ void HealthSystem::update(entt::registry& registry, float dt) {
 
         // È morto?
         if (hp.life <= 0) {
-			sta.status = DEAD; // Imposta lo stato su DEAD
-            if (registry.all_of<is_player>(entity)) {
-                registry.ctx().get<entt::dispatcher>().trigger<PlayerDeathEvent>();
-            }
+			sta.status = StatusType::DEAD; // Imposta lo stato su StatusType::DEAD
+            APP_LOG("Entity %d is dead!", entity);
         }
     }
 
@@ -53,5 +51,18 @@ void HealthSystem::update(entt::registry& registry, float dt) {
                 hf.filter = WHITE; // Ripristina il colore originale
             }
         }
+    }
+}
+
+void HealthSystem::resetEntities(entt::registry& registry) {
+    auto entities = registry.view<health, status, is_aggroed>();
+    for (auto entity : entities) {
+        auto& hp = entities.get<health>(entity);
+        auto& st = entities.get<status>(entity);
+        auto& aggro = entities.get<is_aggroed>(entity);
+
+        hp.reset();
+        st.status = StatusType::IDLE; // Resetta lo stato a StatusType::IDLE
+        aggro.aggroed = false; // Resetta l'aggro
     }
 }

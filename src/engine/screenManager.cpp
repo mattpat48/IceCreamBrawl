@@ -31,8 +31,13 @@ void ScreenManager::popScreen() {
 }
 
 void ScreenManager::update(float delta) {
-	if (currentScreen) {
-		currentScreen->update(delta);
+	if (!screenStack.empty()) {
+		// Aggiorna tutti gli schermi nello stack che non sono in pausa
+		for (auto& screen : screenStack) {
+			if (!screen->paused) {
+				screen->update(delta);
+			}
+		}
 	}
 }
 

@@ -1,6 +1,10 @@
 #include "deathScreen.hpp"
 #include "engine.hpp"
 #include <cmath> // Per ceil()
+#include "utils/logs.h"
+
+// Implementiamo il nuovo costruttore
+DeathScreen::DeathScreen(entt::registry& gameRegistry) : notificationRegistry(gameRegistry) {}
 
 void DeathScreen::load(entt::registry& globalRegistry) {
     // Per semplicità, usiamo il font di default. In un progetto più grande,
@@ -13,9 +17,9 @@ void DeathScreen::update(float delta) {
 
     if (respawnTimer <= 0.0f) {
         // Lancia l'evento di respawn che verrà catturato dal GameScreen
-        registry.ctx().get<entt::dispatcher>().trigger<PlayerRespawnEvent>();
-        
-        // Rimuovi questa schermata dallo stack
+        APP_LOG("Respawn timer finished. Triggering PlayerRespawnEvent and popping DeathScreen.");
+        // Usiamo il registry della GameScreen per lanciare l'evento!
+        notificationRegistry.ctx().get<entt::dispatcher>().trigger<PlayerRespawnEvent>();
         engine->popScreen();
     }
 }

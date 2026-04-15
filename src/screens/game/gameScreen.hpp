@@ -19,7 +19,6 @@
 
 class GameScreen : public Screen {
 public:
-    bool paused = false;
 
     // Dimensioni della mappa in pixel
     float mapWidth = GetScreenWidth();

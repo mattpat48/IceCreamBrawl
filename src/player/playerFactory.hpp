@@ -29,11 +29,11 @@ public:
 
         registry.emplace<transform>(playerEntity, pData.spawnPosition, sData.scale, 0.0f);
         registry.emplace<velocity>(playerEntity, 0.0f, 0.0f);
-        registry.emplace<animation>(playerEntity, sData.animStartFrame, sData.animStartFrame, sData.animEndFrame, sData.animRow, sData.animFrameTime, 0.0f, true, DOWN);
+        registry.emplace<animation>(playerEntity, sData.animStartFrame, sData.animStartFrame, sData.animEndFrame, sData.animRow, sData.animFrameTime, 0.0f, true, Directions::DOWN);
         registry.emplace<script>(playerEntity).bind<playerScripts>(playerEntity, registry);
         registry.emplace<collider>(playerEntity, sData.colOffsetX, sData.colOffsetY, sData.colWidth, sData.colHeight);
         registry.emplace<hit_flash>(playerEntity);
-        registry.emplace<status>(playerEntity, IDLE);
+        registry.emplace<status>(playerEntity, StatusType::IDLE);
         
         // I dati di base (maxHealth, baseDamage) vengono dal database statico (sData)
         // I dati correnti (currentHealth) vengono dal salvataggio (pData)

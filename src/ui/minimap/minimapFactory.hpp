@@ -8,6 +8,7 @@ public:
         entt::entity minimapEntity = registry.create();
         
         registry.emplace<is_ui>(minimapEntity);
+        registry.emplace<is_minimap>(minimapEntity);
         registry.emplace<script>(minimapEntity).bind<minimap>(minimapEntity, registry, playerEntity, mapWidth, mapHeight);
         
         return minimapEntity;

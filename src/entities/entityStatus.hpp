@@ -1,6 +1,8 @@
 #pragma once
 
 #include "defines/components/components.hpp"
+#include "defines/components/entityComponents.hpp"
+#include "defines/events.hpp"
 #include "engine/script.hpp"
 #include <entt/entt.hpp>
 #include "raylib.h"

@@ -37,7 +37,7 @@ struct animation {
     float frameTime;
     float timer;
     bool isPlaying;
-    int direction;
+    Directions direction;
 };
 
 struct script {

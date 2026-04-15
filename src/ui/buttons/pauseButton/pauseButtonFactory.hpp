@@ -23,7 +23,7 @@ public:
 
         registry.emplace<sprite>(buttonEntity, std::move(textures), "default", texWidth, texHeight);
         registry.emplace<transform>(buttonEntity, position, raylib::Vector2(4.0f, 4.0f), 0.0f);
-        registry.emplace<animation>(buttonEntity, 0, 0, 0, 0, 0.1f, 0.0f, false, 0);
+        registry.emplace<animation>(buttonEntity, 0, 0, 0, 0, 0.1f, 0.0f, false, Directions::DOWN);
 
         registry.emplace<script>(buttonEntity).bind<PauseButton>(buttonEntity, registry);
 

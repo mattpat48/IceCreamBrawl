@@ -60,7 +60,7 @@ void touchController::onUpdate(float dt) {
 		}
 
 		if (pStatus && !pStatus->isAttacking()) {
-			pStatus->status = RUN; // Imposta lo stato del player su RUN
+			pStatus->status = StatusType::RUN; // Imposta lo stato del player su StatusType::RUN
 		}
 
 		Vector2 delta = Vector2Subtract(currentJoystickPos, joystickBasePosition);
@@ -83,9 +83,9 @@ void touchController::onUpdate(float dt) {
 			pv->dy = 0.0f;
 		}
 	} else {
-		// Se non stiamo trascinando, assicuriamoci che lo stato torni a IDLE (se stava correndo)
-		if (pStatus && pStatus->status == RUN && !pStatus->isAttacking()) {
-			pStatus->status = IDLE;
+		// Se non stiamo trascinando, assicuriamoci che lo stato torni a StatusType::IDLE (se stava correndo)
+		if (pStatus && pStatus->status == StatusType::RUN && !pStatus->isAttacking()) {
+			pStatus->status = StatusType::IDLE;
 		}
 	}
 }

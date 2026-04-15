@@ -54,7 +54,7 @@ void CombatSystem::update(entt::registry& registry, float dt) {
         auto& sta = attackers.get<status>(attacker);
 
         if (atk.canAttack(end.stamina) && !sta.isDead() && !sta.isAttacking()) {
-            sta.status = ATTACK; // Imposta lo stato su ATTACK
+            sta.status = StatusType::ATTACK; // Imposta lo stato su StatusType::ATTACK
             end.consume(atk.cost);
             atk.currentCooldown = atk.cooldown;
 
@@ -68,6 +68,8 @@ void CombatSystem::update(entt::registry& registry, float dt) {
                 float minDistance = atk.range;
 
                 for (auto victim : victims) {
+                    auto isVictimDead = registry.get<status>(victim).isDead();
+                    if (isVictimDead) continue;
                     if (attacker == victim || (registry.any_of<is_enemy>(attacker) && registry.any_of<is_enemy>(victim))) continue;
                     
                     float dist = Vector2Distance(atkPos, getColliderCenter(registry, victim));
@@ -90,10 +92,10 @@ void CombatSystem::update(entt::registry& registry, float dt) {
                 // Mappiamo la direzione se ci serve per un cono o una linea
                 Vector2 facingDir = {0.0f, 1.0f}; // Default giù
                 if (auto* anim = registry.try_get<animation>(attacker)) {
-                    if (anim->direction == RIGHT)      facingDir = { 1.0f,  0.0f};
-                    else if (anim->direction == LEFT)  facingDir = {-1.0f,  0.0f};
-                    else if (anim->direction == UP)    facingDir = { 0.0f, -1.0f};
-                    else if (anim->direction == DOWN)  facingDir = { 0.0f,  1.0f};
+                    if (anim->direction == Directions::RIGHT)      facingDir = { 1.0f,  0.0f};
+                    else if (anim->direction == Directions::LEFT)  facingDir = {-1.0f,  0.0f};
+                    else if (anim->direction == Directions::UP)    facingDir = { 0.0f, -1.0f};
+                    else if (anim->direction == Directions::DOWN)  facingDir = { 0.0f,  1.0f};
                 }
 
                 for (auto victim : victims) {

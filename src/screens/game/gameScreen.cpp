@@ -139,20 +139,27 @@ void GameScreen::unload(entt::registry& globalRegistry) {
 }
 
 void GameScreen::onPlayerDeath(const PlayerDeathEvent& event) {
+    if (event.handled) return; // Se l'evento è già stato gestito, ignoralo
+    event.handled = true; // Segnala che l'evento è stato gestito
     APP_LOG("PlayerDeathEvent received. Pushing DeathScreen.");
-    // Il gioco continua a girare sotto, ma noi aggiungiamo la schermata di morte in cima
-    engine->pushScreen(std::make_unique<DeathScreen>());
+    engine->pushScreen(std::make_unique<DeathScreen>(registry));
+    healthManager.resetEntities(registry);
 }
 
 void GameScreen::onPlayerRespawn(const PlayerRespawnEvent& event) {
+    if (event.handled) return; // Se l'evento è già stato gestito, ignoralo
+    event.handled = true; // Segnala che l'evento è stato gestito
     APP_LOG("PlayerRespawnEvent received. Respawning player.");
 
-    // 1. Ricrea il giocatore usando la factory
+    // Prima di creare il nuovo player, distruggiamo la vecchia entità "morta"
+    if (registry.valid(playerEntity)) {
+        registry.destroy(playerEntity);
+    }
+
     PlayerSaveData pData = engine->getDataManager().getPlayerData();
     auto pStaticData = engine->getDataManager().getPlayerStaticData();
     entt::entity newPlayerEntity = PlayerFactory::create(registry, engine->getAssetManager(), pData, pStaticData);
 
-    // 2. Aggiorna tutti i sistemi che avevano una reference alla vecchia entità
     rebindPlayer(newPlayerEntity);
 }
 
@@ -167,13 +174,19 @@ void GameScreen::rebindPlayer(entt::entity newPlayer) {
     auto joystickView = registry.view<script, is_joystick>();
     for (auto entity : joystickView) {
         auto* controllerScript = dynamic_cast<touchController*>(registry.get<script>(entity).instance.get());
-        if (controllerScript) controllerScript->playerEntity = newPlayer;
+        if (controllerScript) controllerScript->setPlayerEntity(newPlayer);
     }
 
     auto minimapView = registry.view<script, is_minimap>();
     for (auto entity : minimapView) {
         auto* minimapScript = dynamic_cast<minimap*>(registry.get<script>(entity).instance.get());
         if (minimapScript) minimapScript->setPlayerEntity(newPlayer);
+    }
+
+    auto attackButtonView = registry.view<script, is_primary_attack>();
+    for (auto entity : attackButtonView) {
+        auto* attackButtonScript = dynamic_cast<attackButton*>(registry.get<script>(entity).instance.get());
+        if (attackButtonScript) attackButtonScript->setPlayerEntity(newPlayer);
     }
 
     // Aggiungi qui altri sistemi/UI che dipendono dal player, come i pulsanti di attacco

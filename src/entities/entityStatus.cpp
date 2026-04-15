@@ -1,4 +1,5 @@
 #include "entityStatus.hpp"
+#include "entt/entt.hpp"
 
 void entityStatus::onUpdate(float dt) {
 	auto healthComp = getComponent<health>();
@@ -11,11 +12,22 @@ void entityStatus::onUpdate(float dt) {
 	// 1. GESTIONE DELLA MORTE (Ha priorità assoluta)
 	if (statusComp->isDead()) {
 		if (spriteComp->currentTexture != "dead") {
-			animationComp->row = 0; // Assumiamo che la riga 0 sia dedicata alla morte
-			spriteComp->currentTexture = "dead"; // Assicurati di avere una texture "dead.png" caricata nella Factory!
+			animationComp->row = 0;
+			spriteComp->currentTexture = "dead";
 			animationComp->currentFrame = animationComp->startFrame;
+			animationComp->isPlaying = true;
 		} else if (animationComp->currentFrame == animationComp->endFrame) {
-			registry->destroy(entity); // Se vuoi distruggerla subito
+			animationComp->isPlaying = false;
+            if (registry->all_of<is_player>(entity)) {
+				// Lancia l'evento e nascondi il player solo una volta per evitare crash
+				if (!registry->all_of<is_hidden>(entity)) {
+                	registry->ctx().get<entt::dispatcher>().trigger<PlayerDeathEvent>();
+					registry->emplace<is_hidden>(entity); // Nascondi il player morto
+				}
+            } else {
+			    // Se è un nemico o un'altra entità, distruggila.
+			    registry->destroy(entity);
+            }
 		}
 		return; // Se è morto, non facciamo nient'altro
 	}
@@ -27,13 +39,13 @@ void entityStatus::onUpdate(float dt) {
 			spriteComp->currentTexture = "attack";
 			animationComp->currentFrame = animationComp->startFrame;
 		} else if (animationComp->currentFrame == animationComp->endFrame) {
-			statusComp->status = IDLE;
+			statusComp->status = StatusType::IDLE;
 			spriteComp->currentTexture = "idle";
 			attackComp->currentCooldown = attackComp->cooldown;
 		}
 	} 
 	else if (statusComp->isRunning()) {
-		// Se il controller ha impostato RUNNING, assicuriamoci che la texture sia quella giusta
+		// Se il controller ha impostato StatusType::RUNNING, assicuriamoci che la texture sia quella giusta
 		if (spriteComp->currentTexture != "run") {
 			spriteComp->currentTexture = "run"; // Assicurati di caricare "run.png" nella Factory!
 			animationComp->currentFrame = animationComp->startFrame;

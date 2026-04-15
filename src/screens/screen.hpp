@@ -20,6 +20,8 @@ protected:
     std::unique_ptr<InputSystem> inputSystem;
 
 public:
+    bool paused = false;
+    
     int width;
     int height;
 

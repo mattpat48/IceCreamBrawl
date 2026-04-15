@@ -1,4 +1,5 @@
 #include "screen.hpp"
+#include "utils/logs.h"
 
 void Screen::DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, float scale, Color tint) {
 	if ((texture.id <= 0) || (scale <= 0.0f)) return;  // Wanna see a infinite loop?!...just delete this line!
@@ -112,9 +113,21 @@ void Screen::updateGameLogic(float delta) {
 void Screen::basicDraw() {
 	// Lambda di supporto per non duplicare la logica di disegno
 	auto drawEntitySprite = [&](entt::entity entity, transform& t, sprite& s, animation& a) {
+		if (registry.any_of<is_hidden>(entity)) {
+			APP_LOG("Entity %d is hidden, skipping draw", static_cast<int>(entity));
+			return; // Salta il disegno se l'entità è nascosta
+		}
+		int dir;
+		switch (a.direction) {
+			case Directions::DOWN:        dir = 0; break;
+			case Directions::UP:     dir = 1; break;
+			case Directions::LEFT:      dir = 2; break;
+			case Directions::RIGHT:      dir = 3; break;
+			default: dir = 0; break;
+		}
         Rectangle source = {
             .x = static_cast<float>(a.currentFrame * s.width),
-            .y = static_cast<float>(a.direction * s.height), // Usa direction invece di row per coerenza
+            .y = static_cast<float>(dir * s.height),
             .width = static_cast<float>(s.width),
             .height = static_cast<float>(s.height)
         };
@@ -209,9 +222,9 @@ void Screen::updateAnimations(float dt) {
 		auto& v = movingView.get<velocity>(entity);
 
 		if (std::abs(v.dx) > std::abs(v.dy)) {
-			a.direction = (v.dx > 0) ? RIGHT : LEFT;
+			a.direction = (v.dx > 0) ? Directions::RIGHT : Directions::LEFT;
 		} else if (v.dy != 0) {
-			a.direction = (v.dy > 0) ? DOWN : UP;
+			a.direction = (v.dy > 0) ? Directions::DOWN : Directions::UP;
 		}
 	}
 

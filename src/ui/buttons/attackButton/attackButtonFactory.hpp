@@ -13,6 +13,7 @@ public:
 
 		entt::entity attackButtonEntity = registry.create();
 		registry.emplace<is_ui>(attackButtonEntity);
+		registry.emplace<is_primary_attack>(attackButtonEntity);
         
 		std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> primaryTextures;
 		primaryTextures["default"] = assetManager.loadTexture(bData.texturePath);
@@ -20,7 +21,7 @@ public:
 								 std::move(primaryTextures), "default",
 								 bData.spriteWidth, bData.spriteHeight);
 		registry.emplace<transform>(attackButtonEntity, position, bData.scale, 0.0f);
-		registry.emplace<animation>(attackButtonEntity, bData.animStartFrame, bData.animStartFrame, bData.animEndFrame, bData.animRow, bData.animFrameTime, 0.0f, false, 0);
+		registry.emplace<animation>(attackButtonEntity, bData.animStartFrame, bData.animStartFrame, bData.animEndFrame, bData.animRow, bData.animFrameTime, 0.0f, false, Directions::DOWN);
 		registry.emplace<script>(attackButtonEntity).bind<attackButton>(attackButtonEntity, registry, playerEntity);
 
         return attackButtonEntity;

@@ -14,6 +14,7 @@ public:
                                           Vector2 position, float radius) {
         entt::entity handle = registry.create();
         registry.emplace<is_ui>(handle);
+        registry.emplace<is_joystick>(handle);
 
         std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;
         textures["idle"] = assetManager.loadTexture(std::string("resources/sprites/controller/") + "handle.png");
@@ -21,7 +22,7 @@ public:
         registry.emplace<sprite>(handle, std::move(textures), "idle", 100, 100);
         registry.emplace<transform>(handle, position, Vector2{1.0f, 1.0f}, 0.0f);
         registry.emplace<velocity>(handle, 0.0f, 0.0f);
-        registry.emplace<animation>(handle, 0, 0, 0, 0, 0.1f, 0.0f, false, 0);
+        registry.emplace<animation>(handle, 0, 0, 0, 0, 0.1f, 0.0f, false, Directions::DOWN);
         
         registry.emplace<script>(handle).bind<touchController>(handle, registry, playerEntity, position, radius);
 
@@ -34,7 +35,7 @@ public:
         registry.emplace<sprite>(circle, std::move(circleTextures), "idle", 300, 300);
         registry.emplace<transform>(circle, position, Vector2{1.0f, 1.0f}, 0.0f);
         registry.emplace<velocity>(circle, 0.0f, 0.0f);
-        registry.emplace<animation>(circle, 0, 0, 0, 0, 0.1f, 0.0f, false, 0);
+        registry.emplace<animation>(circle, 0, 0, 0, 0, 0.1f, 0.0f, false, Directions::DOWN);
 
         return handle;
     }

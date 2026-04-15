@@ -62,7 +62,7 @@ public:
                 0, 5, 0, 0.1f, 
                 -40.0f, -40.0f, 80.0f, 80.0f,
                 30.0f, 100.0f, 0.0f, 0.0f,
-				5.0f,
+				20.0f,
                 0.0f, 1.5f, 100.0f,
                 AttackRange::MELEE, AttackType::TARGET, AttackShape::NONE, 0.0f
             };
