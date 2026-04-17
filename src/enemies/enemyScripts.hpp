@@ -1,25 +1,25 @@
 #pragma once
 
 #include "defines/components/components.hpp"
-#include "entities/entityStatus.hpp"
+#include "enemies/enemyStatus.hpp"
 
 class enemyScripts : public Script {
 public:
 
     void onCreate() override {
-        enemyStatus.bind<entityStatus>(entity, *registry);
+        status.bind<enemyStatus>(entity, *registry);
     }
 
     void onUpdate(float dt) override {
-        enemyStatus.instance->onUpdate(dt);
+        status.instance->onUpdate(dt);
     }
 
     void onDraw() override {
-        enemyStatus.instance->onDraw();
+        status.instance->onDraw();
     }
 
     virtual ~enemyScripts() = default;
 
 protected:
-    script enemyStatus;
+    script status;
 };

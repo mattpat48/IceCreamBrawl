@@ -3,7 +3,7 @@
 #include "defines/components/components.hpp"
 #include "ui/controller/controller.hpp"
 #include "ui/buttons/buttons.hpp"
-#include "entities/entityStatus.hpp"
+#include "player/playerStatus.hpp"
 #include <entt/entt.hpp>
 
 #include "raylib.h"
@@ -15,19 +15,19 @@ class playerScripts : public Script {
 public:
 
     void onCreate() override {
-        playerStatus.bind<entityStatus>(entity, *registry);
+        status.bind<playerStatus>(entity, *registry);
     }
 
     void onUpdate(float dt) override {
-        playerStatus.instance->onUpdate(dt);
+        status.instance->onUpdate(dt);
     }
 
     void onDraw() override {
-        playerStatus.instance->onDraw();
+        status.instance->onDraw();
     }
 
     virtual ~playerScripts() = default;
 
 protected:
-    script playerStatus;
+    script status;
 };

@@ -18,16 +18,6 @@ void entityStatus::onUpdate(float dt) {
 			animationComp->isPlaying = true;
 		} else if (animationComp->currentFrame == animationComp->endFrame) {
 			animationComp->isPlaying = false;
-            if (registry->all_of<is_player>(entity)) {
-				// Lancia l'evento e nascondi il player solo una volta per evitare crash
-				if (!registry->all_of<is_hidden>(entity)) {
-                	registry->ctx().get<entt::dispatcher>().trigger<PlayerDeathEvent>();
-					registry->emplace<is_hidden>(entity); // Nascondi il player morto
-				}
-            } else {
-			    // Se è un nemico o un'altra entità, distruggila.
-			    registry->destroy(entity);
-            }
 		}
 		return; // Se è morto, non facciamo nient'altro
 	}
@@ -60,18 +50,4 @@ void entityStatus::onUpdate(float dt) {
 }
 
 void entityStatus::onDraw() {
-	auto view = registry->view<is_player, health, endurance>();
-	
-	for (auto entity : view) {
-		auto& healthComp = view.get<health>(entity);
-		auto& enduranceComp = view.get<endurance>(entity);
-
-		float healthPercent = healthComp.life / healthComp.maxLife;
-		DrawRectangle(10, 40, 200 * healthPercent, 20, RED);
-		DrawRectangleLines(10, 40, 200, 20, BLACK);
-
-		float staminaPercent = enduranceComp.stamina / enduranceComp.maxStamina;
-		DrawRectangle(10, 70, 200 * staminaPercent, 20, BLUE);
-		DrawRectangleLines(10, 70, 200, 20, BLACK);
-	}
 }

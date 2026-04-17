@@ -8,4 +8,5 @@ raylib-cpp
 *.apk
 *.o
 *.a
+*.tmp
 my-app-release.apk.idsig
