@@ -24,6 +24,63 @@ static Rectangle getColliderRect(entt::registry& registry, entt::entity e) {
     return {0.0f, 0.0f, 0.0f, 0.0f};
 }
 
+static bool isValidTarget(entt::registry& registry, entt::entity attacker, entt::entity victim) {
+    if (!registry.valid(attacker) || !registry.valid(victim) || attacker == victim) {
+        return false;
+    }
+
+    if (!registry.all_of<health, status>(victim)) {
+        return false;
+    }
+
+    if (registry.get<status>(victim).isDead()) {
+        return false;
+    }
+
+    // Evita il fuoco amico nemico-nemico mantenendo la logica gia' esistente.
+    if (registry.any_of<is_enemy>(attacker) && registry.any_of<is_enemy>(victim)) {
+        return false;
+    }
+
+    return true;
+}
+
+static entt::entity findClosestTargetInRange(entt::registry& registry, entt::entity attacker, float range) {
+    entt::entity closestVictim = entt::null;
+    float minDistance = range;
+    const Vector2 attackerPos = getColliderCenter(registry, attacker);
+
+    auto victims = registry.view<health, status>();
+    for (auto victim : victims) {
+        if (!isValidTarget(registry, attacker, victim)) {
+            continue;
+        }
+
+        const float dist = Vector2Distance(attackerPos, getColliderCenter(registry, victim));
+        if (dist <= minDistance) {
+            minDistance = dist;
+            closestVictim = victim;
+        }
+    }
+
+    return closestVictim;
+}
+
+static bool isTargetInRange(entt::registry& registry, entt::entity attacker, entt::entity target, float range) {
+    if (!isValidTarget(registry, attacker, target)) {
+        return false;
+    }
+
+    const Vector2 attackerPos = getColliderCenter(registry, attacker);
+    const Vector2 targetPos = getColliderCenter(registry, target);
+    return Vector2Distance(attackerPos, targetPos) <= range;
+}
+
+static Vector2 getTargetArrowTip(entt::registry& registry, entt::entity target) {
+    Rectangle rect = getColliderRect(registry, target);
+    return {rect.x + (rect.width * 0.5f), rect.y - 6.0f};
+}
+
 void CombatSystem::update(entt::registry& registry, float dt) {
     // Troviamo tutti quelli che vogliono attaccare e hanno le statistiche di attacco
     auto attackers = registry.view<attack_intent, attack, endurance, status>();
@@ -48,6 +105,37 @@ void CombatSystem::update(entt::registry& registry, float dt) {
         APP_LOG("Hit! Attacker %d hits Victim %d for %.2f damage!", attacker, victim, damageAmount);
     };
 
+    // Mantiene aggiornato il lock del target per il player quando usa attacco TARGET.
+    auto targeters = registry.view<is_player, attack, status>();
+    for (auto entity : targeters) {
+        auto& atk = targeters.get<attack>(entity);
+        auto& sta = targeters.get<status>(entity);
+
+        if (sta.isDead() || atk.type != AttackType::TARGET) {
+            if (registry.any_of<target_lock>(entity)) {
+                registry.remove<target_lock>(entity);
+            }
+            continue;
+        }
+
+        entt::entity currentTarget = entt::null;
+        if (auto* lock = registry.try_get<target_lock>(entity)) {
+            currentTarget = lock->target;
+        }
+
+        if (!isTargetInRange(registry, entity, currentTarget, atk.range)) {
+            currentTarget = findClosestTargetInRange(registry, entity, atk.range);
+        }
+
+        if (currentTarget == entt::null) {
+            if (registry.any_of<target_lock>(entity)) {
+                registry.remove<target_lock>(entity);
+            }
+        } else {
+            registry.emplace_or_replace<target_lock>(entity, currentTarget);
+        }
+    }
+
     for (auto attacker : attackers) {
         auto& atk = attackers.get<attack>(attacker);
         auto& end = attackers.get<endurance>(attacker);
@@ -64,27 +152,30 @@ void CombatSystem::update(entt::registry& registry, float dt) {
 
             // --- 1. ATTACCO A TARGET (Cerca il più vicino) ---
             if (atk.type == AttackType::TARGET) {
-                entt::entity closestVictim = entt::null;
-                float minDistance = atk.range;
+                entt::entity selectedTarget = entt::null;
 
-                for (auto victim : victims) {
-                    auto isVictimDead = registry.get<status>(victim).isDead();
-                    if (isVictimDead) continue;
-                    if (attacker == victim || (registry.any_of<is_enemy>(attacker) && registry.any_of<is_enemy>(victim))) continue;
-                    
-                    float dist = Vector2Distance(atkPos, getColliderCenter(registry, victim));
-                    if (dist <= minDistance) {
-                        minDistance = dist;
-                        closestVictim = victim;
+                if (registry.any_of<is_player>(attacker)) {
+                    if (auto* lock = registry.try_get<target_lock>(attacker)) {
+                        if (isTargetInRange(registry, attacker, lock->target, atk.range)) {
+                            selectedTarget = lock->target;
+                        }
                     }
                 }
 
-                if (closestVictim != entt::null) {
-                    applyDamage(attacker, closestVictim);
+                if (selectedTarget == entt::null) {
+                    selectedTarget = findClosestTargetInRange(registry, attacker, atk.range);
+
+                    if (registry.any_of<is_player>(attacker) && selectedTarget != entt::null) {
+                        registry.emplace_or_replace<target_lock>(attacker, selectedTarget);
+                    }
+                }
+
+                if (selectedTarget != entt::null) {
+                    applyDamage(attacker, selectedTarget);
                     
                     // Creiamo il feedback visivo sul bersaglio
                     registry.emplace_or_replace<attack_feedback>(attacker, 
-                        0.2f, 0.2f, AttackType::TARGET, AttackShape::NONE, 0.0f, 0.0f, atkPos, Vector2{0,0}, closestVictim);
+                        0.2f, 0.2f, AttackType::TARGET, AttackShape::NONE, 0.0f, 0.0f, atkPos, Vector2{0,0}, selectedTarget);
                 }
             } 
             // --- 2. ATTACCO AD AREA (Colpisce tutti nella forma) ---
@@ -143,6 +234,37 @@ void CombatSystem::update(entt::registry& registry, float dt) {
 }
 
 void CombatSystem::draw(entt::registry& registry) {
+    auto targetLocks = registry.view<is_player, attack, status, target_lock>();
+    for (auto entity : targetLocks) {
+        auto& atk = targetLocks.get<attack>(entity);
+        auto& sta = targetLocks.get<status>(entity);
+        auto& lock = targetLocks.get<target_lock>(entity);
+
+        if (sta.isDead() || atk.type != AttackType::TARGET) {
+            continue;
+        }
+
+        if (!isTargetInRange(registry, entity, lock.target, atk.range)) {
+            continue;
+        }
+
+        const Vector2 tip = getTargetArrowTip(registry, lock.target);
+        const float t = static_cast<float>(GetTime());
+        const float pulse = 1.0f + (sinf(t * 6.0f) * 0.18f);
+        const float halfWidth = 13.0f * pulse;
+        const float height = 24.0f * pulse;
+
+        const Vector2 left = {tip.x - halfWidth, tip.y - height};
+        const Vector2 right = {tip.x + halfWidth, tip.y - height};
+        const Color fill = {255, 36, 36, 255};
+        const Color border = {255, 240, 240, 255};
+
+        DrawTriangle(left, right, tip, fill);
+        DrawLineEx(left, right, 3.0f, border);
+        DrawLineEx(right, tip, 3.0f, border);
+        DrawLineEx(tip, left, 3.0f, border);
+    }
+
     auto feedbacks = registry.view<attack_feedback>();
     
     for (auto entity : feedbacks) {

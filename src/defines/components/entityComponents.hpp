@@ -216,6 +216,10 @@ struct attack_intent {
 
 };
 
+struct target_lock {
+    entt::entity target = entt::null;
+};
+
 struct damage_received {
     float amount;
 };
