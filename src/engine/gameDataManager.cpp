@@ -1,4 +1,5 @@
 #include "gameDataManager.hpp"
+#include "levelDatabase.hpp" // Includiamo il nuovo database dei livelli
 
 PlayerSaveData GameDataManager::getPlayerData() const {
     PlayerSaveData data;
@@ -15,24 +16,6 @@ PlayerSaveData GameDataManager::getPlayerData() const {
 }
 
 LevelData GameDataManager::getLevelData(int levelId) const {
-    LevelData level;
-    
-    // SIMULAZIONE: potresti caricare "level_01.json", "level_02.json" in base a levelId
-    if (levelId == 1) {
-        level.mapTextureId = "default";
-        level.mapWidth = GetScreenWidth();
-        level.mapHeight = GetScreenHeight();
-        level.isTiled = true;
-        
-        // Definiamo ondate o nemici statici per questo livello
-        // Ora basta definire solo il TIPO, la QUANTITA' e l'INTERVALLO. Il resto è nel database.
-        level.enemies.push_back({"slime", 1, 0.0f}); 
-        //level.enemies.push_back({"goblin", 3, 10.0f, 50.0f, 10.0f}); // 3 goblin, 1 ogni 10 secondi
-    } else {
-        // Fallback o altri livelli
-        level.mapWidth = 1000.0f;
-        level.mapHeight = 1000.0f;
-    }
-    
-    return level;
+    // La logica è stata spostata in LevelDatabase per una migliore organizzazione.
+    return LevelDatabase::getLevelData(levelId);
 }

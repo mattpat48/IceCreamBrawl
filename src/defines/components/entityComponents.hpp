@@ -248,6 +248,10 @@ struct is_hidden {
 
 };
 
+struct is_inactive {
+
+};
+
 struct is_aggroed {
     bool aggroed;
 };

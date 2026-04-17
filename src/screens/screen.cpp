@@ -192,7 +192,7 @@ void Screen::basicDraw() {
 	auto scriptView = registry.view<script>();
 	for (auto entity : scriptView) {
 		auto& s = scriptView.get<script>(entity);
-		if (s.instance) {
+		if (s.instance && !registry.any_of<is_inactive>(entity)) {
 			s.instance->onDraw();
 		}
 	}
@@ -208,7 +208,7 @@ void Screen::updateScripts() {
 
 	for (auto entity : scriptView) {
 		auto& s = scriptView.get<script>(entity);
-		if (s.instance) {
+		if (s.instance && !registry.any_of<is_inactive>(entity)) {
 			s.instance->onUpdate(dt);
 		}
 	}
