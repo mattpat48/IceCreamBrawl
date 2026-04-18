@@ -17,8 +17,9 @@ public:
             level.mapHeight = GetScreenHeight() * 2.0f; // 2160.0f
             level.isTiled = true;
             
-            // Definiamo i nemici per questo livello
-            level.enemies.push_back({"slime", 5, 3.0f}); // 5 slime, 1 ogni 3 secondi
+            // Definiamo i nemici per questo livello:
+            // cap 5, spawn immediato 3, poi 1 ogni 3 secondi fino al cap.
+            level.enemies.push_back({"slime", 5, 3.0f, 3});
         } else {
             // Fallback per livelli non definiti
             level.mapTextureId = "default";

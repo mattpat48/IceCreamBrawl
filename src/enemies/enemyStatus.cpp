@@ -5,7 +5,10 @@ enemyStatus::enemyStatus() : entityStatus() {
 
 void enemyStatus::onUpdate(float deltaTime) {
 	entityStatus::onUpdate(deltaTime);
-	if (getComponent<status>()->isDead()) {
+}
+
+void enemyStatus::handleDeath() {
+	if (!registry->all_of<is_hidden>(entity)) {	
 		registry->destroy(entity);
 	}
 }

@@ -13,7 +13,5 @@ public:
 
 	void onUpdate(float deltaTime) override;
 	void onDraw() override;
-
-private:
-	void handleDeath();
+	void handleDeath() override;
 };

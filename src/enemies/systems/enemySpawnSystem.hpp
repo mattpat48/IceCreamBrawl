@@ -8,6 +8,7 @@ struct SpawnState {
     EnemySpawnData data;
     int spawnedCount = 0;
     float timer = 0.0f;
+    int initialSpawnRemaining = 0;
 };
 
 class EnemySpawnSystem {

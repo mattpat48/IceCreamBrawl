@@ -11,4 +11,5 @@ class enemyStatus : public entityStatus {
 public:
     enemyStatus();
     void onUpdate(float deltaTime);
+    void handleDeath() override;
 };

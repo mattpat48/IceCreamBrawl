@@ -25,8 +25,9 @@ struct PlayerSaveData {
 
 struct EnemySpawnData {
     std::string enemyType; // es. "goblin", "orc", "slime"
-    int count;             // Quanti ne spawnano
-    float spawnInterval;   // Se 0.0f, spawnano tutti all'inizio, altrimenti ogni X secondi
+    int count;             // Cap massimo di nemici da spawnare per questo slot
+    float spawnInterval;   // Intervallo (in secondi) tra uno spawn periodico e il successivo
+    int initialSpawnCount = 1; // Quanti nemici spawnano subito all'inizio
 };
 
 struct LevelData {

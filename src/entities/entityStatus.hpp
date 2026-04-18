@@ -21,4 +21,8 @@ public:
     void onUpdate(float dt) override;
 
     void onDraw() override;
+
+    virtual void handleDeath() {
+        // Questa funzione può essere sovrascritta da classi derivate (es. playerStatus, enemyStatus) per gestire la morte in modo specifico
+    }
 };

@@ -17,7 +17,7 @@ void entityStatus::onUpdate(float dt) {
 			animationComp->currentFrame = animationComp->startFrame;
 			animationComp->isPlaying = true;
 		} else if (animationComp->currentFrame == animationComp->endFrame) {
-			animationComp->isPlaying = false;
+			handleDeath();
 		}
 		return; // Se è morto, non facciamo nient'altro
 	}

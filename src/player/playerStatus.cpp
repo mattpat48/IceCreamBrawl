@@ -5,10 +5,6 @@ playerStatus::playerStatus() : entityStatus() {
 
 void playerStatus::onUpdate(float deltaTime) {
 	entityStatus::onUpdate(deltaTime);
-	auto statusComp = getComponent<status>();
-	if (statusComp->isDead()) {
-		handleDeath();
-	}
 }
 
 void playerStatus::handleDeath() {
