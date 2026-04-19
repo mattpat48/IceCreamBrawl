@@ -1,11 +1,8 @@
 #pragma once
 
 #include "defines/components/components.hpp"
-#include "engine/script.hpp"
 #include "input/inputSystem.hpp"
 #include "raymath.h"
-#include <entt/entt.hpp>
-#include <iostream>
 
 class buttonHandler : public Script {
 public:

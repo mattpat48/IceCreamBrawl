@@ -1,7 +1,5 @@
 #pragma once
 
-#include "defines/components/components.hpp"
-#include "defines/components/entityComponents.hpp"
 #include <entt/entt.hpp>
 
 class EnemyAttackSystem {

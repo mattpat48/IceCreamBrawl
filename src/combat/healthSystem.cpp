@@ -1,8 +1,10 @@
 #include "healthSystem.hpp"
+
 #include "defines/components/components.hpp"
 #include "defines/components/entityComponents.hpp"
-#include "defines/events.hpp"
 #include "utils/logs.h"
+
+#include "raylib.h"
 
 void HealthSystem::update(entt::registry& registry, float dt) {
     // Trova chiunque abbia ricevuto danno e abbia una salute

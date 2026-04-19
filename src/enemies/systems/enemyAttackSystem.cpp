@@ -1,8 +1,10 @@
 #include "enemyAttackSystem.hpp"
-#include <raymath.h>
+
+#include "defines/components/components.hpp"
+#include "defines/components/entityComponents.hpp"
 #include "utils/logs.h"
 
-
+#include <raymath.h>
 
 void EnemyAttackSystem::update(entt::registry& registry, entt::entity playerEntity, float dt) {
     if (!registry.valid(playerEntity)) return;

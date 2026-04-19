@@ -1,8 +1,9 @@
 #include "enemyMovementSystem.hpp"
+
 #include "defines/components/components.hpp"
+#include "defines/components/entityComponents.hpp"
+
 #include <raymath.h>
-
-
 
 void EnemyMovementSystem::update(entt::registry& registry, entt::entity playerEntity, float dt) {
     if (!registry.valid(playerEntity)) return;

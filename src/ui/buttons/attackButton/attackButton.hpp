@@ -1,3 +1,5 @@
+#pragma once
+
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 #include <entt/entt.hpp>
@@ -6,7 +8,7 @@
 #include "defines/components/entityComponents.hpp"
 #include "utils/logs.h"
 
-#include "buttons.hpp"
+#include "ui/buttons/buttons.hpp"
 
 class attackButton : public buttonHandler {
 public:

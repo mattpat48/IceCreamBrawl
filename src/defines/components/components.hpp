@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/script.hpp"
-#include "components/entityComponents.hpp"
+#include "defines/components/entityComponents.hpp"
 
 struct is_ui {
     

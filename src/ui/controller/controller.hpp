@@ -1,11 +1,8 @@
 #pragma once
 
 #include "raylib.h"
-#include "raylib-cpp.hpp"
 #include "defines/components/components.hpp"
 #include "input/inputSystem.hpp"
-
-#include "utils/logs.h"
 
 class touchController : public Script {
 public:

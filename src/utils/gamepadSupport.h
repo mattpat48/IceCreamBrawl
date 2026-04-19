@@ -1,3 +1,5 @@
+#pragma once
+
 #include "raylib.h"
 
 // NOTE: Gamepad name ID depends on drivers and OS

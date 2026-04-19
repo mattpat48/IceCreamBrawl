@@ -1,5 +1,10 @@
 #include "combatSystem.hpp"
+
+#include "defines/components/components.hpp"
+#include "defines/components/entityComponents.hpp"
 #include "utils/logs.h"
+
+#include "raylib.h"
 #include <raymath.h>
 
 static Vector2 getColliderCenter(entt::registry& registry, entt::entity e) {

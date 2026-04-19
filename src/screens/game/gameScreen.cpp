@@ -1,14 +1,14 @@
 #include "gameScreen.hpp"
-#include "playerFactory.hpp"
-#include "controllerFactory.hpp"
+#include "ui/controller/controllerFactory.hpp"
 #include "screens/game/deathScreen.hpp"
-#include "minimapFactory.hpp"
-#include "mapFactory.hpp"
+#include "ui/minimap/minimapFactory.hpp"
+#include "map/mapFactory.hpp"
 #include "ui/buttons/pauseButton/pauseButtonFactory.hpp"
-#include "attackButtonFactory.hpp"
-#include "engine.hpp"
+#include "ui/buttons/attackButton/attackButtonFactory.hpp"
+#include "engine/engine.hpp"
+#include "player/playerFactory.hpp"
+#include "engine/playerRebindingService.hpp"
 #include <raymath.h>
-#include "ui/minimap/minimap.hpp"
 #include "utils/logs.h"
 
 void GameScreen::load(entt::registry& globalRegistry) {
@@ -24,6 +24,7 @@ void GameScreen::load(entt::registry& globalRegistry) {
 
     mapWidth = lData.mapWidth;
     mapHeight = lData.mapHeight;
+    gameplayRuntime = std::make_unique<GameplayRuntime>(engine->getAssetManager(), engine->getDataManager());
 
     auto pStaticData = engine->getDataManager().getPlayerStaticData();
     playerEntity = PlayerFactory::create(registry, engine->getAssetManager(), pData, pStaticData);
@@ -52,8 +53,8 @@ void GameScreen::load(entt::registry& globalRegistry) {
     //auto pauseButton = PauseButtonFactory::create(registry, engine->getAssetManager(), {GetScreenWidth() - 70.0f, 70.0f});
     //APP_LOG("Pause button created with entity ID: %d", static_cast<int>(pauseButton));
     
-    // Inizializza lo spawner prendendo i dati dal level data!
-    enemySpawnSystem.init(lData.enemies);
+    // Inizializza orchestration gameplay con i dati livello correnti.
+    gameplayRuntime->initialize(lData);
 }
 
 void GameScreen::updateCamera() {
@@ -103,12 +104,9 @@ void GameScreen::update(float delta) {
         updateGameLogic(delta);
         updateCamera();
 
-        combatManager.update(registry, delta);
-        healthManager.update(registry, delta);
-
-        enemySpawnSystem.update(registry, engine->getAssetManager(), engine->getDataManager(), delta, mapWidth, mapHeight);
-        enemyMovementSystem.update(registry, playerEntity, delta);
-        enemyAttackSystem.update(registry, playerEntity, delta);
+        if (gameplayRuntime) {
+            gameplayRuntime->update(registry, delta, playerEntity, mapWidth, mapHeight);
+        }
     }
 }
 
@@ -117,17 +115,10 @@ void GameScreen::draw() {
     
     // Disegniamo gli elementi di combattimento in 2D (con la prospettiva della telecamera)
     BeginMode2D(camera);
-    combatManager.draw(registry);
+    if (gameplayRuntime) {
+        gameplayRuntime->getCombatSystem().draw(registry);
+    }
     EndMode2D();
-
-    // Se il gioco è in pausa, disegna l'overlay di pausa sopra a tutto il resto
-    //if (paused) {
-    //    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.7f));
-    //    const char* text = "PAUSA";
-    //    int fontSize = 100;
-    //    int textWidth = MeasureText(text, fontSize);
-    //    DrawText(text, GetScreenWidth() / 2 - textWidth / 2, GetScreenHeight() / 2 - fontSize / 2, fontSize, WHITE);
-    //}
 }
 
 void GameScreen::unload(entt::registry& globalRegistry) {
@@ -135,6 +126,7 @@ void GameScreen::unload(entt::registry& globalRegistry) {
     registry.ctx().get<entt::dispatcher>().sink<PlayerDeathEvent>().disconnect<&GameScreen::onPlayerDeath>(this);
     registry.ctx().get<entt::dispatcher>().sink<PlayerRespawnEvent>().disconnect<&GameScreen::onPlayerRespawn>(this);
     //registry.ctx().get<entt::dispatcher>().sink<PauseToggleEvent>().disconnect<&GameScreen::onPauseToggle>(this);
+    gameplayRuntime.reset();
     engine->getAssetManager().unloadAll();
 }
 
@@ -143,7 +135,9 @@ void GameScreen::onPlayerDeath(const PlayerDeathEvent& event) {
     event.handled = true; // Segnala che l'evento è stato gestito
     APP_LOG("PlayerDeathEvent received. Pushing DeathScreen.");
     engine->pushScreen(std::make_unique<DeathScreen>(registry));
-    healthManager.resetEntities(registry);
+    if (gameplayRuntime) {
+        gameplayRuntime->handlePlayerDeath(registry);
+    }
 }
 
 void GameScreen::onPlayerRespawn(const PlayerRespawnEvent& event) {
@@ -151,44 +145,8 @@ void GameScreen::onPlayerRespawn(const PlayerRespawnEvent& event) {
     event.handled = true; // Segnala che l'evento è stato gestito
     APP_LOG("PlayerRespawnEvent received. Respawning player.");
 
-    // Prima di creare il nuovo player, distruggiamo la vecchia entità "morta"
-    if (registry.valid(playerEntity)) {
-        registry.destroy(playerEntity);
+    if (gameplayRuntime) {
+        playerEntity = gameplayRuntime->respawnPlayer(registry, playerEntity);
+        PlayerRebindingService::rebindPlayer(registry, playerEntity);
     }
-
-    PlayerSaveData pData = engine->getDataManager().getPlayerData();
-    auto pStaticData = engine->getDataManager().getPlayerStaticData();
-    entt::entity newPlayerEntity = PlayerFactory::create(registry, engine->getAssetManager(), pData, pStaticData);
-
-    rebindPlayer(newPlayerEntity);
-}
-
-void GameScreen::rebindPlayer(entt::entity newPlayer) {
-    this->playerEntity = newPlayer;
-
-    // Aggiorna i sistemi che dipendono dal player
-    enemyMovementSystem.updatePlayerEntity(newPlayer);
-    enemyAttackSystem.updatePlayerEntity(newPlayer);
-
-    // Aggiorna gli script della UI che dipendono dal player
-    auto joystickView = registry.view<script, is_joystick>();
-    for (auto entity : joystickView) {
-        auto* controllerScript = dynamic_cast<touchController*>(registry.get<script>(entity).instance.get());
-        if (controllerScript) controllerScript->setPlayerEntity(newPlayer);
-    }
-
-    auto minimapView = registry.view<script, is_minimap>();
-    for (auto entity : minimapView) {
-        auto* minimapScript = dynamic_cast<minimap*>(registry.get<script>(entity).instance.get());
-        if (minimapScript) minimapScript->setPlayerEntity(newPlayer);
-    }
-
-    auto attackButtonView = registry.view<script, is_primary_attack>();
-    for (auto entity : attackButtonView) {
-        auto* attackButtonScript = dynamic_cast<attackButton*>(registry.get<script>(entity).instance.get());
-        if (attackButtonScript) attackButtonScript->setPlayerEntity(newPlayer);
-    }
-
-    // Aggiungi qui altri sistemi/UI che dipendono dal player, come i pulsanti di attacco
-    APP_LOG("Player rebound to all systems with new entity ID: %d", static_cast<int>(newPlayer));
 }

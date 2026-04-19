@@ -1,9 +1,6 @@
-#include "raylib.h"
-#include "raylib-cpp.hpp"
-#include <entt/entt.hpp>
+#pragma once
 
-#include "defines/components/components.hpp"
-#include "defines/components/entityComponents.hpp"
+#include <entt/entt.hpp>
 
 class HealthSystem {
 public:
