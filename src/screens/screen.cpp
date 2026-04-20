@@ -142,6 +142,9 @@ void Screen::basicDraw() {
 		};
 
 		Vector2 origin = { 0.0f, 0.0f };
+		if (registry.any_of<homing_projectile>(entity)) {
+			origin = { dest.width * 0.5f, dest.height * 0.5f };
+		}
 
 		if (t.scale.x < 0) {
 			source.width = -source.width;

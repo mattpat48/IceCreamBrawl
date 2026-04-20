@@ -3,6 +3,7 @@
 #include "engine/script.hpp"
 
 #include <entt/entt.hpp>
+#include <memory>
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
@@ -166,6 +167,23 @@ struct attack_feedback {
     Vector2 origin;
     Vector2 direction;
     entt::entity target; // Usato solo se type == TARGET
+};
+
+// Campo extra sul player per lanciare il proiettile ranged senza metterlo nelle playerTextures.
+struct ranged_projectile_emitter {
+    std::shared_ptr<raylib::Texture2D> texture;
+    float speed = 820.0f;
+    float hitRadius = 24.0f;
+    float maxLifetime = 2.5f;
+};
+
+struct homing_projectile {
+    entt::entity attacker = entt::null;
+    entt::entity target = entt::null;
+    float damage = 0.0f;
+    float speed = 820.0f;
+    float hitRadius = 24.0f;
+    float lifetime = 2.5f;
 };
 
 struct ability {

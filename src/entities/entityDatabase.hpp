@@ -48,8 +48,8 @@ public:
             -50.0f, -70.0f, 100.0f, 140.0f,  // collider (offsetX, offsetY, width, height)
             100.0f, 50.0f, 2.0f, 5.0f,	 // maxHealth, maxEndurance, healthRegenRate, enduranceRegenRate
 			15.0f, 						 // baseDamage
-            10.0f, 0.0f, 200.0f,         // attackCost, attackCooldown, attackRange
-            AttackRange::MELEE, AttackType::TARGET, AttackShape::NONE, 0.0f // attack pattern
+            10.0f, 0.0f, 500.0f,         // attackCost, attackCooldown, attackRange
+            AttackRange::RANGED, AttackType::TARGET, AttackShape::NONE, 0.0f // attack pattern
         };
     }
 

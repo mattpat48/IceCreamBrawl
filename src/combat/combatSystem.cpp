@@ -7,6 +7,9 @@
 
 #include "raylib.h"
 #include <raymath.h>
+#include <cmath>
+#include <unordered_map>
+#include <vector>
 
 static Vector2 getColliderCenter(entt::registry& registry, entt::entity e) {
     auto* t = registry.try_get<transform>(e);
@@ -87,6 +90,40 @@ static Vector2 getTargetArrowTip(entt::registry& registry, entt::entity target) 
     return {rect.x + (rect.width * 0.5f), rect.y - 6.0f};
 }
 
+static float computeProjectileRotationDeg(const Vector2& direction) {
+    return std::atan2(direction.y, direction.x) * RAD2DEG;
+}
+
+static bool spawnHomingProjectile(entt::registry& registry, entt::entity attacker, entt::entity victim, float damageAmount) {
+    auto* emitter = registry.try_get<ranged_projectile_emitter>(attacker);
+    if (!emitter || !emitter->texture) {
+        return false;
+    }
+
+    entt::entity projectile = registry.create();
+    const Vector2 spawnPos = getColliderCenter(registry, attacker);
+
+    std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;
+    textures["default"] = emitter->texture;
+
+    registry.emplace<sprite>(projectile, std::move(textures), "default", emitter->texture->width, emitter->texture->height);
+    const Vector2 initialTargetPos = getColliderCenter(registry, victim);
+    const Vector2 initialDir = Vector2Subtract(initialTargetPos, spawnPos);
+    const float initialRotation = Vector2LengthSqr(initialDir) > 0.0001f ? computeProjectileRotationDeg(initialDir) : 0.0f;
+    registry.emplace<transform>(projectile, spawnPos, Vector2{1.0f, 1.0f}, initialRotation);
+    registry.emplace<animation>(projectile, 0, 0, 0, 0, 1.0f, 0.0f, false, Directions::DOWN);
+    registry.emplace<homing_projectile>(projectile, attacker, victim, damageAmount, emitter->speed, emitter->hitRadius, emitter->maxLifetime);
+    const float diameter = emitter->hitRadius * 2.0f;
+    registry.emplace<collider>(
+        projectile,
+        -emitter->hitRadius,
+        -emitter->hitRadius,
+        diameter,
+        diameter
+    );
+    return true;
+}
+
 static void setStatusWithEvent(entt::registry& registry, entt::entity entity, StatusType next, StatusChangeSource source) {
     auto* sta = registry.try_get<status>(entity);
     if (!sta) {
@@ -126,6 +163,52 @@ void CombatSystem::update(entt::registry& registry, float dt) {
         registry.ctx().get<entt::dispatcher>().trigger(DamageAppliedEvent{attacker, victim, damageAmount});
         APP_LOG("Hit! Attacker %d hits Victim %d for %.2f damage!", attacker, victim, damageAmount);
     };
+
+    // Aggiorna i proiettili homing e applica il danno all'impatto.
+    auto projectiles = registry.view<homing_projectile, transform>();
+    std::vector<entt::entity> projectilesToDestroy;
+    for (auto projectile : projectiles) {
+        auto& proj = projectiles.get<homing_projectile>(projectile);
+        auto& tr = projectiles.get<transform>(projectile);
+
+        proj.lifetime -= dt;
+        if (proj.lifetime <= 0.0f || !registry.valid(proj.target)) {
+            projectilesToDestroy.push_back(projectile);
+            continue;
+        }
+
+        const Vector2 targetPos = getColliderCenter(registry, proj.target);
+        Vector2 toTarget = Vector2Subtract(targetPos, tr.position);
+        const float distance = Vector2Length(toTarget);
+        const float maxStep = proj.speed * dt;
+
+        if (distance > 0.0001f) {
+            tr.rotation = computeProjectileRotationDeg(toTarget);
+        }
+
+        if (distance <= proj.hitRadius || distance <= maxStep) {
+            if (isValidTarget(registry, proj.attacker, proj.target)) {
+                if (auto* dmgRec = registry.try_get<damage_received>(proj.target)) {
+                    dmgRec->amount += proj.damage;
+                } else {
+                    registry.emplace<damage_received>(proj.target, proj.damage);
+                }
+                registry.ctx().get<entt::dispatcher>().trigger(DamageAppliedEvent{proj.attacker, proj.target, proj.damage});
+                APP_LOG("Projectile hit! Attacker %d hits Victim %d for %.2f damage!", proj.attacker, proj.target, proj.damage);
+            }
+            projectilesToDestroy.push_back(projectile);
+            continue;
+        }
+
+        toTarget = Vector2Scale(Vector2Normalize(toTarget), maxStep);
+        tr.position = Vector2Add(tr.position, toTarget);
+    }
+
+    for (auto projectile : projectilesToDestroy) {
+        if (registry.valid(projectile)) {
+            registry.destroy(projectile);
+        }
+    }
 
     // Mantiene aggiornato il lock del target per il player quando usa attacco TARGET.
     auto targeters = registry.view<is_player, attack, status>();
@@ -193,7 +276,15 @@ void CombatSystem::update(entt::registry& registry, float dt) {
                 }
 
                 if (selectedTarget != entt::null) {
-                    applyDamage(attacker, selectedTarget);
+                    if (atk.attackRange == AttackRange::RANGED) {
+                        const float damageAmount = registry.get<damage>(attacker).currentDamage;
+                        const bool spawned = spawnHomingProjectile(registry, attacker, selectedTarget, damageAmount);
+                        if (!spawned) {
+                            applyDamage(attacker, selectedTarget);
+                        }
+                    } else {
+                        applyDamage(attacker, selectedTarget);
+                    }
                     
                     // Creiamo il feedback visivo sul bersaglio
                     registry.emplace_or_replace<attack_feedback>(attacker, 
