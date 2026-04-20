@@ -2,8 +2,24 @@
 
 #include "defines/components/components.hpp"
 #include "defines/components/entityComponents.hpp"
+#include "defines/events.hpp"
 
 #include <raymath.h>
+
+static void setStatusWithEvent(entt::registry& registry, entt::entity entity, StatusType next, StatusChangeSource source) {
+	auto* sta = registry.try_get<status>(entity);
+	if (!sta) {
+		return;
+	}
+
+	if (sta->status == next) {
+		return;
+	}
+
+	const StatusType prev = sta->status;
+	sta->status = next;
+	registry.ctx().get<entt::dispatcher>().trigger(EntityStatusChangedEvent{entity, prev, next, source});
+}
 
 void EnemyMovementSystem::update(entt::registry& registry, entt::entity playerEntity, float dt) {
     if (!registry.valid(playerEntity)) return;
@@ -42,15 +58,16 @@ void EnemyMovementSystem::update(entt::registry& registry, entt::entity playerEn
 				
 				v.dx = norm.x * speed * dt;
 				v.dy = norm.y * speed * dt;
-				s.status = StatusType::RUN;
+				setStatusWithEvent(registry, entity, StatusType::RUN, StatusChangeSource::EnemyMovement);
 			} else {
 				v.dx = 0.0f;
 				v.dy = 0.0f;
 				if (!s.isAttacking()) {
-					s.status = StatusType::IDLE;
+					setStatusWithEvent(registry, entity, StatusType::IDLE, StatusChangeSource::EnemyMovement);
 				}
 				if (distance > 500.0f) {
 					aggro.aggroed = false;
+					registry.ctx().get<entt::dispatcher>().trigger(EnemyAggroChangedEvent{entity, false});
 				}
 			}
 		} else {
@@ -58,6 +75,7 @@ void EnemyMovementSystem::update(entt::registry& registry, entt::entity playerEn
 			float distance = Vector2Distance(playerTransform->position, t.position);
 			if (distance < 300.0f) {
 				aggro.aggroed = true;
+				registry.ctx().get<entt::dispatcher>().trigger(EnemyAggroChangedEvent{entity, true});
 				// Quando diventa aggro, resetta la velocità per evitare che continui il movimento casuale
 				v.dx = 0.0f;
 				v.dy = 0.0f;
@@ -70,13 +88,13 @@ void EnemyMovementSystem::update(entt::registry& registry, entt::entity playerEn
 					// Il nemico è fermo.
 					v.dx = 0.0f;
 					v.dy = 0.0f;
-					if (s.status == StatusType::RUN) s.status = StatusType::IDLE;
+					if (s.status == StatusType::RUN) setStatusWithEvent(registry, entity, StatusType::IDLE, StatusChangeSource::EnemyMovement);
 
 					if (wander.timer >= wander.currentIdleDuration) {
 						// Il tempo di attesa è finito. Inizia a muoversi.
 						wander.state = WanderState::MOVING;
 						wander.timer = 0.0f;
-						s.status = StatusType::RUN;
+						setStatusWithEvent(registry, entity, StatusType::RUN, StatusChangeSource::EnemyMovement);
 
 						// Scegli una direzione casuale
 						Vector2 randomDir = { (float)GetRandomValue(-100, 100), (float)GetRandomValue(-100, 100) };
@@ -92,7 +110,7 @@ void EnemyMovementSystem::update(entt::registry& registry, entt::entity playerEn
 						// Il tempo di movimento è finito. Torna fermo.
 						wander.state = WanderState::STILL;
 						wander.timer = 0.0f;
-						s.status = StatusType::IDLE;
+						setStatusWithEvent(registry, entity, StatusType::IDLE, StatusChangeSource::EnemyMovement);
 						v.dx = 0.0f;
 						v.dy = 0.0f;
 

@@ -9,6 +9,7 @@ void enemyStatus::onUpdate(float deltaTime) {
 
 void enemyStatus::handleDeath() {
 	if (!registry->all_of<is_hidden>(entity)) {	
+		registry->ctx().get<entt::dispatcher>().trigger(EntityDiedEvent{entity, false});
 		registry->destroy(entity);
 	}
 }

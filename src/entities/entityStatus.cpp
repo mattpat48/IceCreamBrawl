@@ -1,6 +1,21 @@
 #include "entityStatus.hpp"
 #include "entt/entt.hpp"
 
+static void setStatusWithEvent(entt::registry& registry, entt::entity entity, StatusType next, StatusChangeSource source) {
+	auto* sta = registry.try_get<status>(entity);
+	if (!sta) {
+		return;
+	}
+
+	if (sta->status == next) {
+		return;
+	}
+
+	const StatusType prev = sta->status;
+	sta->status = next;
+	registry.ctx().get<entt::dispatcher>().trigger(EntityStatusChangedEvent{entity, prev, next, source});
+}
+
 void entityStatus::onUpdate(float dt) {
 	auto healthComp = getComponent<health>();
 	auto enduranceComp = getComponent<endurance>();
@@ -29,7 +44,7 @@ void entityStatus::onUpdate(float dt) {
 			spriteComp->currentTexture = "attack";
 			animationComp->currentFrame = animationComp->startFrame;
 		} else if (animationComp->currentFrame == animationComp->endFrame) {
-			statusComp->status = StatusType::IDLE;
+			setStatusWithEvent(*registry, entity, StatusType::IDLE, StatusChangeSource::EntityScript);
 			spriteComp->currentTexture = "idle";
 			attackComp->currentCooldown = attackComp->cooldown;
 		}

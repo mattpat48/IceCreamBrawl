@@ -2,9 +2,25 @@
 
 #include "defines/components/components.hpp"
 #include "defines/components/entityComponents.hpp"
+#include "defines/events.hpp"
 #include "utils/logs.h"
 
 #include "raylib.h"
+
+static void setStatusWithEvent(entt::registry& registry, entt::entity entity, StatusType next, StatusChangeSource source) {
+    auto* sta = registry.try_get<status>(entity);
+    if (!sta) {
+        return;
+    }
+
+    if (sta->status == next) {
+        return;
+    }
+
+    const StatusType prev = sta->status;
+    sta->status = next;
+    registry.ctx().get<entt::dispatcher>().trigger(EntityStatusChangedEvent{entity, prev, next, source});
+}
 
 void HealthSystem::update(entt::registry& registry, float dt) {
     // Trova chiunque abbia ricevuto danno e abbia una salute
@@ -29,7 +45,8 @@ void HealthSystem::update(entt::registry& registry, float dt) {
 
         // È morto?
         if (hp.life <= 0) {
-			sta.status = StatusType::DEAD; // Imposta lo stato su StatusType::DEAD
+            setStatusWithEvent(registry, entity, StatusType::DEAD, StatusChangeSource::Health);
+            registry.ctx().get<entt::dispatcher>().trigger(EntityDiedEvent{entity, registry.any_of<is_player>(entity)});
             APP_LOG("Entity %d is dead!", entity);
         }
     }
@@ -60,11 +77,11 @@ void HealthSystem::resetEntities(entt::registry& registry) {
     auto entities = registry.view<health, status, is_aggroed>();
     for (auto entity : entities) {
         auto& hp = entities.get<health>(entity);
-        auto& st = entities.get<status>(entity);
         auto& aggro = entities.get<is_aggroed>(entity);
 
         hp.reset();
-        st.status = StatusType::IDLE; // Resetta lo stato a StatusType::IDLE
+        setStatusWithEvent(registry, entity, StatusType::IDLE, StatusChangeSource::Health);
         aggro.aggroed = false; // Resetta l'aggro
+        registry.ctx().get<entt::dispatcher>().trigger(EnemyAggroChangedEvent{entity, false});
     }
 }

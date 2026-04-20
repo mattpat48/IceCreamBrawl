@@ -2,6 +2,7 @@
 
 #include "defines/components/components.hpp"
 #include "defines/components/entityComponents.hpp"
+#include "defines/events.hpp"
 #include "utils/logs.h"
 
 #include "raylib.h"
@@ -86,6 +87,21 @@ static Vector2 getTargetArrowTip(entt::registry& registry, entt::entity target) 
     return {rect.x + (rect.width * 0.5f), rect.y - 6.0f};
 }
 
+static void setStatusWithEvent(entt::registry& registry, entt::entity entity, StatusType next, StatusChangeSource source) {
+    auto* sta = registry.try_get<status>(entity);
+    if (!sta) {
+        return;
+    }
+
+    if (sta->status == next) {
+        return;
+    }
+
+    const StatusType prev = sta->status;
+    sta->status = next;
+    registry.ctx().get<entt::dispatcher>().trigger(EntityStatusChangedEvent{entity, prev, next, source});
+}
+
 void CombatSystem::update(entt::registry& registry, float dt) {
     // Troviamo tutti quelli che vogliono attaccare e hanno le statistiche di attacco
     auto attackers = registry.view<attack_intent, attack, endurance, status>();
@@ -107,6 +123,7 @@ void CombatSystem::update(entt::registry& registry, float dt) {
         } else {
             registry.emplace<damage_received>(victim, damageAmount);
         }
+        registry.ctx().get<entt::dispatcher>().trigger(DamageAppliedEvent{attacker, victim, damageAmount});
         APP_LOG("Hit! Attacker %d hits Victim %d for %.2f damage!", attacker, victim, damageAmount);
     };
 
@@ -147,7 +164,7 @@ void CombatSystem::update(entt::registry& registry, float dt) {
         auto& sta = attackers.get<status>(attacker);
 
         if (atk.canAttack(end.stamina) && !sta.isDead() && !sta.isAttacking()) {
-            sta.status = StatusType::ATTACK; // Imposta lo stato su StatusType::ATTACK
+            setStatusWithEvent(registry, attacker, StatusType::ATTACK, StatusChangeSource::Combat);
             end.consume(atk.cost);
             atk.currentCooldown = atk.cooldown;
 
