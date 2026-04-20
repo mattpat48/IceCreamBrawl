@@ -2,12 +2,12 @@
 
 #include "raylib.h"
 #include "defines/components/components.hpp"
+#include "defines/events.hpp"
 #include "input/inputSystem.hpp"
 
 class touchController : public Script {
 public:
-    touchController(entt::entity playerEntity,Vector2 joystickBasePosition, float joystickRadius) {
-        this->playerEntity = playerEntity; // Initialize playerEntity to the provided entity
+    touchController(Vector2 joystickBasePosition, float joystickRadius) {
         this->joystickBasePosition = joystickBasePosition; // Store the joystick base position
         this->joystickRadius = joystickRadius; // Store the joystick radius
     }
@@ -27,13 +27,9 @@ public:
 
     void reset();
 
-    void setPlayerEntity(entt::entity newPlayer) { playerEntity = newPlayer; }
-    entt::entity getPlayerEntity() const { return playerEntity; }
-
     virtual ~touchController() = default;
 
 protected:
-    entt::entity playerEntity; // Riferimento all'entità del player
     Vector2 joystickBasePosition; // Base position of the joystick
     float joystickRadius; // Radius of the joystick base
 

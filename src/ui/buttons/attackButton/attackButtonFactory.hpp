@@ -9,7 +9,7 @@
 class AttackButtonFactory {
 public:
     static entt::entity create(entt::registry& registry, AssetManager& assetManager, 
-                             entt::entity playerEntity, const ButtonStaticData& bData, Vector2 position) {
+							 const ButtonStaticData& bData, Vector2 position) {
 
 		entt::entity attackButtonEntity = registry.create();
 		registry.emplace<is_ui>(attackButtonEntity);
@@ -22,7 +22,7 @@ public:
 								 bData.spriteWidth, bData.spriteHeight);
 		registry.emplace<transform>(attackButtonEntity, position, bData.scale, 0.0f);
 		registry.emplace<animation>(attackButtonEntity, bData.animStartFrame, bData.animStartFrame, bData.animEndFrame, bData.animRow, bData.animFrameTime, 0.0f, false, Directions::DOWN);
-		registry.emplace<script>(attackButtonEntity).bind<attackButton>(attackButtonEntity, registry, playerEntity);
+		registry.emplace<script>(attackButtonEntity).bind<attackButton>(attackButtonEntity, registry);
 
         return attackButtonEntity;
     }

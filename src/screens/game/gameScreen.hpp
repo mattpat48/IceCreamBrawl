@@ -2,6 +2,8 @@
 
 #include "raylib.h"
 
+#include <entt/entt.hpp>
+
 #include "screens/screen.hpp"
 #include "defines/events.hpp"
 #include "engine/gameplayRuntime.hpp"

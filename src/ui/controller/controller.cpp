@@ -1,5 +1,7 @@
 #include "controller.hpp"
 
+#include "utils/logs.h"
+
 void touchController::onCreate() {
 	// Ci iscriviamo agli eventi dell'InputSystem appena lo script viene creato
 	auto& dispatcher = registry->ctx().get<entt::dispatcher>();
@@ -47,22 +49,9 @@ void touchController::onTouchUp(const TouchUpEvent& event) {
 
 void touchController::onUpdate(float dt) {
 	auto t = getComponent<transform>();
-	auto pv = registry->try_get<velocity>(playerEntity);
-	auto pStatus = registry->try_get<status>(playerEntity);
+	Vector2 movement = {0.0f, 0.0f};
 
 	if (isDragging) {
-		// Se il player attacca (ad es. premendo un altro tasto nel frattempo), interrompiamo il movimento
-		if (pStatus && pStatus->isAttacking()) {
-			isDragging = false;
-			activePointerId = -1;
-			reset();
-			return;
-		}
-
-		if (pStatus && !pStatus->isAttacking()) {
-			pStatus->status = StatusType::RUN; // Imposta lo stato del player su StatusType::RUN
-		}
-
 		Vector2 delta = Vector2Subtract(currentJoystickPos, joystickBasePosition);
 		float distance = Vector2Length(delta);
 		
@@ -71,32 +60,22 @@ void touchController::onUpdate(float dt) {
 			clampedDelta = Vector2Scale(Vector2Normalize(delta), joystickRadius);
 		}
 		if (t) t->position = Vector2Add(joystickBasePosition, clampedDelta);
-	
-		// Calcola e applica la velocità
+
+		// Calcola il vettore di movimento e pubblicalo come intent.
 		float length = Vector2Length(clampedDelta);
-		if (length > 0 && pv) {
+		if (length > 0.0f) {
 			Vector2 normalized = Vector2Normalize(clampedDelta);
-			pv->dx = normalized.x * length / joystickRadius * 350.0f * dt; // Scale by joystick radius
-			pv->dy = normalized.y * length / joystickRadius * 350.0f * dt; // Scale by joystick radius
-		} else if (pv) {
-			pv->dx = 0.0f;
-			pv->dy = 0.0f;
+			movement = { normalized.x * length / joystickRadius * 350.0f * dt, normalized.y * length / joystickRadius * 350.0f * dt };
 		}
 	} else {
-		// Se non stiamo trascinando, assicuriamoci che lo stato torni a StatusType::IDLE (se stava correndo)
-		if (pStatus && pStatus->status == StatusType::RUN && !pStatus->isAttacking()) {
-			pStatus->status = StatusType::IDLE;
-		}
+		reset();
 	}
+
+	registry->ctx().get<entt::dispatcher>().trigger(PlayerMoveIntentEvent{movement});
 }
 
 void touchController::reset() {
 	auto t = getComponent<transform>();
-	auto pv = registry->try_get<velocity>(playerEntity);
 	if (t) t->position = joystickBasePosition;
-	if (pv) {
-		pv->dx = 0.0f;
-		pv->dy = 0.0f;
-	}
 	currentJoystickPos = joystickBasePosition;
 }

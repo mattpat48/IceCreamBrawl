@@ -1,5 +1,21 @@
 #include "minimap.hpp"
 
+void minimap::onCreate() {
+	auto& dispatcher = registry->ctx().get<entt::dispatcher>();
+	dispatcher.sink<PlayerRespawnEvent>().connect<&minimap::onPlayerRespawn>(this);
+}
+
+void minimap::onDestroy() {
+	auto& dispatcher = registry->ctx().get<entt::dispatcher>();
+	dispatcher.sink<PlayerRespawnEvent>().disconnect<&minimap::onPlayerRespawn>(this);
+}
+
+void minimap::onPlayerRespawn(const PlayerRespawnEvent& event) {
+	if (event.playerEntity != entt::null) {
+		playerEntity = event.playerEntity;
+	}
+}
+
 void minimap::onDraw() {
 	// Controlla che l'entità del giocatore sia ancora valida
 	if (!registry->valid(playerEntity)) return;

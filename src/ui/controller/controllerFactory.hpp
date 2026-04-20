@@ -10,7 +10,6 @@ class ControllerFactory {
 public:
 
     static entt::entity createTouchJoystick(entt::registry& registry, AssetManager &assetManager,
-                                          entt::entity playerEntity, 
                                           Vector2 position, float radius) {
         entt::entity handle = registry.create();
         registry.emplace<is_ui>(handle);
@@ -24,7 +23,7 @@ public:
         registry.emplace<velocity>(handle, 0.0f, 0.0f);
         registry.emplace<animation>(handle, 0, 0, 0, 0, 0.1f, 0.0f, false, Directions::DOWN);
         
-        registry.emplace<script>(handle).bind<touchController>(handle, registry, playerEntity, position, radius);
+        registry.emplace<script>(handle).bind<touchController>(handle, registry, position, radius);
 
         entt::entity circle = registry.create();
         registry.emplace<is_ui>(circle);

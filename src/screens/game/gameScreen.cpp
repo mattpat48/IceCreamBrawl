@@ -7,7 +7,7 @@
 #include "ui/buttons/attackButton/attackButtonFactory.hpp"
 #include "engine/engine.hpp"
 #include "player/playerFactory.hpp"
-#include "engine/playerRebindingService.hpp"
+#include <entt/entt.hpp>
 #include <raymath.h>
 #include "utils/logs.h"
 
@@ -32,7 +32,7 @@ void GameScreen::load(entt::registry& globalRegistry) {
 
     auto btnData = engine->getDataManager().getPrimaryButtonData();
     Vector2 primaryPosition = {GetScreenWidth() * btnData.relPosX, GetScreenHeight() * btnData.relPosY};
-    auto primaryAttackButton = AttackButtonFactory::create(registry, engine->getAssetManager(), playerEntity, btnData, primaryPosition);
+    auto primaryAttackButton = AttackButtonFactory::create(registry, engine->getAssetManager(), btnData, primaryPosition);
     APP_LOG("Primary attack button created with entity ID: %d", static_cast<int>(primaryAttackButton));
 
     // Add map background entity
@@ -42,7 +42,7 @@ void GameScreen::load(entt::registry& globalRegistry) {
     // Add touch controller entity
     auto joyData = engine->getDataManager().getJoystickData();
     Vector2 joystickPosition = {GetScreenWidth() * joyData.relPosX, GetScreenHeight() * joyData.relPosY};
-    auto joystickEntity = ControllerFactory::createTouchJoystick(registry, engine->getAssetManager(), playerEntity, joystickPosition, joyData.radius);
+    auto joystickEntity = ControllerFactory::createTouchJoystick(registry, engine->getAssetManager(), joystickPosition, joyData.radius);
     APP_LOG("Touch joystick created with entity ID: %d", static_cast<int>(joystickEntity));
     
     // Add minimap entity
@@ -147,6 +147,6 @@ void GameScreen::onPlayerRespawn(const PlayerRespawnEvent& event) {
 
     if (gameplayRuntime) {
         playerEntity = gameplayRuntime->respawnPlayer(registry, playerEntity);
-        PlayerRebindingService::rebindPlayer(registry, playerEntity);
+        event.playerEntity = playerEntity;
     }
 }
