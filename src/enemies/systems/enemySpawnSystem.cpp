@@ -9,9 +9,14 @@
 
 const float MIN_SPAWN_DISTANCE = 150.0f;
 
-void EnemySpawnSystem::init(const std::vector<EnemySpawnData>& enemies) {
+void EnemySpawnSystem::init(const LevelData& levelData, AssetManager& assetManagerRef, GameDataManager& dataManagerRef) {
+    assetManager = &assetManagerRef;
+    dataManager = &dataManagerRef;
+    mapWidth = static_cast<float>(levelData.mapWidth);
+    mapHeight = static_cast<float>(levelData.mapHeight);
+
     spawnStates.clear();
-    for (const auto& enemy : enemies) {
+    for (const auto& enemy : levelData.enemies) {
         SpawnState state;
         state.data = enemy;
         state.spawnedCount = 0;
@@ -21,7 +26,11 @@ void EnemySpawnSystem::init(const std::vector<EnemySpawnData>& enemies) {
     }
 }
 
-void EnemySpawnSystem::update(entt::registry& registry, AssetManager& assetManager, GameDataManager& dataManager, float dt, float mapWidth, float mapHeight) {    
+void EnemySpawnSystem::update(entt::registry& registry, float dt) {
+    if (!assetManager || !dataManager) {
+        return;
+    }
+
     // Ottieni la posizione del player una volta per evitare lookup ripetuti
     Vector2 playerPos = {0.0f, 0.0f};
     bool playerExists = false;
@@ -90,12 +99,12 @@ void EnemySpawnSystem::update(entt::registry& registry, AssetManager& assetManag
             spawnAttemptsThisTick = 1;
         }
 
-        EntityStaticData sData = dataManager.getEnemyStaticData(state.data.enemyType);
+        EntityStaticData sData = dataManager->getEnemyStaticData(state.data.enemyType);
 
         for (int i = 0; i < spawnAttemptsThisTick && state.spawnedCount < state.data.count; ++i) {
             Vector2 spawnPos;
             if (findValidSpawnPosition(spawnPos)) {
-                EnemyFactory::create(registry, assetManager, state.data, sData, spawnPos);
+                EnemyFactory::create(registry, *assetManager, state.data, sData, spawnPos);
                 state.spawnedCount++;
                 if (state.initialSpawnRemaining > 0) {
                     state.initialSpawnRemaining--;

@@ -2,14 +2,14 @@
 #include "player/playerFactory.hpp"
 
 void GameplayRuntime::initialize(const LevelData& levelData) {
-    enemySpawnSystem.init(levelData.enemies);
+    enemySpawnSystem.init(levelData, assetManager, dataManager);
 }
 
 void GameplayRuntime::update(entt::registry& registry, float dt, entt::entity playerEntity, float mapWidth, float mapHeight) {
     combatSystem.update(registry, dt);
     healthSystem.update(registry, dt);
 
-    enemySpawnSystem.update(registry, assetManager, dataManager, dt, mapWidth, mapHeight);
+    enemySpawnSystem.update(registry, dt);
     enemyMovementSystem.update(registry, playerEntity, dt);
     enemyAttackSystem.update(registry, playerEntity, dt);
 }

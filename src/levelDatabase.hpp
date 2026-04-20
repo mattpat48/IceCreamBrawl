@@ -1,8 +1,6 @@
 #pragma once
 
-#include "engine/gameDataManager.hpp" // Per LevelData e EnemySpawnData
-#include <vector>
-#include <string>
+#include "engine/gameDataTypes.hpp"
 
 class LevelDatabase {
 public:

@@ -16,9 +16,13 @@ public:
     EnemySpawnSystem() = default;
     ~EnemySpawnSystem() = default;
 
-    void init(const std::vector<EnemySpawnData>& enemies);
-    void update(entt::registry& registry, AssetManager& assetManager, GameDataManager& dataManager, float dt, float mapWidth, float mapHeight);
+    void init(const LevelData& levelData, AssetManager& assetManager, GameDataManager& dataManager);
+    void update(entt::registry& registry, float dt);
 
 private:
     std::vector<SpawnState> spawnStates;
+    AssetManager* assetManager = nullptr;
+    GameDataManager* dataManager = nullptr;
+    float mapWidth = 0.0f;
+    float mapHeight = 0.0f;
 };
