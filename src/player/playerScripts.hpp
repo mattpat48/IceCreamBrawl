@@ -6,6 +6,7 @@
 
 class playerScripts : public Script {
 public:
+    static constexpr float kRangedAttackMoveMultiplier = 0.85f;
 
     void onCreate() override {
         playerStatusScript.bind<playerStatus>(entity, *registry);
@@ -22,6 +23,13 @@ public:
     }
 
     void onUpdate(float dt) override {
+        if (auto* gate = registry->try_get<attack_movement_gate>(entity)) {
+            gate->windupRemaining -= dt;
+            if (gate->windupRemaining < 0.0f) {
+                gate->windupRemaining = 0.0f;
+            }
+        }
+
         playerStatusScript.instance->onUpdate(dt);
     }
 
@@ -36,13 +44,33 @@ public:
 
         auto* movement = registry->try_get<velocity>(entity);
         auto* playerStatusComp = registry->try_get<status>(entity);
-        if (!movement || !playerStatusComp) {
+        auto* attackComp = registry->try_get<attack>(entity);
+        auto* movementGate = registry->try_get<attack_movement_gate>(entity);
+        if (!movement || !playerStatusComp || !attackComp) {
             return;
         }
 
         if (playerStatusComp->isAttacking()) {
-            movement->dx = 0.0f;
-            movement->dy = 0.0f;
+            const bool isRangedTarget =
+                attackComp->attackRange == AttackRange::RANGED &&
+                attackComp->type == AttackType::TARGET;
+
+            const bool isMeleeAoe =
+                attackComp->attackRange == AttackRange::MELEE &&
+                attackComp->type == AttackType::AOE;
+
+            if (isRangedTarget) {
+                movement->dx = event.movement.x * kRangedAttackMoveMultiplier;
+                movement->dy = event.movement.y * kRangedAttackMoveMultiplier;
+            } else if (isMeleeAoe && movementGate && movementGate->windupRemaining <= 0.0f) {
+                movement->dx = event.movement.x;
+                movement->dy = event.movement.y;
+            } else {
+                movement->dx = 0.0f;
+                movement->dy = 0.0f;
+            }
+
+            event.handled = true;
             return;
         }
 

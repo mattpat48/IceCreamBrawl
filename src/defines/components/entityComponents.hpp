@@ -234,6 +234,13 @@ struct attack_intent {
 
 };
 
+// Governa il lock movimento durante la fase di wind-up degli attacchi.
+struct attack_movement_gate {
+    float windupRemaining = 0.0f;
+    bool lockFacing = false;
+    Directions facing = Directions::DOWN;
+};
+
 struct target_lock {
     entt::entity target = entt::null;
 };

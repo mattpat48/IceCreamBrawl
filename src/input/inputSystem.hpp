@@ -2,6 +2,7 @@
 #include <entt/entt.hpp>
 #include <raylib.h>
 #include <raymath.h>
+#include <unordered_map>
 
 // 1. Definiamo gli Eventi che l'Input System "lancerà" al resto del gioco.
 // I componenti (come il touchController) ascolteranno questi eventi.
@@ -35,9 +36,8 @@ struct GestureEvent {
 class InputSystem {
 private:
     entt::dispatcher& dispatcher; // Riferimento al dispatcher globale
-    
-    Vector2 lastPosition;
-    bool isPointerActive;
+
+    std::unordered_map<int, Vector2> activePointers;
 
 public:
     InputSystem(entt::dispatcher& disp);

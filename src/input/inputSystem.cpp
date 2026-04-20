@@ -1,41 +1,69 @@
 #include "inputSystem.hpp"
 
+namespace {
+std::unordered_map<int, Vector2> collectCurrentPointers() {
+    std::unordered_map<int, Vector2> pointers;
+
+    const int touchCount = GetTouchPointCount();
+    if (touchCount > 0) {
+        pointers.reserve(static_cast<size_t>(touchCount));
+        for (int i = 0; i < touchCount; ++i) {
+            pointers.emplace(i, GetTouchPosition(i));
+        }
+        return pointers;
+    }
+
+    if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+        pointers.emplace(-1, GetMousePosition());
+    }
+
+    return pointers;
+}
+
+Vector2 getPrimaryPointerPosition(const std::unordered_map<int, Vector2>& pointers) {
+    if (pointers.empty()) {
+        return GetMousePosition();
+    }
+
+    if (const auto mouseIt = pointers.find(-1); mouseIt != pointers.end()) {
+        return mouseIt->second;
+    }
+
+    return pointers.begin()->second;
+}
+} // namespace
+
 InputSystem::InputSystem(entt::dispatcher& disp) : dispatcher(disp) {
-    isPointerActive = false;
-    lastPosition = {0.0f, 0.0f};
 }
 
 void InputSystem::update() {
+    const auto currentPointers = collectCurrentPointers();
+
     // 1. Gestione Gesti Avanzati Raylib (Swipe, Tap, Pinch ecc.)
     int gesture = GetGestureDetected();
     if (gesture != GESTURE_NONE) {
-        dispatcher.trigger(GestureEvent{gesture, GetTouchPosition(0)});
+        dispatcher.trigger(GestureEvent{gesture, getPrimaryPointerPosition(currentPointers)});
     }
 
-    // 2. Gestione base del tocco (o click del mouse su PC)
-    // Raylib è comodo: GetTouchPosition(0) funge da mouse se non c'è touch
-    bool currentActive = IsMouseButtonDown(MOUSE_LEFT_BUTTON) || GetTouchPointCount() > 0;
-    Vector2 currentPos = GetTouchPosition(0);
-
-    if (currentActive) {
-        if (!isPointerActive) {
-            // TOUCH DOWN: Il dito ha appena toccato lo schermo
-            isPointerActive = true;
-            lastPosition = currentPos;
-            dispatcher.trigger(TouchDownEvent{currentPos, 0});
-        } else {
-            // TOUCH MOVE: Il dito si sta muovendo
-            Vector2 delta = Vector2Subtract(currentPos, lastPosition);
-            if (delta.x != 0.0f || delta.y != 0.0f) {
-                dispatcher.trigger(TouchMoveEvent{currentPos, delta, 0});
-                lastPosition = currentPos;
-            }
+    // 2. Diff tra frame corrente e precedente per emettere DOWN/MOVE/UP per ogni pointer.
+    for (const auto& [pointerId, position] : currentPointers) {
+        const auto previousIt = activePointers.find(pointerId);
+        if (previousIt == activePointers.end()) {
+            dispatcher.trigger(TouchDownEvent{position, pointerId});
+            continue;
         }
-    } else {
-        if (isPointerActive) {
-            // TOUCH UP: Il dito è stato sollevato
-            isPointerActive = false;
-            dispatcher.trigger(TouchUpEvent{currentPos, 0});
+
+        const Vector2 delta = Vector2Subtract(position, previousIt->second);
+        if (delta.x != 0.0f || delta.y != 0.0f) {
+            dispatcher.trigger(TouchMoveEvent{position, delta, pointerId});
         }
     }
+
+    for (const auto& [pointerId, previousPosition] : activePointers) {
+        if (currentPointers.find(pointerId) == currentPointers.end()) {
+            dispatcher.trigger(TouchUpEvent{previousPosition, pointerId});
+        }
+    }
+
+    activePointers = currentPointers;
 }

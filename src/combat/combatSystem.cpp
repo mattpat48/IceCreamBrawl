@@ -11,6 +11,8 @@
 #include <unordered_map>
 #include <vector>
 
+static constexpr float MELEE_AOE_WINDUP_SECONDS = 0.10f;
+
 static Vector2 getColliderCenter(entt::registry& registry, entt::entity e) {
     auto* t = registry.try_get<transform>(e);
     auto* c = registry.try_get<collider>(e);
@@ -88,6 +90,14 @@ static bool isTargetInRange(entt::registry& registry, entt::entity attacker, ent
 static Vector2 getTargetArrowTip(entt::registry& registry, entt::entity target) {
     Rectangle rect = getColliderRect(registry, target);
     return {rect.x + (rect.width * 0.5f), rect.y - 6.0f};
+}
+
+static Directions directionFromDelta(const Vector2& delta) {
+    if (std::abs(delta.x) >= std::abs(delta.y)) {
+        return delta.x >= 0.0f ? Directions::RIGHT : Directions::LEFT;
+    }
+
+    return delta.y >= 0.0f ? Directions::DOWN : Directions::UP;
 }
 
 static float computeProjectileRotationDeg(const Vector2& direction) {
@@ -248,6 +258,14 @@ void CombatSystem::update(entt::registry& registry, float dt) {
 
         if (atk.canAttack(end.stamina) && !sta.isDead() && !sta.isAttacking()) {
             setStatusWithEvent(registry, attacker, StatusType::ATTACK, StatusChangeSource::Combat);
+
+            float windupSeconds = 0.0f;
+            bool lockFacing = false;
+            Directions facing = Directions::DOWN;
+            if (atk.attackRange == AttackRange::MELEE && atk.type == AttackType::AOE) {
+                windupSeconds = MELEE_AOE_WINDUP_SECONDS;
+            }
+
             end.consume(atk.cost);
             atk.currentCooldown = atk.cooldown;
 
@@ -277,6 +295,11 @@ void CombatSystem::update(entt::registry& registry, float dt) {
 
                 if (selectedTarget != entt::null) {
                     if (atk.attackRange == AttackRange::RANGED) {
+                        const Vector2 attackerPos = getColliderCenter(registry, attacker);
+                        const Vector2 targetPos = getColliderCenter(registry, selectedTarget);
+                        facing = directionFromDelta(Vector2Subtract(targetPos, attackerPos));
+                        lockFacing = true;
+
                         const float damageAmount = registry.get<damage>(attacker).currentDamage;
                         const bool spawned = spawnHomingProjectile(registry, attacker, selectedTarget, damageAmount);
                         if (!spawned) {
@@ -334,6 +357,10 @@ void CombatSystem::update(entt::registry& registry, float dt) {
                 registry.emplace_or_replace<attack_feedback>(attacker, 
                     0.2f, 0.2f, AttackType::AOE, atk.shape, atk.angle, atk.range, atkPos, facingDir, entt::null);
             }
+
+            auto& movementGate = registry.emplace_or_replace<attack_movement_gate>(attacker, windupSeconds);
+            movementGate.lockFacing = lockFacing;
+            movementGate.facing = facing;
         }
         // Rimuoviamo l'intento di attaccare, l'azione è stata processata
         registry.remove<attack_intent>(attacker);

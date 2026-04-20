@@ -223,6 +223,13 @@ void Screen::updateAnimations(float dt) {
 	for (auto entity : movingView) {
 		auto& a = movingView.get<animation>(entity);
 		auto& v = movingView.get<velocity>(entity);
+		auto* statusComp = registry.try_get<status>(entity);
+		auto* movementGate = registry.try_get<attack_movement_gate>(entity);
+
+		if (statusComp && statusComp->isAttacking() && movementGate && movementGate->lockFacing) {
+			a.direction = movementGate->facing;
+			continue;
+		}
 
 		if (std::abs(v.dx) > std::abs(v.dy)) {
 			a.direction = (v.dx > 0) ? Directions::RIGHT : Directions::LEFT;
