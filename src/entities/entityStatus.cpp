@@ -39,14 +39,16 @@ void entityStatus::onUpdate(float dt) {
 
 	// 2. MACCHINA A STATI PER LE ANIMAZIONI (State Machine)
 	// Usiamo lo stato attuale per decidere che texture applicare
-	if (statusComp->isAttacking()) {
+	if (statusComp->isAttacking() || statusComp->isUsingAbility()) {
 		if (spriteComp->currentTexture != "attack") {
 			spriteComp->currentTexture = "attack";
 			animationComp->currentFrame = animationComp->startFrame;
 		} else if (animationComp->currentFrame == animationComp->endFrame) {
 			setStatusWithEvent(*registry, entity, StatusType::IDLE, StatusChangeSource::EntityScript);
 			spriteComp->currentTexture = "idle";
-			attackComp->currentCooldown = attackComp->cooldown;
+			if (statusComp->isAttacking()) {
+				attackComp->currentCooldown = attackComp->cooldown;
+			}
 		}
 	} 
 	else if (statusComp->isRunning()) {

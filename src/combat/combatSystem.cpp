@@ -3,11 +3,13 @@
 #include "defines/components/components.hpp"
 #include "defines/components/entityComponents.hpp"
 #include "defines/events.hpp"
+#include "skills/skillsDatabase.hpp"
 #include "utils/logs.h"
 
 #include "raylib.h"
 #include <raymath.h>
 #include <cmath>
+#include <algorithm>
 #include <unordered_map>
 #include <vector>
 
@@ -134,6 +136,41 @@ static bool spawnHomingProjectile(entt::registry& registry, entt::entity attacke
     return true;
 }
 
+static void drawStatusEffectIcons(entt::registry& registry, entt::entity entity, Vector2 anchor, bool stackToRight) {
+    auto* effects = registry.try_get<status_effects>(entity);
+    if (!effects || effects->active.empty()) {
+        return;
+    }
+
+    float x = anchor.x;
+    float y = anchor.y;
+    const float iconSize = 18.0f;
+    const float step = iconSize + 4.0f;
+
+    for (const auto& effect : effects->active) {
+        const SkillEffectDefinition* definition = SkillsDatabase::getStatusEffectDefinition(effect.skillId);
+        if (!definition) {
+            continue;
+        }
+
+        Rectangle iconRect = { x, y, iconSize, iconSize };
+        DrawRectangleRounded(iconRect, 0.25f, 4, Fade(definition->iconColor, 0.80f));
+        DrawRectangleRoundedLines(iconRect, 0.25f, 4, BLACK);
+
+        if (!definition->shortLabel.empty()) {
+            int labelSize = 10;
+            int textWidth = MeasureText(definition->shortLabel.c_str(), labelSize);
+            DrawText(definition->shortLabel.c_str(), static_cast<int>(x + (iconSize - textWidth) / 2.0f), static_cast<int>(y + 3.0f), labelSize, WHITE);
+        }
+
+        if (stackToRight) {
+            x += step;
+        } else {
+            y += step;
+        }
+    }
+}
+
 static void setStatusWithEvent(entt::registry& registry, entt::entity entity, StatusType next, StatusChangeSource source) {
     auto* sta = registry.try_get<status>(entity);
     if (!sta) {
@@ -150,6 +187,62 @@ static void setStatusWithEvent(entt::registry& registry, entt::entity entity, St
 }
 
 void CombatSystem::update(entt::registry& registry, float dt) {
+    // Aggiorna effetti di stato attivi tramite script nel SkillsDatabase.
+    auto effectsView = registry.view<status_effects>();
+    for (auto entity : effectsView) {
+        auto& effects = effectsView.get<status_effects>(entity);
+
+        for (auto& effect : effects.active) {
+            const SkillEffectDefinition* definition = SkillsDatabase::getStatusEffectDefinition(effect.skillId);
+            if (!definition) {
+                effect.remainingTime = 0.0f;
+                continue;
+            }
+
+            SkillEffectContext ctx{registry, effect.source, entity, dt};
+
+            if (definition->activationMode == StatusEffectActivationMode::SINGLE_ACTIVATION) {
+                if (!effect.singleActivationDone && definition->onApply) {
+                    definition->onApply(ctx);
+                }
+                effect.singleActivationDone = true;
+            } else if (definition->activationMode == StatusEffectActivationMode::CONTINUOUS_ACTIVATION) {
+                effect.tickAccumulator += dt;
+                const float interval = definition->tickInterval > 0.0f ? definition->tickInterval : dt;
+                while (effect.tickAccumulator >= interval) {
+                    if (definition->onTick) {
+                        SkillEffectContext tickCtx{registry, effect.source, entity, interval};
+                        definition->onTick(tickCtx);
+                    }
+                    effect.tickAccumulator -= interval;
+                }
+            }
+
+            effect.remainingTime -= dt;
+        }
+
+        for (const auto& effect : effects.active) {
+            if (effect.remainingTime > 0.0f) {
+                continue;
+            }
+
+            const SkillEffectDefinition* definition = SkillsDatabase::getStatusEffectDefinition(effect.skillId);
+            if (definition && definition->onExpire) {
+                SkillEffectContext ctx{registry, effect.source, entity, dt};
+                definition->onExpire(ctx);
+            }
+        }
+
+        effects.active.erase(
+            std::remove_if(
+                effects.active.begin(),
+                effects.active.end(),
+                [](const status_effect_instance& effect) { return effect.remainingTime <= 0.0f; }
+            ),
+            effects.active.end()
+        );
+    }
+
     // Troviamo tutti quelli che vogliono attaccare e hanno le statistiche di attacco
     auto attackers = registry.view<attack_intent, attack, endurance, status>();
     
@@ -374,6 +467,25 @@ void CombatSystem::update(entt::registry& registry, float dt) {
 }
 
 void CombatSystem::draw(entt::registry& registry) {
+    auto abilityTargetingView = registry.view<is_player, transform, ability_loadout, ability_targeting_state>();
+    for (auto entity : abilityTargetingView) {
+        auto& transformComp = abilityTargetingView.get<transform>(entity);
+        auto& loadout = abilityTargetingView.get<ability_loadout>(entity);
+        auto& targeting = abilityTargetingView.get<ability_targeting_state>(entity);
+
+        if (!targeting.hasPendingAbility()) {
+            continue;
+        }
+
+        const int abilityIndex = targeting.pendingAbilityIndex;
+        if (abilityIndex < 0 || abilityIndex >= static_cast<int>(loadout.abilities.size())) {
+            continue;
+        }
+
+        const float range = loadout.abilities[abilityIndex].range;
+        DrawRing(transformComp.position, range - 4.0f, range + 4.0f, 0.0f, 360.0f, 72, Fade(BLUE, 0.48f));
+    }
+
     auto targetLocks = registry.view<is_player, attack, status, target_lock>();
     for (auto entity : targetLocks) {
         auto& atk = targetLocks.get<attack>(entity);
@@ -403,6 +515,15 @@ void CombatSystem::draw(entt::registry& registry) {
         DrawLineEx(left, right, 3.0f, border);
         DrawLineEx(right, tip, 3.0f, border);
         DrawLineEx(tip, left, 3.0f, border);
+    }
+
+    auto enemyEffectsView = registry.view<is_enemy, transform, collider>();
+    for (auto entity : enemyEffectsView) {
+        auto& t = enemyEffectsView.get<transform>(entity);
+        auto& c = enemyEffectsView.get<collider>(entity);
+        Rectangle rect = c.getRect(t.position);
+        Vector2 anchor = {rect.x + rect.width + 6.0f, rect.y - 6.0f};
+        drawStatusEffectIcons(registry, entity, anchor, false);
     }
 
     auto feedbacks = registry.view<attack_feedback>();

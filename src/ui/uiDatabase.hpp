@@ -39,4 +39,24 @@ public:
     static JoystickStaticData getJoystickData() {
         return { 0.75f, 0.75f, 200.0f }; // Posizione: 75% X, 75% Y, Raggio 200
     }
+
+    static ButtonStaticData getDebuffAbilityButtonData() {
+        return {
+            "resources/sprites/buttons/primary.png",
+            220, 200,
+            {1.0f, 1.0f},
+            0, 2, 0, 0.1f,
+            0.40f, 0.75f
+        };
+    }
+
+    static ButtonStaticData getBuffAbilityButtonData() {
+        return {
+            "resources/sprites/buttons/primary.png",
+            220, 200,
+            {1.0f, 1.0f},
+            0, 2, 0, 0.1f,
+            0.55f, 0.75f
+        };
+    }
 };

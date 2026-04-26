@@ -3,12 +3,16 @@
 #include "engine/script.hpp"
 
 #include <entt/entt.hpp>
+#include <algorithm>
+#include <cmath>
 #include <memory>
+#include <string>
+#include <vector>
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
 enum class Directions { UP, DOWN, LEFT, RIGHT, UP_LEFT, UP_RIGHT, DOWN_LEFT, DOWN_RIGHT };
-enum class StatusType { IDLE, ATTACK, DODGE, RUN, DEAD };
+enum class StatusType { IDLE, ATTACK, ABILITY1, ABILITY2, DODGE, RUN, DEAD };
 
 struct hit_flash {
     Color filter = WHITE;
@@ -38,6 +42,9 @@ struct status {
     }
     bool isAttacking() const {
         return status == StatusType::ATTACK;
+    }
+    bool isUsingAbility() const {
+        return status == StatusType::ABILITY1 || status == StatusType::ABILITY2;
     }
     bool isDodging() const {
         return status == StatusType::DODGE;
@@ -205,6 +212,76 @@ struct ability {
                 currentCooldown = 0.0f;
             }
         }
+    }
+};
+
+enum class AbilityType {
+    BUFFING,
+    DEBUFFING,
+    DAMAGING
+};
+
+struct ability_definition {
+    std::string name;
+    AbilityType type = AbilityType::BUFFING;
+    float cost = 0.0f;
+    float cooldown = 0.0f;
+    float currentCooldown = 0.0f;
+    float range = 0.0f;
+    std::string statusEffectId;
+
+    bool isReady() const {
+        return currentCooldown <= 0.0f;
+    }
+
+    void tickCooldown(float dt) {
+        if (currentCooldown <= 0.0f) {
+            return;
+        }
+
+        currentCooldown -= dt;
+        if (currentCooldown < 0.0f) {
+            currentCooldown = 0.0f;
+        }
+    }
+};
+
+struct ability_targeting_state {
+    int pendingAbilityIndex = -1;
+
+    bool hasPendingAbility() const {
+        return pendingAbilityIndex >= 0;
+    }
+
+    void clear() {
+        pendingAbilityIndex = -1;
+    }
+};
+
+struct ability_loadout {
+    std::vector<ability_definition> abilities;
+};
+
+struct status_effect_instance {
+    std::string skillId;
+    entt::entity source = entt::null;
+    float remainingTime = 0.0f;
+    float tickAccumulator = 0.0f;
+    bool singleActivationDone = false;
+};
+
+struct status_effects {
+    std::vector<status_effect_instance> active;
+
+    void addOrRefresh(const status_effect_instance& incoming) {
+        for (auto& effect : active) {
+            if (effect.skillId == incoming.skillId && effect.source == incoming.source) {
+                effect.remainingTime = std::max(effect.remainingTime, incoming.remainingTime);
+                return;
+            }
+        }
+
+        active.push_back(incoming);
     }
 };
 

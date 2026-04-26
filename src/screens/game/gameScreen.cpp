@@ -5,6 +5,7 @@
 #include "map/mapFactory.hpp"
 #include "ui/buttons/pauseButton/pauseButtonFactory.hpp"
 #include "ui/buttons/attackButton/attackButtonFactory.hpp"
+#include "ui/buttons/abilityButton/abilityButtonFactory.hpp"
 #include "engine/engine.hpp"
 #include "player/playerFactory.hpp"
 #include <entt/entt.hpp>
@@ -17,6 +18,7 @@ void GameScreen::load(entt::registry& globalRegistry) {
     //registry.ctx().get<entt::dispatcher>().sink<PauseToggleEvent>().connect<&GameScreen::onPauseToggle>(this);
     registry.ctx().get<entt::dispatcher>().sink<PlayerDeathEvent>().connect<&GameScreen::onPlayerDeath>(this); // Ascolta la morte
     registry.ctx().get<entt::dispatcher>().sink<PlayerRespawnEvent>().connect<&GameScreen::onPlayerRespawn>(this); // Ascolta il respawn
+    registry.ctx().emplace<Camera2D>(camera);
  
     // 1. Carica i dati dal manager
     PlayerSaveData pData = engine->getDataManager().getPlayerData();
@@ -34,6 +36,16 @@ void GameScreen::load(entt::registry& globalRegistry) {
     Vector2 primaryPosition = {GetScreenWidth() * btnData.relPosX, GetScreenHeight() * btnData.relPosY};
     auto primaryAttackButton = AttackButtonFactory::create(registry, engine->getAssetManager(), btnData, primaryPosition);
     APP_LOG("Primary attack button created with entity ID: %d", static_cast<int>(primaryAttackButton));
+
+    auto debuffBtnData = engine->getDataManager().getDebuffAbilityButtonData();
+    Vector2 debuffPosition = {GetScreenWidth() * debuffBtnData.relPosX, GetScreenHeight() * debuffBtnData.relPosY};
+    auto debuffAbilityButton = AbilityButtonFactory::create(registry, engine->getAssetManager(), debuffBtnData, debuffPosition, 0);
+    APP_LOG("Debuff ability button created with entity ID: %d", static_cast<int>(debuffAbilityButton));
+
+    auto buffBtnData = engine->getDataManager().getBuffAbilityButtonData();
+    Vector2 buffPosition = {GetScreenWidth() * buffBtnData.relPosX, GetScreenHeight() * buffBtnData.relPosY};
+    auto buffAbilityButton = AbilityButtonFactory::create(registry, engine->getAssetManager(), buffBtnData, buffPosition, 1);
+    APP_LOG("Buff ability button created with entity ID: %d", static_cast<int>(buffAbilityButton));
 
     // Add map background entity
     auto mapEntity = MapFactory::create(registry, engine->getAssetManager(), lData);
@@ -98,11 +110,17 @@ void GameScreen::updateCamera() {
 void GameScreen::update(float delta) {
     // L'input deve essere processato anche in pausa per poter catturare l'evento di un-pause
     updateInput();
+    if (auto* ctxCamera = registry.ctx().find<Camera2D>()) {
+        *ctxCamera = camera;
+    }
 
     if (!paused) {
         // Eseguiamo la logica di gioco solo se non siamo in pausa
         updateGameLogic(delta);
         updateCamera();
+        if (auto* ctxCamera = registry.ctx().find<Camera2D>()) {
+            *ctxCamera = camera;
+        }
 
         if (gameplayRuntime) {
             gameplayRuntime->update(registry, delta, playerEntity, mapWidth, mapHeight);

@@ -15,5 +15,7 @@ public:
     EntityStaticData getPlayerStaticData() const { return EntityDatabase::getPlayerData(); }
     EntityStaticData getEnemyStaticData(const std::string& type) const { return EntityDatabase::getEnemyData(type); }
     ButtonStaticData getPrimaryButtonData() const { return UIDatabase::getPrimaryAttackButtonData(); }
+    ButtonStaticData getDebuffAbilityButtonData() const { return UIDatabase::getDebuffAbilityButtonData(); }
+    ButtonStaticData getBuffAbilityButtonData() const { return UIDatabase::getBuffAbilityButtonData(); }
     JoystickStaticData getJoystickData() const { return UIDatabase::getJoystickData(); }
 };

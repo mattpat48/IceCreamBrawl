@@ -32,6 +32,10 @@ struct PlayerMoveIntentEvent {
 	mutable bool handled = false;
 };
 struct PlayerAttackIntentEvent { mutable bool handled = false; };
+struct PlayerAbilityIntentEvent {
+	int abilitySlot = 0;
+	mutable bool handled = false;
+};
 
 // -----------------------------
 // Combat / gameplay domain events
