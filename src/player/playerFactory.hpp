@@ -45,8 +45,9 @@ public:
         registry.emplace<attack>(playerEntity, sData.attackCost, sData.attackCooldown, sData.attackRange, sData.attackRangeType, sData.attackType, sData.attackShape, sData.attackAngle, 0.0f, 0.0f, 0.0f, 0.0f);
         registry.emplace<ranged_projectile_emitter>(playerEntity, projectileTexture, 820.0f, 24.0f, 2.5f);
         auto& loadout = registry.emplace<ability_loadout>(playerEntity);
-        loadout.abilities.push_back({"Cripple", AbilityType::DEBUFFING, 12.0f, 6.0f, 0.0f, 260.0f, "cripple_attack"});
-        loadout.abilities.push_back({"Fortify", AbilityType::BUFFING, 10.0f, 8.0f, 0.0f, 260.0f, "fortify_health"});
+        loadout.abilities.push_back({"Cripple", SkillCastKind::RANGED_TARGET, 12.0f, 6.0f, 0.0f, 260.0f, "cripple_attack"});
+        loadout.abilities.push_back({"Fortify", SkillCastKind::RANGED_TARGET, 10.0f, 8.0f, 0.0f, 260.0f, "fortify_health"});
+        loadout.abilities.push_back({"Shockwave", SkillCastKind::MELEE_AOE, 14.0f, 7.0f, 0.0f, 230.0f, "shockwave_strike"});
         registry.emplace<ability_targeting_state>(playerEntity);
 
         return playerEntity;

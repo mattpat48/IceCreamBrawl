@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-static constexpr float MELEE_AOE_WINDUP_SECONDS = 0.10f;
+static constexpr float MELEE_AOE_WINDUP_SECONDS = 0.20f;
 
 static Vector2 getColliderCenter(entt::registry& registry, entt::entity e) {
     auto* t = registry.try_get<transform>(e);
@@ -186,6 +186,102 @@ static void setStatusWithEvent(entt::registry& registry, entt::entity entity, St
     registry.ctx().get<entt::dispatcher>().trigger(EntityStatusChangedEvent{entity, prev, next, source});
 }
 
+static bool checkAoeHit(entt::registry& registry,
+                        entt::entity attacker,
+                        entt::entity victim,
+                        const Vector2& origin,
+                        const Vector2& facingDir,
+                        float range,
+                        AttackShape shape,
+                        float angle) {
+    if (!isValidTarget(registry, attacker, victim)) {
+        return false;
+    }
+
+    Rectangle vicRect = getColliderRect(registry, victim);
+    Vector2 vicCenter = getColliderCenter(registry, victim);
+    float dist = Vector2Distance(origin, vicCenter);
+
+    if (shape == AttackShape::CIRCLE) {
+        return CheckCollisionCircleRec(origin, range, vicRect);
+    }
+
+    if (shape == AttackShape::CONE) {
+        if (!CheckCollisionCircleRec(origin, range, vicRect)) {
+            return false;
+        }
+
+        if (dist <= 0.1f) {
+            return true;
+        }
+
+        Vector2 toVictim = Vector2Normalize(Vector2Subtract(vicCenter, origin));
+        float dotProduct = Vector2DotProduct(facingDir, toVictim);
+        float threshold = cosf((angle / 2.0f) * DEG2RAD);
+        return dotProduct >= threshold;
+    }
+
+    if (shape == AttackShape::LINE) {
+        if (dist > range) {
+            return false;
+        }
+
+        Vector2 toVictim = Vector2Subtract(vicCenter, origin);
+        float projection = Vector2DotProduct(toVictim, facingDir);
+        if (projection < 0.0f || projection > range) {
+            return false;
+        }
+
+        Vector2 perpendicular = {-facingDir.y, facingDir.x};
+        float lateral = std::abs(Vector2DotProduct(toVictim, perpendicular));
+        return lateral <= 28.0f;
+    }
+
+    return false;
+}
+
+static Vector2 getFacingDirection(entt::registry& registry, entt::entity entity) {
+    Vector2 facingDir = {0.0f, 1.0f};
+    if (auto* anim = registry.try_get<animation>(entity)) {
+        if (anim->direction == Directions::RIGHT) facingDir = {1.0f, 0.0f};
+        else if (anim->direction == Directions::LEFT) facingDir = {-1.0f, 0.0f};
+        else if (anim->direction == Directions::UP) facingDir = {0.0f, -1.0f};
+        else if (anim->direction == Directions::DOWN) facingDir = {0.0f, 1.0f};
+    }
+
+    return facingDir;
+}
+
+static void applyDamageWithEvent(entt::registry& registry,
+                                 entt::entity attacker,
+                                 entt::entity victim,
+                                 float damageAmount,
+                                 const char* logPrefix) {
+    if (auto* dmgRec = registry.try_get<damage_received>(victim)) {
+        dmgRec->amount += damageAmount;
+    } else {
+        registry.emplace<damage_received>(victim, damageAmount);
+    }
+
+    registry.ctx().get<entt::dispatcher>().trigger(DamageAppliedEvent{attacker, victim, damageAmount});
+    APP_LOG("%s Attacker %d hits Victim %d for %.2f damage!", logPrefix, attacker, victim, damageAmount);
+}
+
+static void applySkillHit(entt::registry& registry,
+                          entt::entity caster,
+                          entt::entity victim,
+                          const SkillAttackDefinition& skillDef,
+                          float hitDamage) {
+    if (hitDamage > 0.0f) {
+        applyDamageWithEvent(registry, caster, victim, hitDamage, "Skill hit!");
+    }
+
+    if (skillDef.onHit) {
+        SkillHitContext ctx{registry, caster, victim, hitDamage};
+        skillDef.onHit(ctx);
+    }
+}
+
 void CombatSystem::update(entt::registry& registry, float dt) {
     // Aggiorna effetti di stato attivi tramite script nel SkillsDatabase.
     auto effectsView = registry.view<status_effects>();
@@ -256,16 +352,89 @@ void CombatSystem::update(entt::registry& registry, float dt) {
         }
     }
 
+    auto skillFeedbacks = registry.view<skill_cast_feedback>();
+    for (auto entity : skillFeedbacks) {
+        auto& fb = skillFeedbacks.get<skill_cast_feedback>(entity);
+        fb.lifetime -= dt;
+        if (fb.lifetime <= 0.0f) {
+            registry.remove<skill_cast_feedback>(entity);
+        }
+    }
+
     auto applyDamage = [&registry](entt::entity attacker, entt::entity victim) {
         float damageAmount = registry.get<damage>(attacker).currentDamage;
-        if (auto* dmgRec = registry.try_get<damage_received>(victim)) {
-            dmgRec->amount += damageAmount;
-        } else {
-            registry.emplace<damage_received>(victim, damageAmount);
-        }
-        registry.ctx().get<entt::dispatcher>().trigger(DamageAppliedEvent{attacker, victim, damageAmount});
-        APP_LOG("Hit! Attacker %d hits Victim %d for %.2f damage!", attacker, victim, damageAmount);
+        applyDamageWithEvent(registry, attacker, victim, damageAmount, "Hit!");
     };
+
+    auto skillCasts = registry.view<skill_attack_intent, ability_loadout, damage, status>();
+    for (auto caster : skillCasts) {
+        auto& castIntent = skillCasts.get<skill_attack_intent>(caster);
+        auto& loadout = skillCasts.get<ability_loadout>(caster);
+        auto& dmg = skillCasts.get<damage>(caster);
+        auto& sta = skillCasts.get<status>(caster);
+
+        if (sta.isDead()) {
+            registry.remove<skill_attack_intent>(caster);
+            continue;
+        }
+
+        if (castIntent.abilityIndex < 0 || castIntent.abilityIndex >= static_cast<int>(loadout.abilities.size())) {
+            registry.remove<skill_attack_intent>(caster);
+            continue;
+        }
+
+        auto& abilityDef = loadout.abilities[castIntent.abilityIndex];
+        const SkillAttackDefinition* skillDef = SkillsDatabase::getSkillAttackDefinition(abilityDef.statusEffectId);
+        if (!skillDef) {
+            registry.remove<skill_attack_intent>(caster);
+            continue;
+        }
+
+        Vector2 origin = getColliderCenter(registry, caster);
+        Vector2 facingDir = getFacingDirection(registry, caster);
+        float hitDamage = dmg.currentDamage * skillDef->damageMultiplier;
+        if (skillDef->kind == SkillCastKind::MELEE_AOE) {
+            auto victims = registry.view<health, status>();
+            for (auto victim : victims) {
+                if (caster == victim) {
+                    continue;
+                }
+
+                if (!checkAoeHit(registry, caster, victim, origin, facingDir, skillDef->range, skillDef->shape, skillDef->angle)) {
+                    continue;
+                }
+
+                applySkillHit(registry, caster, victim, *skillDef, hitDamage);
+            }
+        } else {
+            entt::entity target = castIntent.target;
+            if (!isValidTarget(registry, caster, target)) {
+                target = entt::null;
+            }
+
+            if (target != entt::null) {
+                const float distance = Vector2Distance(origin, getColliderCenter(registry, target));
+                if (distance <= skillDef->range) {
+                    applySkillHit(registry, caster, target, *skillDef, hitDamage);
+                }
+            }
+        }
+
+        registry.emplace_or_replace<skill_cast_feedback>(
+            caster,
+            skillDef->frameTime * static_cast<float>(skillDef->frameCount),
+            skillDef->frameTime * static_cast<float>(skillDef->frameCount),
+            skillDef->frameTime,
+            skillDef->frameCount,
+            skillDef->shape,
+            skillDef->angle,
+            skillDef->range,
+            origin,
+            facingDir
+        );
+
+        registry.remove<skill_attack_intent>(caster);
+    }
 
     // Aggiorna i proiettili homing e applica il danno all'impatto.
     auto projectiles = registry.view<homing_projectile, transform>();
@@ -291,13 +460,7 @@ void CombatSystem::update(entt::registry& registry, float dt) {
 
         if (distance <= proj.hitRadius || distance <= maxStep) {
             if (isValidTarget(registry, proj.attacker, proj.target)) {
-                if (auto* dmgRec = registry.try_get<damage_received>(proj.target)) {
-                    dmgRec->amount += proj.damage;
-                } else {
-                    registry.emplace<damage_received>(proj.target, proj.damage);
-                }
-                registry.ctx().get<entt::dispatcher>().trigger(DamageAppliedEvent{proj.attacker, proj.target, proj.damage});
-                APP_LOG("Projectile hit! Attacker %d hits Victim %d for %.2f damage!", proj.attacker, proj.target, proj.damage);
+                applyDamageWithEvent(registry, proj.attacker, proj.target, proj.damage, "Projectile hit!");
             }
             projectilesToDestroy.push_back(projectile);
             continue;
@@ -419,31 +582,9 @@ void CombatSystem::update(entt::registry& registry, float dt) {
                 }
 
                 for (auto victim : victims) {
-                    if (attacker == victim || (registry.any_of<is_enemy>(attacker) && registry.any_of<is_enemy>(victim))) continue;
-                    
-                    Rectangle vicRect = getColliderRect(registry, victim);
-                    Vector2 vicCenter = getColliderCenter(registry, victim);
-                    float dist = Vector2Distance(atkPos, vicCenter);
-
-                    bool hit = false;
-                    if (atk.shape == AttackShape::CIRCLE) {
-                        hit = CheckCollisionCircleRec(atkPos, atk.range, vicRect);
-                    } 
-                    else if (atk.shape == AttackShape::CONE) {
-                        // Prima controlliamo se il rettangolo è almeno nel raggio del cono (Cerchio-Rettangolo)
-                        if (CheckCollisionCircleRec(atkPos, atk.range, vicRect)) {
-                            if (dist <= 0.1f) { 
-                                hit = true; // Perfettamente sovrapposti
-                            } else {
-                                Vector2 toVictim = Vector2Normalize(Vector2Subtract(vicCenter, atkPos));
-                                float dotProduct = Vector2DotProduct(facingDir, toVictim);
-                                float threshold = cosf((atk.angle / 2.0f) * DEG2RAD);
-                                if (dotProduct >= threshold) hit = true;
-                            }
-                        }
+                    if (checkAoeHit(registry, attacker, victim, atkPos, facingDir, atk.range, atk.shape, atk.angle)) {
+                        applyDamage(attacker, victim);
                     }
-
-                    if (hit) applyDamage(attacker, victim);
                 }
                 
                 // Creiamo il feedback visivo dell'area (indipendentemente se abbiamo colpito qualcuno o no)
@@ -559,6 +700,40 @@ void CombatSystem::draw(entt::registry& registry) {
             DrawCircleLines(targetPos.x, targetPos.y, 25.0f, targetColor);
             DrawLine(targetPos.x - 35, targetPos.y, targetPos.x + 35, targetPos.y, targetColor);
             DrawLine(targetPos.x, targetPos.y - 35, targetPos.x, targetPos.y + 35, targetColor);
+        }
+    }
+
+    auto skillCastFeedbacks = registry.view<skill_cast_feedback>();
+    for (auto entity : skillCastFeedbacks) {
+        auto& fb = skillCastFeedbacks.get<skill_cast_feedback>(entity);
+
+        float elapsed = fb.maxLifetime - fb.lifetime;
+        int frameIndex = static_cast<int>(elapsed / fb.frameTime);
+        if (frameIndex < 0) frameIndex = 0;
+        if (frameIndex >= fb.frameCount) frameIndex = fb.frameCount - 1;
+
+        float frameT = (fb.frameCount <= 1) ? 1.0f : static_cast<float>(frameIndex) / static_cast<float>(fb.frameCount - 1);
+        Color color = {
+            255,
+            static_cast<unsigned char>(255.0f * (1.0f - frameT)),
+            static_cast<unsigned char>(255.0f * (1.0f - frameT)),
+            170
+        };
+
+        if (fb.shape == AttackShape::CIRCLE) {
+            DrawCircleV(fb.origin, fb.range, Fade(color, 0.35f));
+            DrawCircleLines(fb.origin.x, fb.origin.y, fb.range, color);
+        } else if (fb.shape == AttackShape::CONE) {
+            float centerAngle = atan2(fb.direction.y, fb.direction.x) * RAD2DEG;
+            float startAngle = centerAngle - (fb.angle / 2.0f);
+            float endAngle = centerAngle + (fb.angle / 2.0f);
+            DrawCircleSector(fb.origin, fb.range, startAngle, endAngle, 32, Fade(color, 0.35f));
+            DrawCircleSectorLines(fb.origin, fb.range, startAngle, endAngle, 32, color);
+        } else if (fb.shape == AttackShape::LINE) {
+            float angleDeg = atan2(fb.direction.y, fb.direction.x) * RAD2DEG;
+            Rectangle lineRect = {fb.origin.x, fb.origin.y - 14.0f, fb.range, 28.0f};
+            DrawRectanglePro(lineRect, Vector2{0.0f, 14.0f}, angleDeg, Fade(color, 0.35f));
+            DrawRectangleLinesEx(lineRect, 2.0f, color);
         }
     }
 

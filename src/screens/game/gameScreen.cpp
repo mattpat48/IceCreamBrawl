@@ -47,6 +47,11 @@ void GameScreen::load(entt::registry& globalRegistry) {
     auto buffAbilityButton = AbilityButtonFactory::create(registry, engine->getAssetManager(), buffBtnData, buffPosition, 1);
     APP_LOG("Buff ability button created with entity ID: %d", static_cast<int>(buffAbilityButton));
 
+    auto damageBtnData = engine->getDataManager().getDamageAbilityButtonData();
+    Vector2 damagePosition = {GetScreenWidth() * damageBtnData.relPosX, GetScreenHeight() * damageBtnData.relPosY};
+    auto damageAbilityButton = AbilityButtonFactory::create(registry, engine->getAssetManager(), damageBtnData, damagePosition, 2);
+    APP_LOG("Damaging ability button created with entity ID: %d", static_cast<int>(damageAbilityButton));
+
     // Add map background entity
     auto mapEntity = MapFactory::create(registry, engine->getAssetManager(), lData);
     APP_LOG("Map loaded with entity ID: %d", static_cast<int>(mapEntity));

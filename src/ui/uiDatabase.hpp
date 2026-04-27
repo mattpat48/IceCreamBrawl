@@ -32,7 +32,7 @@ public:
             220, 200,           // Dimensioni sprite
             {1.0f, 1.0f},     // Scala
             0, 2, 0, 0.1f,    // Animazione
-            0.25f, 0.75f      // Posizione: 25% schermo orizzontale, 75% verticale
+            0.16f, 0.83f      // Curva sinistra: nodo basso
         };
     }
 
@@ -46,7 +46,7 @@ public:
             220, 200,
             {1.0f, 1.0f},
             0, 2, 0, 0.1f,
-            0.40f, 0.75f
+            0.21f, 0.71f
         };
     }
 
@@ -56,7 +56,17 @@ public:
             220, 200,
             {1.0f, 1.0f},
             0, 2, 0, 0.1f,
-            0.55f, 0.75f
+            0.25f, 0.59f
+        };
+    }
+
+    static ButtonStaticData getDamageAbilityButtonData() {
+        return {
+            "resources/sprites/buttons/primary.png",
+            220, 200,
+            {1.0f, 1.0f},
+            0, 2, 0, 0.1f,
+            0.28f, 0.47f
         };
     }
 };

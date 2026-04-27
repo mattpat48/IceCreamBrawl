@@ -49,7 +49,7 @@ public:
             100.0f, 50.0f, 2.0f, 5.0f,	 // maxHealth, maxEndurance, healthRegenRate, enduranceRegenRate
 			15.0f, 						 // baseDamage
             10.0f, 0.0f, 150.0f,         // attackCost, attackCooldown, attackRange
-            AttackRange::MELEE, AttackType::AOE, AttackShape::CIRCLE, 0.0f // attack pattern
+            AttackRange::MELEE, AttackType::AOE, AttackShape::CONE, 120.0f // attack pattern
         };
     } 
 

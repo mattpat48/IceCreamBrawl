@@ -17,5 +17,6 @@ public:
     ButtonStaticData getPrimaryButtonData() const { return UIDatabase::getPrimaryAttackButtonData(); }
     ButtonStaticData getDebuffAbilityButtonData() const { return UIDatabase::getDebuffAbilityButtonData(); }
     ButtonStaticData getBuffAbilityButtonData() const { return UIDatabase::getBuffAbilityButtonData(); }
+    ButtonStaticData getDamageAbilityButtonData() const { return UIDatabase::getDamageAbilityButtonData(); }
     JoystickStaticData getJoystickData() const { return UIDatabase::getJoystickData(); }
 };

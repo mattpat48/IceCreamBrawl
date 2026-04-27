@@ -176,6 +176,18 @@ struct attack_feedback {
     entt::entity target; // Usato solo se type == TARGET
 };
 
+struct skill_cast_feedback {
+    float lifetime = 0.0f;
+    float maxLifetime = 0.0f;
+    float frameTime = 0.1f;
+    int frameCount = 5;
+    AttackShape shape = AttackShape::CIRCLE;
+    float angle = 0.0f;
+    float range = 0.0f;
+    Vector2 origin = {0.0f, 0.0f};
+    Vector2 direction = {0.0f, 1.0f};
+};
+
 // Campo extra sul player per lanciare il proiettile ranged senza metterlo nelle playerTextures.
 struct ranged_projectile_emitter {
     std::shared_ptr<raylib::Texture2D> texture;
@@ -215,15 +227,14 @@ struct ability {
     }
 };
 
-enum class AbilityType {
-    BUFFING,
-    DEBUFFING,
-    DAMAGING
+enum class SkillCastKind {
+    MELEE_AOE,
+    RANGED_TARGET
 };
 
 struct ability_definition {
     std::string name;
-    AbilityType type = AbilityType::BUFFING;
+    SkillCastKind castKind = SkillCastKind::RANGED_TARGET;
     float cost = 0.0f;
     float cooldown = 0.0f;
     float currentCooldown = 0.0f;
@@ -309,6 +320,11 @@ struct special {
 
 struct attack_intent {
 
+};
+
+struct skill_attack_intent {
+    int abilityIndex = -1;
+    entt::entity target = entt::null;
 };
 
 // Governa il lock movimento durante la fase di wind-up degli attacchi.

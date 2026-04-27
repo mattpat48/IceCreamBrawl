@@ -4,8 +4,6 @@
 #include "defines/events.hpp"
 #include "input/inputSystem.hpp"
 #include "player/playerStatus.hpp"
-#include "skills/skillsDatabase.hpp"
-
 #include <raymath.h>
 
 class playerScripts : public Script {
@@ -135,10 +133,19 @@ public:
         }
 
         enduranceComp->consume(abilityDef.cost);
-        auto* playerStatusComp = registry->try_get<status>(entity);
-        if (playerStatusComp) {
-            playerStatusComp->status = (event.abilitySlot == 0) ? StatusType::ABILITY1 : StatusType::ABILITY2;
+
+        if (abilityDef.castKind == SkillCastKind::MELEE_AOE) {
+            auto* playerStatusComp = registry->try_get<status>(entity);
+            if (playerStatusComp) {
+                playerStatusComp->status = (event.abilitySlot == 0) ? StatusType::ABILITY1 : StatusType::ABILITY2;
+            }
+
+            registry->emplace_or_replace<skill_attack_intent>(entity, event.abilitySlot);
+            abilityDef.currentCooldown = abilityDef.cooldown;
+            event.handled = true;
+            return;
         }
+
         targeting->pendingAbilityIndex = event.abilitySlot;
         event.handled = true;
     }
@@ -177,14 +184,6 @@ public:
                     continue;
                 }
 
-                const bool isEnemy = registry->any_of<is_enemy>(candidate);
-                if (abilityDef.type == AbilityType::DEBUFFING && !isEnemy) {
-                    continue;
-                }
-                if (abilityDef.type == AbilityType::BUFFING && isEnemy) {
-                    continue;
-                }
-
                 auto& t = candidates.get<transform>(candidate);
                 auto& c = candidates.get<collider>(candidate);
                 const Rectangle rect = c.getRect(t.position);
@@ -209,19 +208,12 @@ public:
             return;
         }
 
-        const SkillEffectDefinition* effectDef = SkillsDatabase::getStatusEffectDefinition(abilityDef.statusEffectId);
-        if (!effectDef) {
-            return;
+        auto* playerStatusComp = registry->try_get<status>(entity);
+        if (playerStatusComp) {
+            playerStatusComp->status = (abilityIndex == 0) ? StatusType::ABILITY1 : StatusType::ABILITY2;
         }
 
-        status_effect_instance incomingEffect;
-        incomingEffect.skillId = abilityDef.statusEffectId;
-        incomingEffect.source = entity;
-        incomingEffect.remainingTime = effectDef->duration;
-
-        auto& effects = registry->get_or_emplace<status_effects>(target);
-        effects.addOrRefresh(incomingEffect);
-
+        registry->emplace_or_replace<skill_attack_intent>(entity, abilityIndex, target);
         loadout->abilities[abilityIndex].currentCooldown = loadout->abilities[abilityIndex].cooldown;
         targeting->clear();
         event.handled = true;
