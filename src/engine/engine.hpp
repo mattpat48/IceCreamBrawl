@@ -36,7 +36,7 @@ public:
 
             screenManager.update(delta);
             // Update streaming music buffers
-            audioManager.updateMusicStreams();
+            // audioManager.updateMusicStreams();
 
             BeginDrawing();
             ClearBackground(LIGHTGRAY);
@@ -53,12 +53,8 @@ public:
 
     ScreenManager& getScreenManager() { return screenManager; }
     AssetManager& getAssetManager() { return assetManager; }
-    AudioManager& getAudioManager() { return audioManager; }
-    EventManager& getEventManager() { return eventManager; }
 
 private:
     ScreenManager screenManager;
     AssetManager assetManager;
-    AudioManager audioManager;
-    EventManager eventManager;
 };

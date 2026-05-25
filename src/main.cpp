@@ -1,8 +1,8 @@
 #include "raylib.h"
+#include "raylib-cpp.hpp"
+
 #include "engine/engine.hpp"
-
-#include "screens/menu/menuScreen.hpp"
-
+#include "screens/game/gameScreen.hpp"
 #include <iostream>
 
 class Game : public Engine {
@@ -20,7 +20,8 @@ int main() {
 
     Game engine(width, height);
 
-    engine.setScreen(std::make_unique<MenuScreen>());
+    // set to landing page in the future, for now just start with the game screen
+    engine.setScreen(std::make_unique<GameScreen>());
     
     engine.run();
 
