@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/components.hpp"
+#include "defines/general.hpp"
 #include "scripts/script.hpp"
 #include <entt/entt.hpp>
 #include <iostream>
@@ -28,7 +29,7 @@ public:
 
         // Example logic to update player status
         if (healthComp->life <= 0 && !statusComp->isDead()) {
-            statusComp->status = DEAD; // Set status to DEAD
+            statusComp->status = static_cast<int>(EntityStatus::DEAD); // Set status to DEAD
             std::cout << "Entity is dead!" << std::endl;
             spriteComp->currentTexture = "death"; // Change texture to death
             animationComp->currentFrame = animationComp->startFrame; // Reset animation frame to start frame
@@ -37,7 +38,7 @@ public:
 
         if (statusComp->isAttacking() && animationComp->currentFrame == animationComp->endFrame) {
             std::cout << "Reset after attack" << std::endl;
-            statusComp->status = IDLE;
+            statusComp->status = static_cast<int>(EntityStatus::IDLE);
             spriteComp->currentTexture = "idle"; // Reset to idle texture after attack
             attackComp->currentCooldown = attackComp->cooldown; // Reset attack cooldown
             if (attackComp->modifier) {

@@ -1,5 +1,5 @@
 #include "gameScreen.hpp"
-#include "engine/scripts/entities/player/playerFactory.hpp"
+#include "scripts/entities/player/playerFactory.hpp"
 #include "engine/engine.hpp"
 
 void GameScreen::load(entt::registry& globalRegistry) {

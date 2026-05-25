@@ -5,7 +5,7 @@
 #include "raylib-cpp.hpp"
 #include "engine/assetManager.hpp"
 #include "components/components.hpp"
-#include "defines/defines_player.h"
+#include "defines/general.hpp"
 #include "scripts/entities/player/playerScripts.hpp"
 #include <memory>
 #include <unordered_map>
@@ -30,7 +30,7 @@ public:
         registry.emplace<animation>(playerEntity, 0, 0, 7, 1, 0.1f, 0.0f, true, 0);
         registry.emplace<script>(playerEntity).bind<playerScripts>(playerEntity, registry);
         registry.emplace<hitFlash>(playerEntity);
-        registry.emplace<status>(playerEntity, IDLE);
+        registry.emplace<status>(playerEntity, static_cast<int>(EntityStatus::IDLE));
         
         registry.emplace<health>(playerEntity, PlayerBaseStats::MAX_HEALTH, PlayerBaseStats::MAX_HEALTH, PlayerBaseStats::REGEN_HEALTH);
         registry.emplace<endurance>(playerEntity, PlayerBaseStats::MAX_ENDURANCE, PlayerBaseStats::MAX_ENDURANCE, PlayerBaseStats::REGEN_ENDURANCE);

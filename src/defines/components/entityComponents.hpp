@@ -1,9 +1,9 @@
 #pragma once
 
 #include "scripts/script.hpp"
-#include "defines_general.h"
 
 #include <entt/entt.hpp>
+#include "defines/general.hpp"
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
@@ -16,20 +16,20 @@ struct status {
     int status;
 
     bool isIdle() const {
-        return status == IDLE;
+            return status == static_cast<int>(EntityStatus::IDLE);
     }
     bool isAttacking() const {
-        return status == ATTACK;
+            return status == static_cast<int>(EntityStatus::ATTACK);
     }
     bool isDodging() const {
-        return status == DODGE;
+            return status == static_cast<int>(EntityStatus::DODGE);
     }
     bool isDead() const {
-        return status == DEAD;
+            return status == static_cast<int>(EntityStatus::DEAD);
     }
 
     bool isHurt() const {
-        return status == HURT;
+            return status == static_cast<int>(EntityStatus::HURT);
     }
 };
 
