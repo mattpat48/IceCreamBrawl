@@ -1,7 +1,7 @@
 #include "raylib.h"
 #include "engine/engine.hpp"
 
-#include "screens/game/gameScreen.hpp"
+#include "screens/menu/menuScreen.hpp"
 
 #include <iostream>
 
@@ -20,7 +20,7 @@ int main() {
 
     Game engine(width, height);
 
-    engine.setScreen(std::make_unique<GameScreen>());
+    engine.setScreen(std::make_unique<MenuScreen>());
     
     engine.run();
 
