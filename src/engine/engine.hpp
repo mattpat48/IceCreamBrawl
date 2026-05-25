@@ -5,6 +5,8 @@
 
 #include "screenManager.hpp"
 #include "assetManager.hpp"
+#include "audioManager.hpp"
+#include "eventManager.hpp"
 
 class Engine {
 public:
@@ -35,6 +37,8 @@ public:
             float delta = GetFrameTime();
 
             screenManager.update(delta);
+            // Update streaming music buffers
+            audioManager.updateMusicStreams();
 
             BeginDrawing();
             ClearBackground(LIGHTGRAY);
@@ -51,8 +55,12 @@ public:
 
     ScreenManager& getScreenManager() { return screenManager; }
     AssetManager& getAssetManager() { return assetManager; }
+    AudioManager& getAudioManager() { return audioManager; }
+    EventManager& getEventManager() { return eventManager; }
 
 private:
     ScreenManager screenManager;
     AssetManager assetManager;
+    AudioManager audioManager;
+    EventManager eventManager;
 };
