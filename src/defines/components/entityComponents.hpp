@@ -1,169 +1,46 @@
 #pragma once
 
 #include "scripts/script.hpp"
+#include "entityComponents.hpp"
 
-#include <entt/entt.hpp>
-#include "defines/general.hpp"
-#include "raylib.h"
-#include "raylib-cpp.hpp"
-
-struct hitFlash {
-    Color filter = WHITE;
-    float timeFlash = 0.0f;
+struct sprite {
+    std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;
+    std::string currentTexture;
+    int width;
+    int height;
 };
 
-struct status {
-    int status;
-
-    bool isIdle() const {
-            return status == static_cast<int>(EntityStatus::IDLE);
-    }
-    bool isAttacking() const {
-            return status == static_cast<int>(EntityStatus::ATTACK);
-    }
-    bool isDodging() const {
-            return status == static_cast<int>(EntityStatus::DODGE);
-    }
-    bool isDead() const {
-            return status == static_cast<int>(EntityStatus::DEAD);
-    }
-
-    bool isHurt() const {
-            return status == static_cast<int>(EntityStatus::HURT);
-    }
+struct transform {
+    raylib::Vector2 position;
+    raylib::Vector2 scale;
+    float rotation;
 };
 
-struct health {
-    float life;
-    float maxLife;
-    float regenRate; // amount of health regenerated per 1/2 second
-
-    void reset() {
-        life = maxLife;
-    }
-    void consume(float amount) {
-        life -= amount;
-        if (life < 0) {
-            life = 0;
-        }
-    }
-
-    void regen(float amount) {
-        life += amount;
-        if (life > maxLife) {
-            life = maxLife;
-        }
-    }
+struct velocity {
+    float dx;
+    float dy;
 };
 
-struct endurance {
-    float stamina;
-    float maxStamina;
-    float regenRate; // amount of stamina regenerated per 1/2 second
-
-    void reset() {
-        stamina = maxStamina;
-    }
-    void consume(float amount) {
-        stamina -= amount;
-        if (stamina < 0) {
-            stamina = 0;
-        }
-    }
-
-    void regen(float amount) {
-        stamina += amount;
-        if (stamina > maxStamina) {
-            stamina = maxStamina;
-        }
-    }
+struct animation {
+    int currentFrame;
+    int startFrame;
+    int endFrame;
+    int row;
+    float frameTime;
+    float timer;
+    bool isPlaying;
+    int direction;
 };
 
-struct damage {
-    float damage;
-    float currentDamage;
-    float modifier;
-    float multiplier;
+struct script {
+    std::unique_ptr<Script> instance = nullptr;
 
-    void reset() {
-        currentDamage = damage;
-    }
-    void applyModifier(float mod) {
-        modifier = mod;
-        currentDamage = damage + modifier;
-    }
-    void applyMultiplier(float mult) {
-        multiplier = mult;
-        currentDamage = damage * multiplier;
-    }
-};
-
-struct attack {
-    float cost;
-    float cooldown;
-    bool modifier;
-    float cooldownModifier;
-    float currentCooldown;
-
-    void reset() {
-        currentCooldown = 0.0f;
-    }
-    bool isReady() const {
-        return currentCooldown <= 0.0f;
-    }
-    bool canAttack(float stamina) const {
-        return isReady() && stamina >= cost;
-    }
-    void updateCooldown(float delta) {
-        if (currentCooldown > 0.0f) {
-            currentCooldown -= delta;
-            if (currentCooldown < 0.0f) {
-                reset();
-            }
-        }
-    }
-};
-
-struct ability {
-    std::string name;
-    float cost;
-    float cooldown;
-    float currentCooldown;
-
-    void reset() {
-        currentCooldown = 0.0f;
-    }
-    bool isReady() const {
-        return currentCooldown <= 0.0f;
-    }
-    void updateCooldown(float delta) {
-        if (currentCooldown > 0.0f) {
-            currentCooldown -= delta;
-            if (currentCooldown < 0.0f) {
-                currentCooldown = 0.0f;
-            }
-        }
-    }
-};
-
-struct special {
-    std::string name;
-    float cost;
-    float cooldown;
-    float currentCooldown;
-
-    void reset() {
-        currentCooldown = 0.0f;
-    }
-    bool isReady() const {
-        return currentCooldown <= 0.0f;
-    }
-    void updateCooldown(float delta) {
-        if (currentCooldown > 0.0f) {
-            currentCooldown -= delta;
-            if (currentCooldown < 0.0f) {
-                currentCooldown = 0.0f;
-            }
-        }
+    template <typename T, typename... Args>
+    T& bind(entt::entity ownerEntity, entt::registry& reg, Args&&... args) {
+        instance = std::make_unique<T>(std::forward<Args>(args)...);
+        instance->entity = ownerEntity;
+        instance->registry = &reg;
+        instance->onCreate();
+        return *static_cast<T*>(instance.get());
     }
 };
