@@ -12,6 +12,8 @@ public:
 	void update(float delta) override;
 	void draw() override;
 	void unload(entt::registry& globalRegistry) override;
+
+	void loadAssets();
 	virtual ~GameScreen() = default;
 protected:
 	entt::entity playerEntity;

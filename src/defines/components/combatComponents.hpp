@@ -1,11 +1,11 @@
 #pragma once
 
-#include "scripts/script.hpp"
-
-#include <entt/entt.hpp>
-#include "defines/general.hpp"
 #include "raylib.h"
 #include "raylib-cpp.hpp"
+#include "entt/entt.hpp"
+
+#include "scripts/script.hpp"
+#include "defines/general.hpp"
 
 struct hitFlash {
     Color filter = WHITE;

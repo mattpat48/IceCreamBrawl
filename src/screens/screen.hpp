@@ -1,10 +1,11 @@
 #pragma once
 
 #include <iostream>
-
-#include "components/components.hpp"
-#include "defines/general.hpp"
 #include <entt/entt.hpp>
+
+#include "defines/components/entityComponents.hpp"
+#include "defines/components/combatComponents.hpp"
+#include "defines/general.hpp"
 
 class Engine;
 
@@ -117,10 +118,10 @@ public:
             if (a.isPlaying) {
                 if (std::abs(v.dx) > std::abs(v.dy)) {
                     // Horizontal movement dominates
-                    a.row = (v.dx > 0) ? static_cast<int>(directions::RIGHT) : static_cast<int>(directions::LEFT);  // right : left
+                    a.row = (v.dx > 0) ? static_cast<int>(Directions::RIGHT) : static_cast<int>(Directions::LEFT);  // right : left
                 } else if (v.dy != 0) {
                     // Vertical movement dominates
-                    a.row = (v.dy > 0) ? static_cast<int>(directions::DOWN) : static_cast<int>(directions::UP);  // down : up
+                    a.row = (v.dy > 0) ? static_cast<int>(Directions::DOWN) : static_cast<int>(Directions::UP);  // down : up
                 }
 
                 a.timer += dt;

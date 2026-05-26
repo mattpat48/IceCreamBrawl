@@ -2,10 +2,10 @@
 
 #include "raylib.h"
 #include "raylib-cpp.hpp"
-
 #include <entt/entt.hpp>
-
 #include <memory>
+
+#include "utils/log.h"
 
 class AssetManager {
 public:
@@ -19,6 +19,7 @@ public:
 		} else {
 			auto texture = std::make_shared<raylib::Texture2D>(path);
 			textures[path] = texture;
+			ICB_LOGI("Loaded texture: %s", path.c_str());
 			return texture;
 		}
 	}
@@ -30,6 +31,7 @@ public:
 		} else {
 			auto sound = std::make_shared<raylib::Sound>(path);
 			sounds[path] = sound;
+			ICB_LOGI("Loaded sound: %s", path.c_str());
 			return sound;
 		}
 	}

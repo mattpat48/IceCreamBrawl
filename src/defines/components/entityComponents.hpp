@@ -1,5 +1,8 @@
 #pragma once
 
+#include "raylib.h"
+#include "raylib-cpp.hpp"
+
 #include "scripts/script.hpp"
 #include "entityComponents.hpp"
 

@@ -171,10 +171,10 @@ $BUILD_TOOLS/zipalign -f 4 game.apk game.final.apk
 mv -f game.final.apk game.apk
 
 apksigner sign --ks android/raylib.keystore --out my-app-release.apk --ks-pass pass:raylib game.apk
-mv my-app-release.apk game.apk
+mv my-app-release.apk icb.apk
 
 # Installa sul dispositivo / emulatore
-android/sdk/platform-tools/adb install -r game.apk
+android/sdk/platform-tools/adb install -r icb.apk
 
 find src -name "*.o" -type f -delete
 rm -rf android/build/obj/*
