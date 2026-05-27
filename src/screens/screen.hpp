@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include "defines/components/entityComponents.hpp"
 #include "defines/components/combatComponents.hpp"
@@ -13,6 +13,7 @@ class Screen {
 
 protected:
     entt::registry registry;
+    entt::dispatcher dispatcher;
     Engine* engine = nullptr;
 
 public:
@@ -139,4 +140,8 @@ public:
     }
 
     virtual ~Screen() = default;
+    // Return pointer to this screen's dispatcher stored in the registry context
+    entt::dispatcher* getDispatcherPtr() {
+        return &dispatcher;
+    }
 };

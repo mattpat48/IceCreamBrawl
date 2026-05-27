@@ -5,6 +5,7 @@
 #include "entt/entt.hpp"
 
 #include "screens/screen.hpp"
+#include "defines/events/gestureEvents.hpp"
 
 class GameScreen : public Screen {
 public:
@@ -13,9 +14,15 @@ public:
 	void draw() override;
 	void unload(entt::registry& globalRegistry) override;
 
+	void handleTap(TapEvent& e);
+	void handleSwipe(SwipeEvent& e);
+	void handleLongTap(LongTapEvent& e);
+
 	void loadAssets();
 	virtual ~GameScreen() = default;
 protected:
 	entt::entity playerEntity;
 	entt::entity enemyEntity;
+
+	std::string gesture; 
 };

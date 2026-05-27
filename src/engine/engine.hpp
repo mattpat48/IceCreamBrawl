@@ -5,6 +5,7 @@
 
 #include "screenManager.hpp"
 #include "assetManager.hpp"
+#include "inputManager.hpp"
 
 class Engine {
 public:
@@ -17,11 +18,15 @@ public:
 
     void setScreen(std::unique_ptr<Screen> screen) {
         screen->setEngine(this);
+        // Pass the new screen's dispatcher to the input manager before setting the screen
+        inputManager.setDispatcher(screen->getDispatcherPtr());
         screenManager.setScreen(std::move(screen));
     }
 
     void pushScreen(std::unique_ptr<Screen> screen) {
         screen->setEngine(this);
+        // Pass the new screen's dispatcher to the input manager before pushing
+        inputManager.setDispatcher(screen->getDispatcherPtr());
         screenManager.pushScreen(std::move(screen)); 
     }
 
@@ -33,6 +38,9 @@ public:
         while (!WindowShouldClose()) {
 
             float delta = GetFrameTime();
+
+            // Poll input and emit gesture events for the active screen
+            inputManager.update(delta);
 
             screenManager.update(delta);
             // Update streaming music buffers
@@ -58,4 +66,5 @@ public:
 private:
     ScreenManager screenManager;
     AssetManager assetManager;
+    InputManager inputManager;
 };

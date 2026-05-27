@@ -2,7 +2,7 @@
 
 #include "raylib.h"
 #include "raylib-cpp.hpp"
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 #include <memory>
 
 #include "utils/log.h"

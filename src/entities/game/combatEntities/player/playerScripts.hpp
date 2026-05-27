@@ -4,7 +4,7 @@
 #include "scripts/general/controller.hpp"
 #include "scripts/general/buttons.hpp"
 #include "scripts/entities/entityStatus.hpp"
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include "raylib.h"
 #include "raylib-cpp.hpp"
