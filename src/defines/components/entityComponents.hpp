@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
-#include "scripts/script.hpp"
+#include "entities/script.hpp"
 #include "entityComponents.hpp"
 
 struct sprite {

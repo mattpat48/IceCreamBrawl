@@ -170,12 +170,12 @@ cd ../..
 $BUILD_TOOLS/zipalign -f 4 game.apk game.final.apk
 mv -f game.final.apk game.apk
 
-apksigner sign --ks android/raylib.keystore --out my-app-release.apk --ks-pass pass:raylib game.apk
-mv my-app-release.apk icb.apk
-
-# Installa sul dispositivo / emulatore
-android/sdk/platform-tools/adb install -r icb.apk
+apksigner sign --ks android/raylib.keystore --out icb.apk --ks-pass pass:raylib game.apk
+rm -f game.apk
 
 find src -name "*.o" -type f -delete
 rm -rf android/build/obj/*
 rm -rf $NATIVE_APP_GLUE/*.o
+
+# Installa sul dispositivo / emulatore
+android/sdk/platform-tools/adb install -r icb.apk

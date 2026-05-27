@@ -42,6 +42,7 @@ public:
             ClearBackground(LIGHTGRAY);
 
             DrawFPS(10, 10);
+            DrawGrid(10, 10);
             screenManager.draw();
 
             EndDrawing();

@@ -57,28 +57,28 @@ public:
     }
 
     const EntityInfo* getCombatEntityInfo(const std::string& entityId) const {
-        auto it = combatEntities.find(entityId);
-        if (it != combatEntities.end()) {
+        auto it = combatData.find(entityId);
+        if (it != combatData.end()) {
             return &it->second;
         }
         return nullptr;
     }
 
-    const EntityInfo* getUIEntityInfo(const std::string& entityId) const {
-        auto it = uiEntities.find(entityId);
-        if (it != uiEntities.end()) {
+    const EntityInfo* getEntityInfo(const std::string& entityId) const {
+        auto it = entityData.find(entityId);
+        if (it != entityData.end()) {
             return &it->second;
         }
         return nullptr;
     }
 
 private:
-    std::unordered_map<std::string, EntityInfo> combatEntities;
-    std::unordered_map<std::string, EntityInfo> uiEntities;
+    std::unordered_map<std::string, EntityInfo> combatData;
+    std::unordered_map<std::string, EntityInfo> entityData;
 
     EntityDatabase() {
         // Database di entità predefinite
-        combatEntities["player"] = EntityInfo{
+        entityData["player"] = EntityInfo{
             .id = "player",
             .textures = {
                 {"idle", "resources/sprites/player/idle.png"},
@@ -104,7 +104,7 @@ private:
             }
         };
 
-        combatEntities["enemy"] = EntityInfo{
+        entityData["enemy"] = EntityInfo{
             .id = "enemy",
             .textures = {
                 {"idle", "resources/sprites/enemy/idle.png"},

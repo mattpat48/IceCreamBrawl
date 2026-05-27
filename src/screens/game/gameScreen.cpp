@@ -1,7 +1,7 @@
 #include "gameScreen.hpp"
 
 #include "engine.hpp"
-#include "scripts/entities/entityFactory.hpp"
+#include "entities/game/entityFactory.hpp"
 
 void GameScreen::loadAssets() {
 }

@@ -4,7 +4,7 @@
 #include "raylib-cpp.hpp"
 #include "entt/entt.hpp"
 
-#include "scripts/script.hpp"
+#include "entities/script.hpp"
 #include "defines/general.hpp"
 
 struct hitFlash {
