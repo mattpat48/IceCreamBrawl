@@ -56,20 +56,29 @@ public:
         return instance;
     }
 
-    const EntityInfo* getEntityInfo(const std::string& entityId) const {
-        auto it = entities.find(entityId);
-        if (it != entities.end()) {
+    const EntityInfo* getCombatEntityInfo(const std::string& entityId) const {
+        auto it = combatEntities.find(entityId);
+        if (it != combatEntities.end()) {
+            return &it->second;
+        }
+        return nullptr;
+    }
+
+    const EntityInfo* getUIEntityInfo(const std::string& entityId) const {
+        auto it = uiEntities.find(entityId);
+        if (it != uiEntities.end()) {
             return &it->second;
         }
         return nullptr;
     }
 
 private:
-    std::unordered_map<std::string, EntityInfo> entities;
+    std::unordered_map<std::string, EntityInfo> combatEntities;
+    std::unordered_map<std::string, EntityInfo> uiEntities;
 
     EntityDatabase() {
         // Database di entità predefinite
-        entities["player"] = EntityInfo{
+        combatEntities["player"] = EntityInfo{
             .id = "player",
             .textures = {
                 {"idle", "resources/sprites/player/idle.png"},
@@ -95,7 +104,7 @@ private:
             }
         };
 
-        entities["enemy"] = EntityInfo{
+        combatEntities["enemy"] = EntityInfo{
             .id = "enemy",
             .textures = {
                 {"idle", "resources/sprites/enemy/idle.png"},
@@ -116,30 +125,6 @@ private:
                 .startFrame = 0,
                 .endFrame = 6,
                 .frameTime = 0.12f,
-                .row = 0,
-                .direction = 0
-            }
-        };
-
-        entities["npc"] = EntityInfo{
-            .id = "npc",
-            .textures = {
-                {"idle", "resources/sprites/npc/idle.png"}
-            },
-            .spriteWidth = 32,
-            .spriteHeight = 32,
-            .transform = {
-                .posX = 300.0f,
-                .posY = 200.0f,
-                .scaleX = 1.0f,
-                .scaleY = 1.0f,
-                .rotation = 0.0f
-            },
-            .velocity = {.dx = 0.0f, .dy = 0.0f},
-            .animation = {
-                .startFrame = 0,
-                .endFrame = 3,
-                .frameTime = 0.15f,
                 .row = 0,
                 .direction = 0
             }

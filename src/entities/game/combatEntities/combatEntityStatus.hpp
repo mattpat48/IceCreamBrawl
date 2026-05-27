@@ -1,10 +1,12 @@
 #pragma once
 
-#include "components/components.hpp"
-#include "defines/general.hpp"
-#include "scripts/script.hpp"
 #include <entt/entt.hpp>
 #include <iostream>
+
+#include "defines/general.hpp"
+#include "defines/components/combatComponents.hpp"
+#include "defines/components/entityComponents.hpp"
+#include "scripts/script.hpp"
 
 class entityStatus : public Script {
 public:

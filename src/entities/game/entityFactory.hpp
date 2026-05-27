@@ -8,7 +8,7 @@
 #include "defines/components/combatComponents.hpp"
 #include "defines/general.hpp"
 #include "engine/assetManager.hpp"
-#include "scripts/entities/entityInfos.hpp"
+#include "entities/game/entityInfos.hpp"
 #include "utils/log.h"
 
 namespace EntityFactory {
@@ -60,11 +60,19 @@ namespace EntityFactory {
 		// TODO: Implement combat components
 	}
 
-	entt::entity createEntity(entt::registry& registry, AssetManager& assetManager, const std::string& entityTypeId) {
+	entt::entity createCombatEntity(entt::registry& registry, AssetManager& assetManager, const std::string& entityTypeId) {
 		entt::entity entity = registry.create();
 		
 		addEntityComponents(entity, entityTypeId, registry, assetManager);
 		addCombatComponents(entity, registry);
+		
+		return entity;
+	}
+
+	entt::entity createEntity(entt::registry& registry, AssetManager& assetManager, const std::string& entityTypeId) {
+		entt::entity entity = registry.create();
+		
+		addEntityComponents(entity, entityTypeId, registry, assetManager);
 		
 		return entity;
 	}
