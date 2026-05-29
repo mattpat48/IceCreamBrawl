@@ -167,3 +167,9 @@ struct special {
         }
     }
 };
+
+struct gridInfo {
+    Rows row;
+    Columns column;
+    bool isExclusive;
+};

@@ -6,12 +6,12 @@
 #include "defines/general.hpp"
 #include "defines/components/combatComponents.hpp"
 #include "defines/components/entityComponents.hpp"
-#include "scripts/script.hpp"
+#include "entities/script.hpp"
 
-class entityStatus : public Script {
+class combatEntityStatus : public Script {
 public:
-    entityStatus() {
-        std::cout << "entityStatus creato per entità: " << static_cast<uint32_t>(entity) << std::endl;
+    combatEntityStatus() {
+        std::cout << "combatEntityStatus creato per entità: " << static_cast<uint32_t>(entity) << std::endl;
     }
 
     void onUpdate(float dt) override {

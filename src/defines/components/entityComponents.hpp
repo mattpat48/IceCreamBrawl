@@ -8,6 +8,7 @@
 
 struct sprite {
     std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;
+    std::unordered_map<std::string, std::string> texturePaths;
     std::string currentTexture;
     int width;
     int height;

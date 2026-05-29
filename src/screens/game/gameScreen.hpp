@@ -6,9 +6,11 @@
 
 #include "screens/screen.hpp"
 #include "defines/events/gestureEvents.hpp"
+#include "entities/game/uiEntities/grid/grid.hpp"
 
 class GameScreen : public Screen {
 public:
+
 	void load(entt::registry& globalRegistry) override;
 	void update(float delta) override;
 	void draw() override;
@@ -24,5 +26,7 @@ protected:
 	entt::entity playerEntity;
 	entt::entity enemyEntity;
 
-	std::string gesture; 
+	std::string gesture;
+
+	grid gridInstance;
 };

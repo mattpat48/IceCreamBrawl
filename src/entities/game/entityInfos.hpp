@@ -6,46 +6,30 @@
 #include <vector>
 #include <unordered_map>
 
-// Struttura per le informazioni delle texture di una entità
-struct TextureInfo {
-    std::string name;
-    std::string path;
-};
+#include "defines/components/entityComponents.hpp"
+#include "defines/components/combatComponents.hpp"
+#include "defines/general.hpp"
 
-// Struttura per le informazioni di animazione
-struct AnimationInfo {
-    int startFrame = 0;
-    int endFrame = 7;
-    float frameTime = 0.1f;
-    int row = 0;
-	int direction = 0; // 0: up, 1: right, 2: down, 3: left
-};
-
-// Struttura per le informazioni di trasformazione
-struct TransformInfo {
-    float posX = 0.0f;
-    float posY = 0.0f;
-    float scaleX = 1.0f;
-    float scaleY = 1.0f;
-    float rotation = 0.0f;
-};
-
-// Struttura per le informazioni di velocità
-struct VelocityInfo {
-    float dx = 0.0f;
-    float dy = 0.0f;
-};
-
-// Struttura principale che contiene tutte le info di una entità
 struct EntityInfo {
     std::string id;
-    std::vector<TextureInfo> textures;
-    int spriteWidth = 32;
-    int spriteHeight = 32;
-    TransformInfo transform;
-    VelocityInfo velocity;
-    AnimationInfo animation;
-    // Ulteriori info per combat possono essere aggiunte qui
+    sprite spriteData;
+    transform transformData;
+    velocity velocityData;
+    animation animationData;
+};
+
+struct CombatInfo {
+    std::string id;
+    /*
+    float maxHealth;
+    float maxEndurance;
+    float regenHealth;
+    float regenEndurance;
+    float baseDamage;
+    float attackRange;
+    float attackCooldown;
+    */
+    gridInfo gridData;
 };
 
 // Database di entità predefinite
@@ -56,7 +40,7 @@ public:
         return instance;
     }
 
-    const EntityInfo* getCombatEntityInfo(const std::string& entityId) const {
+    const CombatInfo* getCombatEntityInfo(const std::string& entityId) const {
         auto it = combatData.find(entityId);
         if (it != combatData.end()) {
             return &it->second;
@@ -72,61 +56,135 @@ public:
         return nullptr;
     }
 
+    Vector2 getCellCenter(Rows row, Columns column) const {
+        return gridPositions[static_cast<int>(row)][static_cast<int>(column)];
+    }
+
 private:
-    std::unordered_map<std::string, EntityInfo> combatData;
+    float cellSize;
+    Vector2 gridPositions[GridVariables::GRID_ROWS][GridVariables::GRID_COLUMNS];
+
+    std::unordered_map<std::string, CombatInfo> combatData;
     std::unordered_map<std::string, EntityInfo> entityData;
 
     EntityDatabase() {
-        // Database di entità predefinite
-        entityData["player"] = EntityInfo{
-            .id = "player",
-            .textures = {
-                {"idle", "resources/sprites/player/idle.png"},
-                {"attack", "resources/sprites/player/attack.png"},
-                {"death", "resources/sprites/player/death.png"}
+        cellSize = GetScreenWidth() / static_cast<float>(GridVariables::GRID_COLUMNS);
+        gridPositions[0][0] = Vector2{ cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f - cellSize / 2.0f };
+        gridPositions[0][1] = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 3.0f * 2.0f - cellSize / 2.0f };
+        gridPositions[0][2] = Vector2{ GetScreenWidth() - cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f - cellSize / 2.0f };
+        gridPositions[1][0] = Vector2{ cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f + cellSize / 2.0f };
+        gridPositions[1][1] = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 3.0f * 2.0f + cellSize / 2.0f };
+        gridPositions[1][2] = Vector2{ GetScreenWidth() - cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f + cellSize / 2.0f };
+
+        entityData["undefined"] = EntityInfo{
+            .id = "undefined",
+            .spriteData = {
+                .textures = {},
+                .currentTexture = "",
+                .width = 0,
+                .height = 0
             },
-            .spriteWidth = 96,
-            .spriteHeight = 80,
-            .transform = {
-                .posX = GetScreenWidth() / 2.0f,
-                .posY = GetScreenHeight() / 2.0f,
-                .scaleX = 4.0f,
-                .scaleY = 4.0f,
+            .transformData = {
+                .position = Vector2{0.0f, 0.0f},
+                .scale = Vector2{1.0f, 1.0f},
                 .rotation = 0.0f
             },
-            .velocity = {.dx = 0.0f, .dy = 0.0f},
-            .animation = {
+            .velocityData = {
+                .dx = 0.0f,
+                .dy = 0.0f
+            },
+            .animationData = {
+                .startFrame = 0,
+                .endFrame = 0,
+                .row = 0,
+                .frameTime = 0.1f,
+                .timer = 0.0f,
+                .isPlaying = false,
+                .direction = 0
+            }
+        };
+
+
+        entityData["player"] = EntityInfo{
+            .id = "player",
+            .spriteData = {
+                .textures = {
+                    {"idle", nullptr},
+                    {"attack", nullptr},
+                    {"death", nullptr}
+                },
+                .texturePaths = {
+                    {"idle", "resources/sprites/player/idle.png"},
+                    {"attack", "resources/sprites/player/attack.png"},
+                    {"death", "resources/sprites/player/death.png"},
+                },
+                .currentTexture = "idle",
+                .width = 96,
+                .height = 80
+            },
+            .transformData = {
+                .position = getCellCenter(Rows::FIRST, Columns::SECOND),
+                .scale = Vector2{4.0f, 4.0f},
+                .rotation = 0.0f
+            },
+            .velocityData = {
+                .dx = 0.0f,
+                .dy = 0.0f
+            },
+            .animationData = {
                 .startFrame = 0,
                 .endFrame = 7,
+                .row = static_cast<int>(Directions::UP),
                 .frameTime = 0.1f,
-                .row = 1,
-                .direction = 1
+                .timer = 0.0f,
+                .isPlaying = true,
+                .direction = static_cast<int>(Directions::UP)
             }
         };
 
         entityData["enemy"] = EntityInfo{
             .id = "enemy",
-            .textures = {
-                {"idle", "resources/sprites/enemy/idle.png"},
-                {"walk", "resources/sprites/enemy/walk.png"},
-                {"attack", "resources/sprites/enemy/attack.png"}
+            .spriteData = {
+                .textures = {
+                    {"idle", nullptr},
+                    {"attack", nullptr},
+                    {"death", nullptr}
+                },
+                .texturePaths = {
+                    {"idle", "resources/sprites/enemy/idle.png"},
+                    {"attack", "resources/sprites/enemy/attack.png"},
+                    {"death", "resources/sprites/enemy/death.png"},
+                },
+                .currentTexture = "idle",
+                .width = 96,
+                .height = 80
             },
-            .spriteWidth = 32,
-            .spriteHeight = 32,
-            .transform = {
-                .posX = 200.0f,
-                .posY = 150.0f,
-                .scaleX = 1.0f,
-                .scaleY = 1.0f,
+            .transformData = {
+                .position = Vector2{GetScreenWidth() / 2.0f + 150.0f, GetScreenHeight() / 2.0f},
+                .scale = Vector2{4.0f, 4.0f},
                 .rotation = 0.0f
             },
-            .velocity = {.dx = 0.0f, .dy = 0.0f},
-            .animation = {
+            .velocityData = {
+                .dx = 0.0f,
+                .dy = 0.0f
+            },
+            .animationData = {
                 .startFrame = 0,
-                .endFrame = 6,
-                .frameTime = 0.12f,
-                .row = 0,
-                .direction = 0
+                .endFrame = 7,
+                .row = static_cast<int>(Directions::DOWN),
+                .frameTime = 0.1f,
+                .timer = 0.0f,
+                .isPlaying = true,
+                .direction = static_cast<int>(Directions::DOWN)
+            }
+        };
+
+        combatData["player"] = {
+            .id = "player",
+            .gridData = {
+                .row = Rows::FIRST,
+                .column = Columns::SECOND,
+                .isExclusive = false
             }
         };
     }

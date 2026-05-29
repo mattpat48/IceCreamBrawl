@@ -21,7 +21,7 @@ public:
 
 	// Call every frame (pass delta time, though we use absolute times below)
 	void update(float dt) {
-		pollMouse();
+		//pollMouse();
 		pollTouch();
 	}
 
