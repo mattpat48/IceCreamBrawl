@@ -12,25 +12,8 @@ struct hitFlash {
     float timeFlash = 0.0f;
 };
 
-struct status {
-    int status;
-
-    bool isIdle() const {
-            return status == static_cast<int>(EntityStatus::IDLE);
-    }
-    bool isAttacking() const {
-            return status == static_cast<int>(EntityStatus::ATTACK);
-    }
-    bool isDodging() const {
-            return status == static_cast<int>(EntityStatus::DODGE);
-    }
-    bool isDead() const {
-            return status == static_cast<int>(EntityStatus::DEAD);
-    }
-
-    bool isHurt() const {
-            return status == static_cast<int>(EntityStatus::HURT);
-    }
+struct combatStatus {
+    CombatStatus status;
 };
 
 struct health {
@@ -172,4 +155,12 @@ struct gridInfo {
     Rows row;
     Columns column;
     bool isExclusive;
+};
+
+struct movementTween {
+    Vector2 startPos;
+    Vector2 targetPos;
+    float duration = 0.3f;  // 300ms
+    float elapsed = 0.0f;
+    bool active = false;
 };

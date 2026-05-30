@@ -6,6 +6,7 @@
 #include "screenManager.hpp"
 #include "assetManager.hpp"
 #include "inputManager.hpp"
+#include "movementManager.hpp"
 
 class Engine {
 public:
@@ -20,6 +21,8 @@ public:
         screen->setEngine(this);
         // Pass the new screen's dispatcher to the input manager before setting the screen
         inputManager.setDispatcher(screen->getDispatcherPtr());
+        movementManager.setRegistry(screen->getRegistryPtr());
+        movementManager.setDispatcher(screen->getDispatcherPtr());
         screenManager.setScreen(std::move(screen));
     }
 
@@ -27,6 +30,8 @@ public:
         screen->setEngine(this);
         // Pass the new screen's dispatcher to the input manager before pushing
         inputManager.setDispatcher(screen->getDispatcherPtr());
+        movementManager.setRegistry(screen->getRegistryPtr());
+        movementManager.setDispatcher(screen->getDispatcherPtr());
         screenManager.pushScreen(std::move(screen)); 
     }
 
@@ -39,12 +44,9 @@ public:
 
             float delta = GetFrameTime();
 
-            // Poll input and emit gesture events for the active screen
             inputManager.update(delta);
-
+            movementManager.update(delta);
             screenManager.update(delta);
-            // Update streaming music buffers
-            // audioManager.updateMusicStreams();
 
             BeginDrawing();
             ClearBackground(LIGHTGRAY);
@@ -62,9 +64,12 @@ public:
 
     ScreenManager& getScreenManager() { return screenManager; }
     AssetManager& getAssetManager() { return assetManager; }
+    InputManager& getInputManager() { return inputManager; }
+    MovementManager& getMovementManager() { return movementManager; }
 
 private:
     ScreenManager screenManager;
     AssetManager assetManager;
     InputManager inputManager;
+    MovementManager movementManager;
 };

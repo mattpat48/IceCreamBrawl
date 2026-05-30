@@ -24,6 +24,10 @@ namespace EntityFactory {
 			textures[texInfo.first] = assetManager.loadTexture(texInfo.second);
 		}
 
+		registry.emplace<entityStatus>(entity,
+			info->eStatusData.status
+		);
+
 		registry.emplace<sprite>(entity,
 			std::move(textures),
 			info->spriteData.texturePaths,
@@ -65,6 +69,10 @@ namespace EntityFactory {
 			info->gridData.row,
 			info->gridData.column,
 			info->gridData.isExclusive
+		);
+
+		registry.emplace<combatStatus>(entity,
+			info->cStatusData.status
 		);
 	}
 

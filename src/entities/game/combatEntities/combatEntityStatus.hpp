@@ -17,30 +17,30 @@ public:
     void onUpdate(float dt) override {
         auto healthComp = getComponent<health>();
         auto enduranceComp = getComponent<endurance>();
-        auto statusComp = getComponent<status>();
+        auto statusComp = getComponent<combatStatus>();
         auto spriteComp = getComponent<sprite>();
         auto animationComp = getComponent<animation>();
         auto attackComp = getComponent<attack>();
         auto hitFlashComp = getComponent<hitFlash>();
 
-        if (statusComp->isDead() && animationComp->isPlaying) {
+        if (statusComp->status == CombatStatus::DEAD && animationComp->isPlaying) {
             if (animationComp->currentFrame == animationComp->endFrame) {
                 animationComp->isPlaying = false;
             }
         }
 
         // Example logic to update player status
-        if (healthComp->life <= 0 && !statusComp->isDead()) {
-            statusComp->status = static_cast<int>(EntityStatus::DEAD); // Set status to DEAD
+        if (healthComp->life <= 0 && statusComp->status != CombatStatus::DEAD) {
+            statusComp->status = CombatStatus::DEAD; // Set status to DEAD
             std::cout << "Entity is dead!" << std::endl;
             spriteComp->currentTexture = "death"; // Change texture to death
             animationComp->currentFrame = animationComp->startFrame; // Reset animation frame to start frame
             return;
         }
 
-        if (statusComp->isAttacking() && animationComp->currentFrame == animationComp->endFrame) {
+        if (statusComp->status == CombatStatus::ATTACK && animationComp->currentFrame == animationComp->endFrame) {
             std::cout << "Reset after attack" << std::endl;
-            statusComp->status = static_cast<int>(EntityStatus::IDLE);
+            statusComp->status = CombatStatus::IDLE;
             spriteComp->currentTexture = "idle"; // Reset to idle texture after attack
             attackComp->currentCooldown = attackComp->cooldown; // Reset attack cooldown
             if (attackComp->modifier) {

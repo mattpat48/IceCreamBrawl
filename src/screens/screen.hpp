@@ -36,6 +36,14 @@ public:
     void setEngine(Engine* eng) { engine = eng; }
     Engine* getEngine() const { return engine; }
 
+    entt::registry* getRegistryPtr() {
+        return &registry;
+    }
+
+    entt::dispatcher* getDispatcherPtr() {
+        return &dispatcher;
+    }
+
     void basicUpdate(float delta) {
         updateScripts();
         updateAnimations(delta);
@@ -117,13 +125,13 @@ public:
             auto& v = view.get<velocity>(entity);
 
             if (a.isPlaying) {
-                if (std::abs(v.dx) > std::abs(v.dy)) {
-                    // Horizontal movement dominates
-                    a.row = (v.dx > 0) ? static_cast<int>(Directions::RIGHT) : static_cast<int>(Directions::LEFT);  // right : left
-                } else if (v.dy != 0) {
-                    // Vertical movement dominates
-                    a.row = (v.dy > 0) ? static_cast<int>(Directions::DOWN) : static_cast<int>(Directions::UP);  // down : up
-                }
+                //if (std::abs(v.dx) > std::abs(v.dy)) {
+                //    // Horizontal movement dominates
+                //    a.row = (v.dx > 0) ? static_cast<int>(Directions::RIGHT) : static_cast<int>(Directions::LEFT);  // right : left
+                //} else if (v.dy != 0) {
+                //    // Vertical movement dominates
+                //    a.row = (v.dy > 0) ? static_cast<int>(Directions::DOWN) : static_cast<int>(Directions::UP);  // down : up
+                //}
 
                 a.timer += dt;
 
@@ -140,8 +148,4 @@ public:
     }
 
     virtual ~Screen() = default;
-    // Return pointer to this screen's dispatcher stored in the registry context
-    entt::dispatcher* getDispatcherPtr() {
-        return &dispatcher;
-    }
 };

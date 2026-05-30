@@ -49,7 +49,7 @@ void GameScreen::load(entt::registry& globalRegistry) {
 	dispatcher.sink<SwipeEvent>().connect<&GameScreen::handleSwipe>(this);
 	dispatcher.sink<LongTapEvent>().connect<&GameScreen::handleLongTap>(this);
 
-	gridInstance.load(registry, dispatcher);
+	gridInstance.load(registry, dispatcher, this->engine->getMovementManager());
 
 	playerEntity = EntityFactory::createCombatEntity(registry, engine->getAssetManager(), "player");
 	registry.emplace<script>(playerEntity).bind<playerScripts>(playerEntity, registry);

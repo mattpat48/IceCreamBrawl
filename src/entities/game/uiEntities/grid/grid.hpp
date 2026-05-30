@@ -8,6 +8,8 @@
 #include "defines/general.hpp"
 #include "entities/script.hpp"
 #include "defines/events/gameEvents.hpp"
+#include "entities/game/entityInfos.hpp"
+#include "engine/movementManager.hpp"
 
 #include "utils/log.h"
 
@@ -21,9 +23,10 @@ public:
 					gridCells[r][c][k] = entt::null;
 	}
 
-	void load(entt::registry& registry, entt::dispatcher& dispatcher) {
+	void load(entt::registry& registry, entt::dispatcher& dispatcher, MovementManager& moveMgr) {
 		registryPtr = &registry;
 		dispatcherPtr = &dispatcher;
+		moveManager = &moveMgr;
 
 		dispatcherPtr->sink<PlayerMovementEvent>().connect<&grid::playerMovement>(this);
 	}
@@ -134,6 +137,11 @@ public:
 		if (!foundInSource) return false;
 		ICB_LOGI("Found entity %d in source cell (%d, %d)", int(movingEntity), fromRow, fromColumn);
 		// controlla se destinazione rispetta le regole di esclusività e se ha spazio
+		auto statusComp = registryPtr->try_get<entityStatus>(movingEntity);
+		if (statusComp) {
+			if (statusComp->status != EntityStatus::IDLE)
+				return false;
+		}
 		auto movingInfo = registryPtr->try_get<gridInfo>(movingEntity);
 		bool movingExclusive = movingInfo ? movingInfo->isExclusive : false;
 		int freeSlot = -1;
@@ -164,6 +172,9 @@ public:
 			entityPos->column = static_cast<Columns>(toColumn);
 		}
 
+		auto targetCenter = EntityDatabase::getInstance().getCellCenter(static_cast<Rows>(toRow), static_cast<Columns>(toColumn));
+		if (moveManager) moveManager->handleScroll(movingEntity, *registryPtr, targetCenter, Vector2{50.0f, 50.0f});
+
 		ICB_LOGI("Moved entity %d from (%d, %d) to (%d, %d)", int(movingEntity), fromRow, fromColumn, toRow, toColumn);
 		
 		return true;
@@ -186,6 +197,7 @@ protected:
 
 	entt::dispatcher* dispatcherPtr = nullptr; // da settare esternamente se serve
 	entt::registry* registryPtr = nullptr; // da settare esternamente se serve
+	MovementManager* moveManager = nullptr; // da settare esternamente se serve
 
 	entt::entity gridCells[GridVariables::GRID_ROWS][GridVariables::GRID_COLUMNS][3] = {entt::null};
 };

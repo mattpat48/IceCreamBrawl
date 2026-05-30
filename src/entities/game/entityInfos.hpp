@@ -12,6 +12,7 @@
 
 struct EntityInfo {
     std::string id;
+    entityStatus eStatusData;
     sprite spriteData;
     transform transformData;
     velocity velocityData;
@@ -20,16 +21,8 @@ struct EntityInfo {
 
 struct CombatInfo {
     std::string id;
-    /*
-    float maxHealth;
-    float maxEndurance;
-    float regenHealth;
-    float regenEndurance;
-    float baseDamage;
-    float attackRange;
-    float attackCooldown;
-    */
     gridInfo gridData;
+    combatStatus cStatusData;
 };
 
 // Database di entità predefinite
@@ -68,16 +61,17 @@ private:
     std::unordered_map<std::string, EntityInfo> entityData;
 
     EntityDatabase() {
-        cellSize = GetScreenWidth() / static_cast<float>(GridVariables::GRID_COLUMNS);
+        cellSize = GetScreenWidth() / static_cast<float>(GridVariables::GRID_COLUMNS) + 150.0f;
         gridPositions[0][0] = Vector2{ cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f - cellSize / 2.0f };
         gridPositions[0][1] = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 3.0f * 2.0f - cellSize / 2.0f };
         gridPositions[0][2] = Vector2{ GetScreenWidth() - cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f - cellSize / 2.0f };
-        gridPositions[1][0] = Vector2{ cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f + cellSize / 2.0f };
-        gridPositions[1][1] = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 3.0f * 2.0f + cellSize / 2.0f };
-        gridPositions[1][2] = Vector2{ GetScreenWidth() - cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f + cellSize / 2.0f };
+        gridPositions[1][0] = Vector2{ cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f };
+        gridPositions[1][1] = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 3.0f * 2.0f };
+        gridPositions[1][2] = Vector2{ GetScreenWidth() - cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f };
 
         entityData["undefined"] = EntityInfo{
             .id = "undefined",
+            .eStatusData = { EntityStatus::IDLE },
             .spriteData = {
                 .textures = {},
                 .currentTexture = "",
@@ -107,6 +101,7 @@ private:
 
         entityData["player"] = EntityInfo{
             .id = "player",
+            .eStatusData = { EntityStatus::IDLE },
             .spriteData = {
                 .textures = {
                     {"idle", nullptr},
@@ -124,7 +119,7 @@ private:
             },
             .transformData = {
                 .position = getCellCenter(Rows::FIRST, Columns::SECOND),
-                .scale = Vector2{4.0f, 4.0f},
+                .scale = Vector2{5.0f, 5.0f},
                 .rotation = 0.0f
             },
             .velocityData = {
@@ -144,6 +139,7 @@ private:
 
         entityData["enemy"] = EntityInfo{
             .id = "enemy",
+            .eStatusData = { EntityStatus::IDLE },
             .spriteData = {
                 .textures = {
                     {"idle", nullptr},
@@ -185,6 +181,9 @@ private:
                 .row = Rows::FIRST,
                 .column = Columns::SECOND,
                 .isExclusive = false
+            },
+            .cStatusData = {
+                .status = CombatStatus::IDLE
             }
         };
     }

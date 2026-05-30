@@ -6,7 +6,8 @@
 enum class Directions { DOWN = 0, UP = 1, LEFT = 2, RIGHT = 3 };
 enum class Rows { FIRST = 0, SECOND = 1 };
 enum class Columns { FIRST = 0, SECOND = 1, THIRD = 2 };
-enum class EntityStatus { IDLE = 0, ATTACK = 1, DODGE = 2, DEAD = 3, HURT = 4 };
+enum class CombatStatus { IDLE = 0, ATTACK = 1, DODGE = 2, DEAD = 3, HURT = 4 };
+enum class EntityStatus { IDLE = 0, MOVE = 1, DISABLED = 2 };
 
 // Player base stats
 struct PlayerBaseStats {

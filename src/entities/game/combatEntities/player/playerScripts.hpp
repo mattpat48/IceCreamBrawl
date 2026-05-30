@@ -15,22 +15,21 @@ class playerScripts : public Script {
 public:
 
     void onUpdate(float dt) override {
+        // TODO: remove comment once the right components are added
         //playerStatus.onUpdate(dt);
-        auto playerPosition = getComponent<gridInfo>();
-        auto playerTransform = getComponent<transform>();
-        if (playerPosition && playerTransform) {
-            ICB_LOGI("Updating player position to cell center of (%d, %d)", int(playerPosition->row), int(playerPosition->column));
-            Vector2 cellCenter = EntityDatabase::getInstance().getCellCenter(playerPosition->row, playerPosition->column);
-            playerTransform->position = cellCenter;
-        }
     }
 
     void onCreate() override {
-        //playerStatus.onCreate();
+        playerStatus.onCreate();
     }
 
     void onDraw() override {
-        //playerStatus.onDraw();
+        playerStatus.onDraw();
+        // draw player coordinates in top-left corner for debugging
+        auto t = getComponent<transform>();
+        if (t) {
+            DrawText(TextFormat("Player Pos: (%.1f, %.1f)", t->position.x, t->position.y), 10, 50, 40, WHITE);
+        }
     }
 
     virtual ~playerScripts() = default;

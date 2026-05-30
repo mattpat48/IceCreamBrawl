@@ -4,7 +4,11 @@
 #include "raylib-cpp.hpp"
 
 #include "entities/script.hpp"
-#include "entityComponents.hpp"
+#include "defines/general.hpp"
+
+struct entityStatus {
+    EntityStatus status;
+};
 
 struct sprite {
     std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;
@@ -23,6 +27,10 @@ struct transform {
 struct velocity {
     float dx;
     float dy;
+    float maxSpeedX;
+    float maxSpeedY;
+    float destX;
+    float destY;
 };
 
 struct animation {
