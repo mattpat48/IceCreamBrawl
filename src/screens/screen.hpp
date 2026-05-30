@@ -6,6 +6,7 @@
 #include "defines/components/entityComponents.hpp"
 #include "defines/components/combatComponents.hpp"
 #include "defines/general.hpp"
+#include <algorithm>
 
 class Engine;
 
@@ -49,22 +50,16 @@ public:
         updateAnimations(delta);
 
         auto view = registry.view<transform, velocity>();
-        for (auto entity : view) {
-            auto& t = view.get<transform>(entity);
-            auto& v = view.get<velocity>(entity);
-
+        view.each([&](auto entity, transform &t, velocity &v) {
             // Update position
             t.position.x += v.dx;
             t.position.y += v.dy;
-        }
+        });
     }
 
     void basicDraw() {
         auto view = registry.view<transform, sprite, animation>();
-        for (auto entity : view) {
-            auto& t = view.get<transform>(entity);
-            auto& s = view.get<sprite>(entity);
-            auto& a = view.get<animation>(entity);
+        view.each([&](auto entity, transform &t, sprite &s, animation &a) {
 
             Rectangle source = {
                 static_cast<float>(a.currentFrame * s.width),
@@ -90,16 +85,28 @@ public:
 
             auto hf = registry.try_get<hitFlash>(entity);
             Color filter = hf ? hf->filter : WHITE;
+            // Draw single trail silhouette: chosen color + opacity + offset
+            auto tr = registry.try_get<trail>(entity);
+            if (tr && tr->enabled) {
+                auto tex = s.textures.at(s.currentTexture);
+                Rectangle trailDest = {
+                    dest.x + tr->offset.x,
+                    dest.y + tr->offset.y,
+                    dest.width,
+                    dest.height
+                };
+                ::Color tint = tr->color;
+                tint.a = static_cast<unsigned char>(std::clamp(tr->alpha, 0.0f, 1.0f) * 255.0f);
+                tex->Draw(source, trailDest, origin, t.rotation, tint);
+            }
+
             s.textures.at(s.currentTexture)->Draw(source, dest, origin, t.rotation, filter);
-        }
+        });
 
         auto scriptView = registry.view<script>();
-        for (auto entity : scriptView) {
-            auto& s = scriptView.get<script>(entity);
-            if (s.instance) {
-                s.instance->onDraw();
-            }
-        }
+        scriptView.each([&](auto entity, script &s) {
+            if (s.instance) s.instance->onDraw();
+        });
     }
 
     void basicUnload() {
@@ -109,42 +116,22 @@ public:
     void updateScripts() {
         float dt = GetFrameTime();
         auto scriptView = registry.view<script>();
-
-        for (auto entity : scriptView) {
-            auto& s = scriptView.get<script>(entity);
-            if (s.instance) {
-                s.instance->onUpdate(dt);
-            }
-        }
+        scriptView.each([&](auto entity, script &s) {
+            if (s.instance) s.instance->onUpdate(dt);
+        });
     }
 
     void updateAnimations(float dt) {
         auto view = registry.view<animation, velocity>();
-        for (auto entity : view) {
-            auto& a = view.get<animation>(entity);
-            auto& v = view.get<velocity>(entity);
-
-            if (a.isPlaying) {
-                //if (std::abs(v.dx) > std::abs(v.dy)) {
-                //    // Horizontal movement dominates
-                //    a.row = (v.dx > 0) ? static_cast<int>(Directions::RIGHT) : static_cast<int>(Directions::LEFT);  // right : left
-                //} else if (v.dy != 0) {
-                //    // Vertical movement dominates
-                //    a.row = (v.dy > 0) ? static_cast<int>(Directions::DOWN) : static_cast<int>(Directions::UP);  // down : up
-                //}
-
-                a.timer += dt;
-
-                if (a.timer >= a.frameTime) {
-                    a.timer = 0.0f;
-                    a.currentFrame++;
-
-                    if (a.currentFrame > a.endFrame) {
-                        a.currentFrame = a.startFrame;
-                    }
-                }
+        view.each([&](auto entity, animation &a, velocity &v) {
+            if (!a.isPlaying) return;
+            a.timer += dt;
+            if (a.timer >= a.frameTime) {
+                a.timer = 0.0f;
+                a.currentFrame++;
+                if (a.currentFrame > a.endFrame) a.currentFrame = a.startFrame;
             }
-        }
+        });
     }
 
     virtual ~Screen() = default;

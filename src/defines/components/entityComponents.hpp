@@ -45,6 +45,16 @@ struct animation {
     int direction;
 };
 
+struct trail {
+    bool enabled = false;
+    ::Color color = {0, 0, 0, 120};
+    ::Vector2 offset = {0.0f, 0.0f};
+    float scale = 1.0f; // multiplier for trail size (1.0 = same size as sprite)
+    float alpha = 0.5f; // 0..1
+    float radiusX = 0.0f;
+    float radiusY = 0.0f;
+};
+
 struct script {
     std::unique_ptr<Script> instance = nullptr;
 

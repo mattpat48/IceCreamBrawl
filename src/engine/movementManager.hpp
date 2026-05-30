@@ -51,14 +51,11 @@ public:
 		if (!(currentTransform && currentVel)) return;
 
 		Vector2 delta = Vector2Subtract(targetCenter, currentTransform->position);
-		// set destination
 		currentVel->destX = targetCenter.x;
 		currentVel->destY = targetCenter.y;
 
-		// mark dynamic
 		currentVel->dynamic = true;
 
-		// initialize dynamic state: store start/target and compute duration
 		DynState st;
 		st.startX = currentTransform->position.x;
 		st.startY = currentTransform->position.y;
@@ -66,14 +63,12 @@ public:
 		st.targetY = targetCenter.y;
 		st.elapsed = 0.0f;
 
-		// determine duration: prefer explicit duration param, otherwise infer from 'vel' (interpreted as peak px/sec)
 		float dist = std::sqrt(delta.x*delta.x + delta.y*delta.y);
 		if (duration > 0.0f) {
 			st.duration = duration;
 		} else {
 			float peakSpeed = std::sqrt(vel.x*vel.x + vel.y*vel.y); // px/sec
 			if (peakSpeed > 1e-6f) {
-				// naive estimate: duration = distance / peakSpeed, but clamp to a reasonable range
 				st.duration = std::max(0.05f, std::min(3.0f, dist / peakSpeed));
 			} else {
 				st.duration = std::max(0.1f, dist / 200.0f); // fallback
@@ -84,23 +79,45 @@ public:
 
 		auto entityStatusComp = registry.try_get<entityStatus>(e);
 		if (entityStatusComp) entityStatusComp->status = EntityStatus::MOVE;
-		// zero per-frame dx/dy initially (we will set them each frame in updateMovements)
 		currentVel->dx = 0.0f;
 		currentVel->dy = 0.0f;
 
+		if (addShade) {
+			addShadeToScroll(e, registry, delta);
+		}
+
 	}
 
-	//void addShadeToScroll() {
+	void addShadeToScroll(entt::entity e, entt::registry& reg, Vector2 dir) {
+		// create or update trail component for the entity
+		auto shPtr = reg.try_get<trail>(e);
+		if (!shPtr) {
+			reg.emplace<trail>(e);
+		}
+		auto &sh = reg.get<trail>(e);
+		sh.enabled = true;
+		sh.color = BLACK;
 
-	//}
+		// set trail offset opposite to direction using normalized vector
+		constexpr float trailDistance = 30.0f;
+		float len = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+		if (len > 1e-5f) {
+			sh.offset = Vector2{
+				-(dir.x / len) * trailDistance,
+				-(dir.y / len) * trailDistance
+			};
+		} else {
+			sh.offset = Vector2{0.0f, 0.0f};
+		}
+		sh.radiusX = trailDistance;
+		
+	}
+
 
 	void updateMovements(float dt) {
 		auto movingView = registry->view<transform, velocity, entityStatus>();
-		for (auto entity : movingView) {
-			auto& t = movingView.get<transform>(entity);
-			auto& v = movingView.get<velocity>(entity);
-			auto& s = movingView.get<entityStatus>(entity);
-			if (s.status != EntityStatus::MOVE) continue;
+		movingView.each([&](auto entity, transform &t, velocity &v, entityStatus &s) {
+			if (s.status != EntityStatus::MOVE) return;
 
 			Vector2 delta = { v.destX - t.position.x, v.destY - t.position.y };
 
@@ -113,7 +130,7 @@ public:
 					v.dx = 0.0f; v.dy = 0.0f;
 					t.position = Vector2{ v.destX, v.destY };
 					v.destX = 0.0f; v.destY = 0.0f; s.status = EntityStatus::IDLE;
-					continue;
+					return;
 				}
 
 				DynState &st = it->second;
@@ -126,8 +143,13 @@ public:
 					t.position = Vector2{ st.targetX, st.targetY };
 					v.destX = 0.0f; v.destY = 0.0f;
 					s.status = EntityStatus::IDLE;
+					// disable trail if present
+					if (registry) {
+						auto sh = registry->try_get<trail>(entity);
+						if (sh) sh->enabled = false;
+					}
 					dynamicStates.erase(it);
-					continue;
+					return;
 				}
 
 				// ease in-out cubic
@@ -144,7 +166,26 @@ public:
 				// per-frame displacement to reach eased position this frame
 				v.dx = wantX - t.position.x;
 				v.dy = wantY - t.position.y;
-				continue;
+
+				// update trail offset/alpha if trail component exists
+				if (registry) {
+					auto sh = registry->try_get<trail>(entity);
+					if (sh && sh->enabled) {
+						float dirx = st.targetX - st.startX;
+						float diry = st.targetY - st.startY;
+						float len = std::sqrt(dirx*dirx + diry*diry);
+						float dist = sh->radiusX > 0.0f ? sh->radiusX : 30.0f;
+						Vector2 off = {0.0f, dist * 0.3f};
+						if (len > 1e-5f) {
+							off.x = -(dirx / len) * dist;
+							off.y = -(diry / len) * dist + (std::abs(diry) > std::abs(dirx) ? dist * 0.2f : 0.0f);
+						}
+						sh->offset = off;
+						// slightly fade trail as progress increases
+						sh->alpha = 0.45f * (1.0f - 0.35f * p);
+					}
+				}
+				return;
 
 			} else {
 				// non-dynamic behavior: keep previous logic (per-frame dx/dy already set elsewhere)
@@ -160,8 +201,9 @@ public:
 					v.destX = 0.0f; v.destY = 0.0f;
 					s.status = EntityStatus::IDLE;
 				}
+				return;
 			}
-		}
+		});
 	}
 
 protected:
