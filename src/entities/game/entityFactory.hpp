@@ -43,8 +43,13 @@ namespace EntityFactory {
 		);
 
 		registry.emplace<velocity>(entity,
+			info->velocityData.dynamic,
 			info->velocityData.dx,
-			info->velocityData.dy
+			info->velocityData.dy,
+			info->velocityData.destX,
+			info->velocityData.destY,
+			info->velocityData.maxSpeedX,
+			info->velocityData.maxSpeedY
 		);
 
 		registry.emplace<animation>(entity,

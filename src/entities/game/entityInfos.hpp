@@ -84,8 +84,13 @@ private:
                 .rotation = 0.0f
             },
             .velocityData = {
+                .dynamic = false,
                 .dx = 0.0f,
-                .dy = 0.0f
+                .dy = 0.0f,
+                .destX = 0.0f,
+                .destY = 0.0f,
+                .maxSpeedX = 0.0f,
+                .maxSpeedY = 0.0f,
             },
             .animationData = {
                 .startFrame = 0,
@@ -123,8 +128,13 @@ private:
                 .rotation = 0.0f
             },
             .velocityData = {
+                .dynamic = false,
                 .dx = 0.0f,
-                .dy = 0.0f
+                .dy = 0.0f,
+                .destX = 0.0f,
+                .destY = 0.0f,
+                .maxSpeedX = 0.0f,
+                .maxSpeedY = 0.0f,
             },
             .animationData = {
                 .startFrame = 0,
@@ -161,8 +171,13 @@ private:
                 .rotation = 0.0f
             },
             .velocityData = {
+                .dynamic = false,
                 .dx = 0.0f,
-                .dy = 0.0f
+                .dy = 0.0f,
+                .destX = 0.0f,
+                .destY = 0.0f,
+                .maxSpeedX = 0.0f,
+                .maxSpeedY = 0.0f
             },
             .animationData = {
                 .startFrame = 0,

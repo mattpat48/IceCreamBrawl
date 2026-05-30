@@ -25,12 +25,13 @@ struct transform {
 };
 
 struct velocity {
+    bool dynamic = false;
     float dx;
     float dy;
-    float maxSpeedX;
-    float maxSpeedY;
     float destX;
     float destY;
+    float maxSpeedX;
+    float maxSpeedY;
 };
 
 struct animation {
