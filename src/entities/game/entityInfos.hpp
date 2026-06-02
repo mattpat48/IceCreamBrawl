@@ -62,12 +62,12 @@ private:
 
     EntityDatabase() {
         cellSize = GetScreenWidth() / static_cast<float>(GridVariables::GRID_COLUMNS) + 150.0f;
-        gridPositions[0][0] = Vector2{ cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f };
-        gridPositions[0][1] = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 3.0f * 2.0f };
-        gridPositions[0][2] = Vector2{ GetScreenWidth() - cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f };
-        gridPositions[1][0] = Vector2{ cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f + cellSize / 2.0f};
-        gridPositions[1][1] = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 3.0f * 2.0f  + cellSize / 2.0f };
-        gridPositions[1][2] = Vector2{ GetScreenWidth() - cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f + cellSize / 2.0f };
+        gridPositions[0][0] = Vector2{ cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f - cellSize / 2.0f };
+        gridPositions[0][1] = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 3.0f * 2.0f - cellSize / 2.0f };
+        gridPositions[0][2] = Vector2{ GetScreenWidth() - cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f - cellSize / 2.0f };
+        gridPositions[1][0] = Vector2{ cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f };
+        gridPositions[1][1] = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 3.0f * 2.0f };
+        gridPositions[1][2] = Vector2{ GetScreenWidth() - cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f };
 
         entityData["undefined"] = EntityInfo{
             .id = "undefined",
@@ -124,7 +124,7 @@ private:
             },
             .transformData = {
                 .position = getCellCenter(Rows::FIRST, Columns::SECOND),
-                .scale = Vector2{4.0f, 4.0f},
+                .scale = Vector2{6.0f, 6.0f},
                 .rotation = 0.0f
             },
             .velocityData = {

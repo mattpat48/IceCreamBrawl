@@ -173,7 +173,7 @@ public:
 		}
 
 		auto targetCenter = EntityDatabase::getInstance().getCellCenter(static_cast<Rows>(toRow), static_cast<Columns>(toColumn));
-		if (moveManager) moveManager->handleDynamicScroll(movingEntity, *registryPtr, targetCenter, Vector2{GetScreenWidth() / 20.0f, GetScreenHeight() / 20.0f}, 0.3f, true);
+		if (moveManager) moveManager->handleDynamicScroll(movingEntity, *registryPtr, targetCenter, Vector2{GetScreenWidth() / 20.0f, GetScreenHeight() / 20.0f}, 0.4f, false);
 
 		ICB_LOGI("Moved entity %d from (%d, %d) to (%d, %d)", int(movingEntity), fromRow, fromColumn, toRow, toColumn);
 		

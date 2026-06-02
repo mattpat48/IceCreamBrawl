@@ -13,13 +13,13 @@
 
 // TODO: rimuovere
 void GameScreen::handleTap(TapEvent& e) {
-	gesture = "Tap at (" + std::to_string(e.position.x) + ", " + std::to_string(e.position.y) + ")";
-	ICB_LOGI("Received TapEvent at position (%d, %d) with duration %f seconds", e.position.x, e.position.y, e.duration);
+	//gesture = "Tap at (" + std::to_string(e.position.x) + ", " + std::to_string(e.position.y) + ")";
+	//ICB_LOGI("Received TapEvent at position (%d, %d) with duration %f seconds", e.position.x, e.position.y, e.duration);
 }
 void GameScreen::handleSwipe(SwipeEvent& e) {
-	gesture = "Swipe from (" + std::to_string(e.start.x) + ", " + std::to_string(e.start.y) + 
-			  ") to (" + std::to_string(e.end.x) + ", " + std::to_string(e.end.y) + ")";
-	ICB_LOGI("Received SwipeEvent from (%d, %d) to (%d, %d) with duration %f seconds", e.start.x, e.start.y, e.end.x, e.end.y, e.duration);
+	//gesture = "Swipe from (" + std::to_string(e.start.x) + ", " + std::to_string(e.start.y) + 
+	//		  ") to (" + std::to_string(e.end.x) + ", " + std::to_string(e.end.y) + ")";
+	//ICB_LOGI("Received SwipeEvent from (%d, %d) to (%d, %d) with duration %f seconds", e.start.x, e.start.y, e.end.x, e.end.y, e.duration);
 
 	Directions direction = getSwipeDirection(e.start, e.end);
 	auto playerPos = registry.try_get<gridInfo>(playerEntity);
@@ -34,8 +34,8 @@ void GameScreen::handleSwipe(SwipeEvent& e) {
 	}
 }
 void GameScreen::handleLongTap(LongTapEvent& e) {
-	gesture = "Long Tap at (" + std::to_string(e.position.x) + ", " + std::to_string(e.position.y) + ")";
-	ICB_LOGI("Received LongTapEvent at position (%d, %d) with duration %f seconds", e.position.x, e.position.y, e.duration);
+	//gesture = "Long Tap at (" + std::to_string(e.position.x) + ", " + std::to_string(e.position.y) + ")";
+	//ICB_LOGI("Received LongTapEvent at position (%d, %d) with duration %f seconds", e.position.x, e.position.y, e.duration);
 }
 
 void GameScreen::loadAssets() {
@@ -51,7 +51,7 @@ void GameScreen::load(entt::registry& globalRegistry) {
 
 	gridInstance.load(registry, dispatcher, this->engine->getMovementManager());
 
-	playerEntity = EntityFactory::createCombatEntity(registry, engine->getAssetManager(), "player");
+	playerEntity = EntityFactory::createCombatEntity(registry, engine->getAssetManager(), "player", true);
 	registry.emplace<script>(playerEntity).bind<playerScripts>(playerEntity, registry);
 	gridInstance.addToCell(0, 1, playerEntity);
 	
@@ -63,7 +63,7 @@ void GameScreen::update(float delta) {
 
 void GameScreen::draw() {
 	basicDraw();
-	DrawText(gesture.c_str(), (GetScreenWidth() - MeasureText(gesture.c_str(), 20)) / 2, GetScreenHeight() / 4, 20, DARKGRAY);
+	//DrawText(gesture.c_str(), (GetScreenWidth() - MeasureText(gesture.c_str(), 20)) / 2, GetScreenHeight() / 4, 20, DARKGRAY);
 }
 
 void GameScreen::unload(entt::registry& globalRegistry) {
