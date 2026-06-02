@@ -1,6 +1,7 @@
 #pragma once
 
 #include "entt/entt.hpp"
+#include "defines/events/gestureEvents.hpp"
 #include <memory>
 
 class Script {

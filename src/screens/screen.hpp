@@ -142,21 +142,21 @@ public:
 
     void basicHandleTap(TapEvent& e) {
         auto touchableView = registry.view<isTouchable, script>();
-        touchableView.each([&](auto entity, isTouchable &touch, script &s) {
+        touchableView.each([&](auto entity, script &s) {
             s.instance->onTap(e);
         });
     }
 
     void basicHandleSwipe(SwipeEvent& e) {
         auto swipableView = registry.view<isSwipable, script>();
-        swipableView.each([&](auto entity, isSwipable &swip, script &s) {
+        swipableView.each([&](auto entity, script &s) {
             s.instance->onSwipe(e);
         });
     }
 
     void basicHandleLongTap(LongTapEvent& e) {
         auto touchableView = registry.view<isTouchable, script>();
-        touchableView.each([&](auto entity, isTouchable &longTap, script &s) {
+        touchableView.each([&](auto entity, script &s) {
             s.instance->onLongTap(e);
         });
     }
