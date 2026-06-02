@@ -156,11 +156,3 @@ struct gridInfo {
     Columns column;
     bool isExclusive;
 };
-
-struct movementTween {
-    Vector2 startPos;
-    Vector2 targetPos;
-    float duration = 0.3f;  // 300ms
-    float elapsed = 0.0f;
-    bool active = false;
-};

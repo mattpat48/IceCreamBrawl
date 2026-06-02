@@ -5,6 +5,8 @@
 
 #include "defines/components/entityComponents.hpp"
 #include "defines/components/combatComponents.hpp"
+#include "defines/components/tagComponents.hpp"
+#include "defines/events/gestureEvents.hpp"
 #include "defines/general.hpp"
 #include <algorithm>
 
@@ -33,6 +35,10 @@ public:
     virtual void update(float delta) = 0;
     virtual void draw() = 0;
     virtual void unload(entt::registry& registry) = 0;
+
+    virtual void handleTap(TapEvent& e) = 0;
+	virtual void handleSwipe(SwipeEvent& e) = 0;
+	virtual void handleLongTap(LongTapEvent& e) = 0;
 
     void setEngine(Engine* eng) { engine = eng; }
     Engine* getEngine() const { return engine; }
@@ -131,6 +137,27 @@ public:
                 a.currentFrame++;
                 if (a.currentFrame > a.endFrame) a.currentFrame = a.startFrame;
             }
+        });
+    }
+
+    void basicHandleTap(TapEvent& e) {
+        auto touchableView = registry.view<isTouchable, script>();
+        touchableView.each([&](auto entity, isTouchable &touch, script &s) {
+            s.instance->onTap(e);
+        });
+    }
+
+    void basicHandleSwipe(SwipeEvent& e) {
+        auto swipableView = registry.view<isSwipable, script>();
+        swipableView.each([&](auto entity, isSwipable &swip, script &s) {
+            s.instance->onSwipe(e);
+        });
+    }
+
+    void basicHandleLongTap(LongTapEvent& e) {
+        auto touchableView = registry.view<isTouchable, script>();
+        touchableView.each([&](auto entity, isTouchable &longTap, script &s) {
+            s.instance->onLongTap(e);
         });
     }
 

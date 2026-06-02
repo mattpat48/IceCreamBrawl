@@ -13,13 +13,10 @@
 
 // TODO: rimuovere
 void GameScreen::handleTap(TapEvent& e) {
-	//gesture = "Tap at (" + std::to_string(e.position.x) + ", " + std::to_string(e.position.y) + ")";
-	//ICB_LOGI("Received TapEvent at position (%d, %d) with duration %f seconds", e.position.x, e.position.y, e.duration);
+	basicHandleTap(e);
 }
 void GameScreen::handleSwipe(SwipeEvent& e) {
-	//gesture = "Swipe from (" + std::to_string(e.start.x) + ", " + std::to_string(e.start.y) + 
-	//		  ") to (" + std::to_string(e.end.x) + ", " + std::to_string(e.end.y) + ")";
-	//ICB_LOGI("Received SwipeEvent from (%d, %d) to (%d, %d) with duration %f seconds", e.start.x, e.start.y, e.end.x, e.end.y, e.duration);
+	basicHandleSwipe(e);
 
 	Directions direction = getSwipeDirection(e.start, e.end);
 	auto playerPos = registry.try_get<gridInfo>(playerEntity);
@@ -34,8 +31,7 @@ void GameScreen::handleSwipe(SwipeEvent& e) {
 	}
 }
 void GameScreen::handleLongTap(LongTapEvent& e) {
-	//gesture = "Long Tap at (" + std::to_string(e.position.x) + ", " + std::to_string(e.position.y) + ")";
-	//ICB_LOGI("Received LongTapEvent at position (%d, %d) with duration %f seconds", e.position.x, e.position.y, e.duration);
+	basicHandleLongTap(e);
 }
 
 void GameScreen::loadAssets() {

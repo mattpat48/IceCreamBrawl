@@ -16,9 +16,9 @@ public:
 	void draw() override;
 	void unload(entt::registry& globalRegistry) override;
 
-	void handleTap(TapEvent& e);
-	void handleSwipe(SwipeEvent& e);
-	void handleLongTap(LongTapEvent& e);
+	void handleTap(TapEvent& e) override;
+	void handleSwipe(SwipeEvent& e) override;
+	void handleLongTap(LongTapEvent& e) override;
 
 	void loadAssets();
 	virtual ~GameScreen() = default;

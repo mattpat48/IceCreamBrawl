@@ -20,11 +20,11 @@ public:
     }
 
     void onCreate() override {
-        playerStatus.onCreate();
+        //playerStatus.onCreate();
     }
 
     void onDraw() override {
-        playerStatus.onDraw();
+        //playerStatus.onDraw();
         // draw player coordinates in top-left corner for debugging
         auto t = getComponent<transform>();
         if (t) {

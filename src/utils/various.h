@@ -15,4 +15,3 @@ Directions getSwipeDirection(const Vector2& start, const Vector2& end) {
 		return (dy > 0) ? Directions::DOWN : Directions::UP;
 	}
 }
-
