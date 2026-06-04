@@ -13,6 +13,14 @@
 
 class MovementManager {
 public:
+
+	enum class MovementProfile {
+		Uniform = 0,
+		EaseInOut,
+		EaseIn,
+		EaseOut
+	};
+
 	MovementManager() = default;
 
 	void setRegistry(entt::registry* r) { registry = r; }
@@ -25,8 +33,7 @@ public:
 		updateMovements(dt);
 	}
 
-	void handleScroll(entt::entity e, entt::registry& registry,
-					  Vector2 targetCenter, Vector2 vel, bool addShade = false) {
+	void handleScroll(entt::entity e, entt::registry& registry, Vector2 targetCenter, Vector2 vel) {
 		auto currentTransform = registry.try_get<transform>(e);
 		auto currentVel = registry.try_get<velocity>(e);
 
@@ -43,8 +50,8 @@ public:
 		}
 	}
 
-	void handleDynamicScroll(entt::entity e, entt::registry& registry,
-							 Vector2 targetCenter, Vector2 vel, float duration = 0.0f, bool addShade = false) {
+	void handleDynamicScrollProfile(entt::entity e, entt::registry& registry,
+					 Vector2 targetCenter, Vector2 vel, MovementProfile profile, float duration = 0.0f) {
 		auto currentTransform = registry.try_get<transform>(e);
 		auto currentVel = registry.try_get<velocity>(e);
 
@@ -62,6 +69,7 @@ public:
 		st.targetX = targetCenter.x;
 		st.targetY = targetCenter.y;
 		st.elapsed = 0.0f;
+		st.profile = profile;
 
 		float dist = std::sqrt(delta.x*delta.x + delta.y*delta.y);
 		if (duration > 0.0f) {
@@ -82,35 +90,6 @@ public:
 		currentVel->dx = 0.0f;
 		currentVel->dy = 0.0f;
 
-		if (addShade) {
-			addShadeToScroll(e, registry, delta);
-		}
-
-	}
-
-	void addShadeToScroll(entt::entity e, entt::registry& reg, Vector2 dir) {
-		// create or update trail component for the entity
-		auto shPtr = reg.try_get<trail>(e);
-		if (!shPtr) {
-			reg.emplace<trail>(e);
-		}
-		auto &sh = reg.get<trail>(e);
-		sh.enabled = true;
-		sh.color = BLACK;
-
-		// set trail offset opposite to direction using normalized vector
-		constexpr float trailDistance = 30.0f;
-		float len = std::sqrt(dir.x * dir.x + dir.y * dir.y);
-		if (len > 1e-5f) {
-			sh.offset = Vector2{
-				-(dir.x / len) * trailDistance,
-				-(dir.y / len) * trailDistance
-			};
-		} else {
-			sh.offset = Vector2{0.0f, 0.0f};
-		}
-		sh.radiusX = trailDistance;
-		
 	}
 
 
@@ -152,12 +131,29 @@ public:
 					return;
 				}
 
-				// ease in-out cubic
-				float eased;
-				if (p < 0.5f) eased = 4.0f * p * p * p;
-				else {
-					float q = (2.0f * p) - 2.0f;
-					eased = 0.5f * q * q * q + 1.0f;
+				// interpolation according to movement profile
+				float eased = p;
+				switch (st.profile) {
+				case MovementProfile::Uniform:
+					eased = p;
+					break;
+				case MovementProfile::EaseInOut:
+					if (p < 0.5f) eased = 4.0f * p * p * p;
+					else {
+						float q = (2.0f * p) - 2.0f;
+						eased = 0.5f * q * q * q + 1.0f;
+					}
+					break;
+				case MovementProfile::EaseIn:
+					eased = p * p * p;
+					break;
+				case MovementProfile::EaseOut: {
+						float q = 1.0f - p;
+						eased = 1.0f - (q * q * q);
+					}
+					break;
+				default:
+					eased = p;
 				}
 
 				float wantX = st.startX + (st.targetX - st.startX) * eased;
@@ -218,6 +214,7 @@ protected:
 		float targetY = 0.0f;
 		float elapsed = 0.0f;
 		float duration = 0.5f; // seconds
+		MovementProfile profile = MovementProfile::EaseInOut;
 	};
 
 	std::unordered_map<uint32_t, DynState> dynamicStates;
