@@ -19,12 +19,6 @@ struct EntityInfo {
     animation animationData;
 };
 
-struct CombatInfo {
-    std::string id;
-    gridInfo gridData;
-    combatStatus cStatusData;
-};
-
 // Database di entità predefinite
 class EntityDatabase {
 public:
@@ -33,17 +27,9 @@ public:
         return instance;
     }
 
-    const CombatInfo* getCombatEntityInfo(const std::string& entityId) const {
-        auto it = combatData.find(entityId);
-        if (it != combatData.end()) {
-            return &it->second;
-        }
-        return nullptr;
-    }
-
-    const EntityInfo* getEntityInfo(const std::string& entityId) const {
-        auto it = entityData.find(entityId);
-        if (it != entityData.end()) {
+    const EntityInfo* getGameEntityInfo(const std::string& entityId) const {
+        auto it = gameEntityData.find(entityId);
+        if (it != gameEntityData.end()) {
             return &it->second;
         }
         return nullptr;
@@ -57,8 +43,7 @@ private:
     float cellSize;
     Vector2 gridPositions[GridVariables::GRID_ROWS][GridVariables::GRID_COLUMNS];
 
-    std::unordered_map<std::string, CombatInfo> combatData;
-    std::unordered_map<std::string, EntityInfo> entityData;
+    std::unordered_map<std::string, EntityInfo> gameEntityData;
 
     EntityDatabase() {
         cellSize = GetScreenWidth() / static_cast<float>(GridVariables::GRID_COLUMNS) + 150.0f;
@@ -69,7 +54,7 @@ private:
         gridPositions[1][1] = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 3.0f * 2.0f };
         gridPositions[1][2] = Vector2{ GetScreenWidth() - cellSize / 2.0f, GetScreenHeight() / 3.0f * 2.0f };
 
-        entityData["undefined"] = EntityInfo{
+        gameEntityData["undefined"] = EntityInfo{
             .id = "undefined",
             .eStatusData = { EntityStatus::IDLE },
             .spriteData = {
@@ -104,7 +89,7 @@ private:
         };
 
 
-        entityData["player"] = EntityInfo{
+        gameEntityData["player"] = EntityInfo{
             .id = "player",
             .eStatusData = { EntityStatus::IDLE },
             .spriteData = {
@@ -147,7 +132,7 @@ private:
             }
         };
 
-        entityData["enemy"] = EntityInfo{
+        gameEntityData["enemy"] = EntityInfo{
             .id = "enemy",
             .eStatusData = { EntityStatus::IDLE },
             .spriteData = {
@@ -187,18 +172,6 @@ private:
                 .timer = 0.0f,
                 .isPlaying = true,
                 .direction = static_cast<int>(Directions::DOWN)
-            }
-        };
-
-        combatData["player"] = {
-            .id = "player",
-            .gridData = {
-                .row = Rows::FIRST,
-                .column = Columns::SECOND,
-                .isExclusive = false
-            },
-            .cStatusData = {
-                .status = CombatStatus::IDLE
             }
         };
     }

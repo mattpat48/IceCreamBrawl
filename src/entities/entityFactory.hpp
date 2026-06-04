@@ -8,15 +8,15 @@
 #include "defines/components/combatComponents.hpp"
 #include "defines/general.hpp"
 #include "engine/assetManager.hpp"
-#include "entities/game/entityInfos.hpp"
+#include "entities/entityInfos.hpp"
 #include "utils/log.h"
 
 namespace EntityFactory {
 
 	void addEntityComponents(entt::entity entity, const std::string& entityTypeId, entt::registry& registry, AssetManager& assetManager) {
-		const EntityInfo* info = EntityDatabase::getInstance().getEntityInfo(entityTypeId);
+		const EntityInfo* info = EntityDatabase::getInstance().getGameEntityInfo(entityTypeId);
 		if (!info) {
-			info = EntityDatabase::getInstance().getEntityInfo("undefined");
+			info = EntityDatabase::getInstance().getGameEntityInfo("undefined");
 		}
 
 		std::unordered_map<std::string, std::shared_ptr<raylib::Texture2D>> textures;
@@ -64,32 +64,14 @@ namespace EntityFactory {
 		);
 	}
 
-	void addCombatComponents(entt::entity entity, const std::string& entityTypeId, entt::registry& registry, AssetManager& assetManager, bool hasGridInfo = false) {
-		const CombatInfo* info = EntityDatabase::getInstance().getCombatEntityInfo(entityTypeId);
-		if (!info) {
-			info = EntityDatabase::getInstance().getCombatEntityInfo("undefined");
-		}
-
-		if (hasGridInfo) {
-			registry.emplace<gridInfo>(entity,
-				info->gridData.row,
-				info->gridData.column,
-				info->gridData.isExclusive
-			);
-		}
-
-		registry.emplace<combatStatus>(entity,
-			info->cStatusData.status
-		);
+	void addCombatComponents(entt::entity entity, const std::string& entityTypeId, entt::registry& registry, AssetManager& assetManager) {
+		// TODO: prendere i dati dal database
 	}
 
-	entt::entity createCombatEntity(entt::registry& registry, AssetManager& assetManager, const std::string& entityTypeId, bool hasGridInfo = false) {
-		entt::entity entity = registry.create();
-		
-		addEntityComponents(entity, entityTypeId, registry, assetManager);
-		addCombatComponents(entity, entityTypeId, registry, assetManager, hasGridInfo);
-		
-		return entity;
+	void addGridComponents(entt::entity entity, const std::string& entityTypeId, entt::registry& registry, AssetManager& assetManager, Rows row, Columns column, bool isExclusive) {
+		registry.emplace<gridInfo>(entity,
+			row, column, isExclusive
+		);
 	}
 
 	entt::entity createEntity(entt::registry& registry, AssetManager& assetManager, const std::string& entityTypeId) {
@@ -100,4 +82,23 @@ namespace EntityFactory {
 		return entity;
 	}
 
+	entt::entity createCombatEntity(entt::registry& registry, AssetManager& assetManager, const std::string& entityTypeId) {
+		entt::entity entity = registry.create();
+		
+		addEntityComponents(entity, entityTypeId, registry, assetManager);
+		addCombatComponents(entity, entityTypeId, registry, assetManager);
+		
+		return entity;
+	}
+
+	entt::entity createGridEntity(entt::registry& registry, AssetManager& assetManager, const std::string& entityTypeId,
+								  Rows row, Columns column, bool isExclusive) {
+		entt::entity entity = registry.create();
+		
+		addEntityComponents(entity, entityTypeId, registry, assetManager);
+		addCombatComponents(entity, entityTypeId, registry, assetManager);
+		addGridComponents(entity, entityTypeId, registry, assetManager, row, column, isExclusive);
+		
+		return entity;
+	}
 } // namespace EntityFactory

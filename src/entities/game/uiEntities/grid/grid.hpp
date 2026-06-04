@@ -8,7 +8,7 @@
 #include "defines/general.hpp"
 #include "entities/script.hpp"
 #include "defines/events/gameEvents.hpp"
-#include "entities/game/entityInfos.hpp"
+#include "entities/entityInfos.hpp"
 #include "engine/movementManager.hpp"
 
 #include "utils/log.h"

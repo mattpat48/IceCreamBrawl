@@ -4,7 +4,7 @@
 #include <cmath>
 
 #include "engine/engine.hpp"
-#include "entities/game/entityFactory.hpp"
+#include "entities/entityFactory.hpp"
 #include "defines/events/gestureEvents.hpp"
 #include "entities/game/combatEntities/player/playerScripts.hpp"
 
@@ -47,7 +47,7 @@ void GameScreen::load(entt::registry& globalRegistry) {
 
 	gridInstance.load(registry, dispatcher, this->engine->getMovementManager());
 
-	playerEntity = EntityFactory::createCombatEntity(registry, engine->getAssetManager(), "player", true);
+	playerEntity = EntityFactory::createGridEntity(registry, engine->getAssetManager(), "player", Rows::FIRST, Columns::SECOND, true);
 	registry.emplace<script>(playerEntity).bind<playerScripts>(playerEntity, registry);
 	gridInstance.addToCell(0, 1, playerEntity);
 	

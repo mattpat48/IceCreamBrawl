@@ -7,7 +7,7 @@
 
 #include "defines/components/entityComponents.hpp"
 #include "entities/game/combatEntities/combatEntityStatus.hpp"
-#include "entities/game/entityInfos.hpp"
+#include "entities/entityInfos.hpp"
 
 #include "utils/log.h"
 
