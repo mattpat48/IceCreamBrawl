@@ -123,7 +123,7 @@ private:
             },
             .animationData = {
                 .startFrame = 0,
-                .endFrame = 7,
+                .endFrame = 3,
                 .row = static_cast<int>(Directions::UP),
                 .frameTime = 0.1f,
                 .timer = 0.0f,
@@ -147,11 +147,11 @@ private:
                     {"death", "resources/sprites/enemy/death.png"},
                 },
                 .currentTexture = "idle",
-                .width = 96,
-                .height = 80
+                .width = 79,
+                .height = 69
             },
             .transformData = {
-                .position = Vector2{GetScreenWidth() / 2.0f + 150.0f, GetScreenHeight() / 2.0f},
+                .position = Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 3.0f},
                 .scale = Vector2{4.0f, 4.0f},
                 .rotation = 0.0f
             },

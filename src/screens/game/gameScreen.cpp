@@ -51,6 +51,10 @@ void GameScreen::load(entt::registry& globalRegistry) {
 	registry.emplace<script>(playerEntity).bind<playerScripts>(playerEntity, registry);
 	gridInstance.addToCell(0, 1, playerEntity);
 	
+	//enemyEntity = EntityFactory::createGridEntity(registry, engine->getAssetManager(), "enemy", Rows::SECOND, Columns::SECOND, true);
+	//gridInstance.addToCell(1, 1, enemyEntity);
+	enemyEntity = EntityFactory::createCombatEntity(registry, engine->getAssetManager(), "enemy");
+	
 }
 
 void GameScreen::update(float delta) {
